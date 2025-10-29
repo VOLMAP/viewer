@@ -1,0 +1,58 @@
+<div id="mesh{{i}}_renderer" class="renderer-container col-6">
+  <!-- Axis -->
+  <div class="axis"></div>
+  <!-- Orbital -->
+  <div class="orbital"></div>
+  <!-- Slicer -->
+  <div class="slicer-settings-container">
+    <!-- X -->
+    <div class="setting">
+      <input type="range" class="X-slider" min="-100" max="100" value="100" />
+      <label class="switch">
+        <input type="checkbox" checked class="X-plane-toggle" />
+        <span class="slider round"></span>
+      </label>
+      <div class="reverse-button X-reverse">
+        <img src="./src/assets/img/reverse.png" />
+      </div>
+    </div>
+    <!-- Y -->
+    <div class="setting">
+      <input type="range" class="Y-slider" min="-100" max="100" value="100" />
+      <label class="switch">
+        <input type="checkbox" checked class="Y-plane-toggle" />
+        <span class="slider round"></span>
+      </label>
+      <div class="reverse-button Y-reverse">
+        <img src="./src/assets/img/reverse.png" />
+      </div>
+    </div>
+    <!-- Z -->
+    <div class="setting">
+      <input type="range" class="Z-slider" min="-100" max="100" value="100" />
+      <label class="switch">
+        <input type="checkbox" checked class="Z-plane-toggle" />
+        <span class="slider round"></span>
+      </label>
+      <div class="reverse-button Z-reverse">
+        <img src="./src/assets/img/reverse.png" />
+      </div>
+    </div>
+    <!-- Distortion -->
+    <div class="setting">
+      <input
+        type="range"
+        class="distortion-slider"
+        min="0"
+        max="100"
+        value="0"
+      />
+      <div class="reverse-button distortion-reverse">
+        <img src="./src/assets/img/reverse.png" />
+      </div>
+      <div class="reverse-button degenerate-filter">
+        <p>Deg.</p>
+      </div>
+    </div>
+  </div>
+</div>

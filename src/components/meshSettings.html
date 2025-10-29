@@ -1,0 +1,109 @@
+<div id="mesh{{i}}_settings" class="settings-container col-5 rowS">
+  <!-- Load -->
+  <div class="dropdown colS-4">
+    <div class="dropbtn">
+      <p>Mesh {{i}}</p>
+      <img src="./src/assets/img/dropdown.png" />
+    </div>
+
+    <div class="dropcontent float-left">
+      <!-- Mesh -->
+      <div class="setting">
+        <p>Mesh:</p>
+        <input type="file" class="mesh-input" accept=".obj, .mesh" />
+      </div>
+      <!-- Texture -->
+      <!--
+      <div class="setting">
+        <p>Texture:</p>
+        <input type="file" class="texture-input" accept=".jpg, .jpeg, .png" />
+      </div>
+        -->
+    </div>
+  </div>
+  <!-- Rendering -->
+  <div class="dropdown colS-4">
+    <div class="dropbtn">
+      <p>Rendering</p>
+      <img src="./src/assets/img/dropdown.png" />
+    </div>
+
+    <div class="dropcontent float-left">
+      <!-- Texture -->
+      <div class="setting">
+        <p>Texture:</p>
+        <!--
+        <label class="switch">
+          <input type="checkbox" class="texture-toggle" />
+          <span class="slider round"></span>
+        </label>
+        -->
+        <input type="color" class="color-input" value="#ffffff" />
+      </div>
+      <!-- Wireframe -->
+      <div class="setting">
+        <p>Wireframe:</p>
+        <label class="switch">
+          <input type="checkbox" checked="true" class="wireframe-toggle" />
+          <span class="slider round"></span>
+        </label>
+        <input type="color" class="wireframe-color-input" value="#000000" />
+      </div>
+      <!-- Shell -->
+      <div class="setting">
+        <p>Shell:</p>
+        <label class="switch">
+          <input type="checkbox" checked="true" class="shell-toggle" />
+          <span class="slider round"></span>
+        </label>
+      </div>
+      <!-- Bounding Box -->
+      <div class="setting">
+        <p>Bounding Box:</p>
+        <label class="switch">
+          <input type="checkbox" class="bounding-box-toggle" />
+          <span class="slider round"></span>
+        </label>
+      </div>
+      <!-- Slicer -->
+      <div class="setting">
+        <p>Slicer:</p>
+        <label class="switch">
+          <input type="checkbox" class="slicer-toggle" />
+          <span class="slider round"></span>
+        </label>
+      </div>
+    </div>
+  </div>
+  <!-- Control -->
+  <div class="dropdown colS-4">
+    <div class="dropbtn">
+      <p>Control</p>
+      <img src="./src/assets/img/dropdown.png" />
+    </div>
+
+    <div class="dropcontent float-left">
+      <!-- Axis -->
+      <div class="setting">
+        <p>Axis:</p>
+        <label class="switch">
+          <input type="checkbox" class="axis-toggle" />
+          <span class="slider round"></span>
+        </label>
+      </div>
+      <!-- Orbital -->
+      <div class="setting">
+        <p>Orbital:</p>
+        <label class="switch">
+          <input type="checkbox" class="orbital-toggle" />
+          <span class="slider round"></span>
+        </label>
+      </div>
+      <!-- Reset -->
+      <div class="setting">
+        <p>Reset:</p>
+        <button class="reset-button"></button>
+      </div>
+    </div>
+  </div>
+</div>

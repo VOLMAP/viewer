@@ -1,0 +1,36 @@
+#info {
+  border: solid 2px #010b13;
+}
+
+.info-section {
+  padding: 5px;
+  justify-content: center;
+}
+
+.info-title {
+  margin-right: 15px;
+}
+
+@media (max-width: 767px) {
+  .info-section {
+    justify-content: flex-start;
+  }
+
+  .info-details {
+    display: flex;
+    align-items: center;
+  }
+
+  .info-details > p {
+    margin-right: 10px;
+  }
+}
+
+.map-gradient {
+  display: inline-block;
+  height: 10px;
+  width: 100px;
+  background: linear-gradient(to right, white, red);
+  border-radius: 5px;
+  border: solid 1px black;
+}

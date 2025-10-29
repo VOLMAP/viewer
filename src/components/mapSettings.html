@@ -1,0 +1,65 @@
+<div id="map_settings" class="settings-container col-2 rowS">
+  <!-- Map -->
+  <div class="dropdown colS-12">
+    <div class="dropbtn flex-row">
+      <p>Map</p>
+      <img src="./src/assets/img/dropdown.png" />
+    </div>
+
+    <div class="dropcontent float-left">
+      <!-- Map -->
+      <div class="setting flex-row">
+        <p>View Map:</p>
+        <label class="switch">
+          <input type="checkbox" class="map-toggle" />
+          <span class="slider round"></span>
+        </label>
+      </div>
+      <!-- Energy -->
+      <div class="setting flex-row">
+        <p>Energy:</p>
+        <select class="energy-input" name="energy-input">
+          <option value="CONFORMAL">Conformal</option>
+          <option value="DIRICHLET">Dirichlet</option>
+          <option value="SYMMETRIC-DIRICHLET">Symmetric-dirichlet</option>
+          <option value="ARAP">Arap</option>
+          <option value="MIPS3D">Mips 3D</option>
+        </select>
+      </div>
+      <!-- Gradient -->
+      <div class="setting flex-row">
+        <p>Gradient:</p>
+        <input type="color" class="gradient-start-input" value="#ffffff" />
+        <input type="color" class="gradient-end-input" value="#ff0000" />
+      </div>
+      <!-- Degenerate -->
+      <div class="setting flex-row">
+        <p>Degenerate:</p>
+        <label class="switch">
+          <input type="checkbox" class="degenerate-toggle" />
+          <span class="slider round"></span>
+        </label>
+        <input type="color" class="degenerate-color-input" value="#ffff00" />
+      </div>
+      <!-- Clamping -->
+      <div class="setting flex-row">
+        <p>Clamping:</p>
+        <input type="number" class="clamp-start-input" value="1" />
+        <input type="number" class="clamp-end-input" value="12" />
+      </div>
+      <!-- Map -->
+      <div class="setting flex-row">
+        <p>Reverse:</p>
+        <label class="switch">
+          <input type="checkbox" class="reverse-toggle" />
+          <span class="slider round"></span>
+        </label>
+      </div>
+      <!-- Reset -->
+      <div class="setting">
+        <p>Reset:</p>
+        <button class="reset-button"></button>
+      </div>
+    </div>
+  </div>
+</div>

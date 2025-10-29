@@ -1,0 +1,30 @@
+body {
+  display: flex;
+  flex-direction: column;
+  width: 100vw;
+  height: 100vh;
+  padding: 0;
+  margin: 0;
+  background-color: #f3f3f3;
+}
+
+#menu {
+  height: auto;
+}
+
+#canvas {
+  height: 100%;
+  overflow: auto;
+}
+
+#info {
+  height: auto;
+}
+
+p {
+  margin: 0;
+  padding: 0;
+  font-family: "Times New Roman", Times, serif;
+  color: black;
+  font-size: 16px;
+}

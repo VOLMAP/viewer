@@ -1,0 +1,218 @@
+/*----------------------------The settings----------------------------*/
+.settings-container {
+  height: auto;
+  background-color: #c1b2d5;
+  border: solid 2px #010b13;
+}
+
+#map_settings {
+  background-color: #d5cbb2;
+}
+
+/*Smartphone and Tablet*/
+@media (max-width: 767px) {
+  #map_settings {
+    border-top: none;
+    border-bottom: none;
+  }
+}
+
+@media (min-width: 768px) {
+  #map_settings {
+    border-left: none;
+    border-right: none;
+  }
+}
+
+.dropdown {
+  position: relative;
+}
+
+.settings-container > :not(:last-child) {
+  border-right: solid 2px #010b13;
+}
+
+.dropbtn {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 5px;
+  cursor: pointer;
+}
+
+.dropbtn > p {
+  font-weight: bold;
+  margin-right: 5px;
+}
+
+.setting > p {
+  margin-right: 5px;
+}
+
+.dropbtn > img,
+.setting > img {
+  width: 20px;
+  height: 20px;
+}
+
+.dropcontent {
+  display: none;
+  position: absolute;
+  z-index: 2;
+  align-items: flex-start;
+  margin-top: -2px;
+  border: 2px solid #010b13;
+  border-radius: 5px;
+  background-color: #c1b2d5;
+  box-shadow: #010b13 0px 0px 5px;
+}
+
+.dropcontent > :not(:last-child) {
+  border-bottom: solid 2px #010b13;
+}
+
+#map_settings .dropcontent {
+  background-color: #d5cbb2;
+}
+/*
+.dropdown:hover .dropcontent {
+  display: flex;
+  flex-direction: column;
+}
+*/
+.dropcontent.toggle {
+  display: flex;
+  flex-direction: column;
+}
+
+.float-left {
+  left: 0;
+}
+
+.float-right {
+  right: 0;
+}
+
+.setting {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: 100%;
+  padding: 5px;
+}
+
+/*----------------------------The inputs----------------------------*/
+.switch {
+  display: inline-block;
+  position: relative;
+  width: 46px;
+  height: 20px;
+}
+
+/* Hide default HTML checkbox */
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #f3f3f3;
+  transition: 0.4s;
+  cursor: pointer;
+  border: 1px solid black;
+}
+
+.slider:before {
+  position: absolute;
+  left: 3px;
+  bottom: 3px;
+  width: 12px;
+  height: 12px;
+  background-color: black;
+  transition: 0.4s;
+  content: "";
+}
+
+input:checked + .slider {
+  background-color: #d5cbb2;
+}
+
+#map_settings input:checked + .slider {
+  background-color: #c1b2d5;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #d5cbb2;
+}
+
+#map_settings input:focus + .slider {
+  box-shadow: 0 0 1px #c1b2d5;
+}
+
+input:checked + .slider:before {
+  transform: translateX(26px);
+}
+
+.slider.round {
+  border-radius: 24px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
+.reset-button {
+  width: 46px;
+  height: 20px;
+  border: none;
+  border-radius: 24px;
+  cursor: pointer;
+  border: 1px solid black;
+}
+
+.setting input[type="color"] {
+  width: 46px;
+  height: 20px;
+  border: none;
+  border-radius: 24px;
+  margin-left: 5px;
+  background: #f3f3f3;
+  border: 1px solid black;
+}
+
+input[type="color"]::-webkit-color-swatch {
+  width: 36px;
+  height: 10px;
+  border-radius: 19px;
+  margin-top: -2px;
+}
+
+input[type="color"]::-moz-color-swatch {
+  width: 36px;
+  height: 10px;
+  border-radius: 19px;
+  margin-top: -2px;
+}
+
+input[type="color"]::-o-color-swatch {
+  width: 36px;
+  height: 10px;
+  border-radius: 19px;
+  margin-top: -2px;
+}
+
+.setting input[type="number"] {
+  width: 46px;
+  height: 20px;
+  border: none;
+  border-radius: 24px;
+  margin-left: 5px;
+  background: #f3f3f3;
+  border: 1px solid black;
+}
