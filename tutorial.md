@@ -1,3 +1,3 @@
 # How to use VOLMAP Viewer
 
-We are preparing an amazyng tutorial. Stay tuned! :)
+We are preparing an amazing tutorial. Stay tuned! :)

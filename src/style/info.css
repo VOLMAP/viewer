@@ -7,8 +7,22 @@
   justify-content: center;
 }
 
-.info-title {
-  margin-right: 15px;
+.info-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.info-links {
+  display: flex;
+  flex-grow: 1;
+  justify-content: space-evenly;
+  align-items: center;
+}
+
+.info-links img {
+  display: block;
+  width: 24px;
+  height: 24px;
 }
 
 @media (max-width: 767px) {
@@ -17,11 +31,15 @@
   }
 
   .info-details {
-    display: flex;
+    flex-direction: row;
     align-items: center;
   }
 
   .info-details > p {
+    margin-right: 10px;
+  }
+
+  .info-links > a {
     margin-right: 10px;
   }
 }
