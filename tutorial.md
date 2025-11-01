@@ -34,15 +34,15 @@ Once a model is loaded into the canvas, various inspection and rendering options
 
 The user has the following rendering options:
 
-- **Texture Color** – Change the mesh texture color using a color picker
+- **Texture Color** – Change the mesh texture color using a color picker.
 
-- **Wireframe** – View and customize the color of the mesh wireframe
+- **Wireframe** – View and customize the color of the mesh wireframe.
 
-- **Shell** – Show or hide the mesh shell. The shell is a semi-transparent outline of the mesh surface, it provides a clear visual reference of the model’s outer shape as it remains visible during slicing operations.
+- **Shell** – Toggle the visibility of the mesh shell. The shell is a semi-transparent outline of the mesh surface, it provides a clear visual reference of the model’s outer shape as it remains visible during slicing operations.
 
-- **Bounding Box** – Show or hide the model’s bounding box, the smallest rectangular frame that completely encloses the entire mesh.
+- **Bounding Box** – Toggle the model’s bounding box, the smallest rectangular frame that completely encloses the entire mesh.
 
-- **Slicer** – TODO
+- **Slicer** – Toggle the display of three slicing planes, each perpendicular to one of the main axes, which can be moved by the user through dedicated sliders. Each plane can also be hidden or have its slicing direction inverted. An additional **orange slider** allows you to slice the mesh based on the distortion value (this feature works only if the corresponding map is loaded). The button labelled **Deg.** enables the visualization of degenerate elements only.
 
 ### Control
 
