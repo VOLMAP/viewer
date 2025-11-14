@@ -1,8 +1,8 @@
 import { initializeComponents } from "./components.js";
 import { MeshRenderer } from "../classes/renderer/MeshRenderer.js";
 import { MeshRendererController } from "../classes/renderer/MeshRendererController.js";
-import { MeshMapper } from "../classes/mapper/MeshMapper.js";
-import { MeshMapperController } from "../classes/mapper/MeshMapperController.js";
+import { MapViewer } from "../classes/mapViewer/MapViewer.js";
+import { MapViewerController } from "../classes/mapViewer/MapViewerController.js";
 
 await initializeComponents();
 
@@ -19,9 +19,9 @@ for (let i = 1; i <= n; i++) {
   renderers.push(renderer);
 }
 
-const mapper = new MeshMapper(renderers);
+const mapViewer = new MapViewer(renderers);
 
 const mapSettingsContainer = document.getElementById(`map_settings`);
-new MeshMapperController(mapper, mapSettingsContainer);
+new MapViewerController(mapViewer, mapSettingsContainer);
 
-export { renderers, mapper };
+export { renderers, mapViewer };

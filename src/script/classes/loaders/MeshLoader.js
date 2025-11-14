@@ -19,12 +19,12 @@ export class MeshLoader {
     var numVertices = 0;
     var triangles = new Array();
     var numTriangles = 0;
-    var tetrahedras = new Array();
-    var numTetrahedras = 0;
+    var tetrahedra = new Array();
+    var numTetrahedra = 0;
 
     var verticesLabels = new Array();
     var trianglesLabels = new Array();
-    var tetrahedrasLabels = new Array();
+    var tetrahedraLabels = new Array();
 
     var adjacencyMap = new Map();
 
@@ -75,7 +75,7 @@ export class MeshLoader {
             buffer = buffer.slice(buffer.indexOf("\n") + 1);
             tokens = line.split(/\s+/);
           }
-          numTetrahedras = parseInt(tokens[0]);
+          numTetrahedra = parseInt(tokens[0]);
           mode = "tetrahedra";
         } else if (tokens[0] === "Triangles") {
           if (tokens.length < 2) {
@@ -91,11 +91,11 @@ export class MeshLoader {
           }
           verticesLabels.push(tokens[3]);
         } else if (mode === "tetrahedra" && tokens.length === 5) {
-          tetrahedras.push(parseInt(tokens[1]) - 1);
-          tetrahedras.push(parseInt(tokens[0]) - 1);
-          tetrahedras.push(parseInt(tokens[2]) - 1);
-          tetrahedras.push(parseInt(tokens[3]) - 1);
-          tetrahedrasLabels.push(tokens[4]);
+          tetrahedra.push(parseInt(tokens[1]) - 1);
+          tetrahedra.push(parseInt(tokens[0]) - 1);
+          tetrahedra.push(parseInt(tokens[2]) - 1);
+          tetrahedra.push(parseInt(tokens[3]) - 1);
+          tetrahedraLabels.push(tokens[4]);
         } else if (mode === "triangles" && tokens.length === 4) {
           for (let i = 0; i < 3; i++) {
             triangles.push(parseInt(tokens[i])); // Assicurati che i valori siano numeri interi
@@ -114,20 +114,20 @@ export class MeshLoader {
             throw new Error("No vertices found in this file.");
           }
 
-          if (!numTetrahedras) {
-            throw new Error("No tetrahedras found in this file.");
+          if (!numTetrahedra) {
+            throw new Error("No tetrahedra found in this file.");
           }
 
           if (
             vertices.length !== numVertices * 3 ||
-            tetrahedras.length !== numTetrahedras * 4
+            tetrahedra.length !== numTetrahedra * 4
           ) {
-            throw new Error("Dimension not matching (vertices/tetrahedras)");
+            throw new Error("Dimension not matching (vertices/tetrahedra)");
           }
 
           if (
             verticesLabels.length !== numVertices ||
-            tetrahedrasLabels.length !== numTetrahedras
+            tetrahedraLabels.length !== numTetrahedra
           ) {
             throw new Error("Dimension not matching (labels)");
           }
@@ -135,7 +135,7 @@ export class MeshLoader {
       }
     }
 
-    const tmp = this.generateTriangles(tetrahedras);
+    const tmp = this.generateTriangles(tetrahedra);
     triangles = tmp.triangles;
     adjacencyMap = tmp.adjacencyMap;
 
@@ -152,7 +152,7 @@ export class MeshLoader {
     geometry.userData = {
       vertices: vertices,
       triangles: triangles,
-      tetrahedras: tetrahedras,
+      tetrahedra: tetrahedra,
       triangleSoup: triangleSoup,
       adjacencyMap: adjacencyMap,
       polygonsColor: null,
@@ -161,7 +161,7 @@ export class MeshLoader {
     return new VolumeMesh(geometry);
   }
 
-  generateTriangles(tetrahedras) {
+  generateTriangles(tetrahedra) {
     function sortedFaces(v0, v1, v2, v3) {
       return [
         [v0, v2, v1],
@@ -174,11 +174,11 @@ export class MeshLoader {
     var triangles = new Array();
     var adjacencyMap = new Map();
 
-    for (let i = 0; i < tetrahedras.length; i += 4) {
-      var v0 = tetrahedras[i],
-        v1 = tetrahedras[i + 1],
-        v2 = tetrahedras[i + 2],
-        v3 = tetrahedras[i + 3];
+    for (let i = 0; i < tetrahedra.length; i += 4) {
+      var v0 = tetrahedra[i],
+        v1 = tetrahedra[i + 1],
+        v2 = tetrahedra[i + 2],
+        v3 = tetrahedra[i + 3];
 
       var faces = sortedFaces(v0, v1, v2, v3);
 

@@ -1,4 +1,7 @@
+//Clamping Functions
+
 function clamp(val, min, max) {
+  //We use infinity as a distortion value to identify degenerate tetrahedra
   if (isNaN(val)) return Infinity;
 
   let res = Math.max(val, min);
@@ -13,46 +16,54 @@ function clampArray(arr, min, max) {
   }
 }
 
-const white = 0xffffff;
-const red = 0xff0000;
+//Color Constants and Functions
 
-function hexToRGB(colorInt) {
-  const r = ((colorInt >> 16) & 0xff) / 255;
-  const g = ((colorInt >> 8) & 0xff) / 255;
-  const b = (colorInt & 0xff) / 255;
+const whiteHex = 0xffffff;
+const blackHex = 0x000000;
+const redHex = 0xff0000;
+const greenHex = 0x00ff00;
+const blueHex = 0x0000ff;
+const yellowHex = 0xffff00;
+
+function hexToRGB(colorHex) {
+  const r = ((colorHex >> 16) & 0xff) / 255;
+  const g = ((colorHex >> 8) & 0xff) / 255;
+  const b = (colorHex & 0xff) / 255;
 
   return { r, g, b };
 }
 
 function RGBToHex({ r, g, b }) {
-  const rInt = Math.round(r * 255);
-  const gInt = Math.round(g * 255);
-  const bInt = Math.round(b * 255);
+  const rHex = Math.round(r * 255);
+  const gHex = Math.round(g * 255);
+  const bHex = Math.round(b * 255);
 
-  return (rInt << 16) | (gInt << 8) | bInt;
+  return (rHex << 16) | (gHex << 8) | bHex;
 }
 
-function lerpColor(c1, c2, t) {
+//Linear interpolation between two colors with t as interpolation factor (0-1)
+function lerpColor(start, end, t) {
   return {
-    r: c1.r + (c2.r - c1.r) * t,
-    g: c1.g + (c2.g - c1.g) * t,
-    b: c1.b + (c2.b - c1.b) * t,
+    r: start.r + (end.r - start.r) * t,
+    g: start.g + (end.g - start.g) * t,
+    b: start.b + (end.b - start.b) * t,
   };
 }
 
+//Custom interpolation between two colors with t as interpolation factor (0-1)
 function interpolateColor(start, end, t) {
-  const white = { r: 1, g: 1, b: 1 };
-  const isWhite = ({ r, g, b }) => r == 1 && g == 1 && b == 1;
+  const whiteRGB = { r: 1, g: 1, b: 1 };
+  const isWhite = (c) => c.r === 1 && c.g === 1 && c.b === 1;
 
   if (isWhite(start) || isWhite(end)) {
-    // Interpolazione diretta
+    //Linear interpolation
     return lerpColor(start, end, t);
   } else {
-    // Interpolazione in due fasi: start → bianco → end
+    //Custom interpolation: start → white → end
     if (t < 0.5) {
-      return lerpColor(start, white, t * 2);
+      return lerpColor(start, whiteRGB, t * 2);
     } else {
-      return lerpColor(white, end, (t - 0.5) * 2);
+      return lerpColor(whiteRGB, end, (t - 0.5) * 2);
     }
   }
 }
@@ -60,8 +71,12 @@ function interpolateColor(start, end, t) {
 export {
   clamp,
   clampArray,
-  white,
-  red,
+  whiteHex,
+  blackHex,
+  redHex,
+  blueHex,
+  greenHex,
+  yellowHex,
   hexToRGB,
   RGBToHex,
   lerpColor,

@@ -5,6 +5,7 @@ async function loadComponent(file, i = null) {
   const res = await fetch(path);
   let template = await res.text();
 
+  //Replace placeholders (with optional spaces like {{i}} or {{ i }}) inside the loaded template
   if (i) {
     const regex = new RegExp(`{{\\s*i\\s*}}`, "g");
     template = template.replace(regex, i);
