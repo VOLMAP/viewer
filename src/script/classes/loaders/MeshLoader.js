@@ -37,14 +37,16 @@ export class MeshLoader {
         var line = buffer.slice(0, index).trim();
         buffer = buffer.slice(index + 1);
 
-        if (!line) continue; // Salta linee vuote
+        //Skip empty lines
+        if (!line) continue;
 
-        var tokens = line.split(/\s+/); //divide la riga in token
+        //Split the line into tokens
+        var tokens = line.split(/\s+/);
 
-        // Gestione delle keyword e dei valori
+        //Handle keywords and values
         if (!version && tokens[0] === "MeshVersionFormatted") {
           if (tokens.length < 2) {
-            // Leggi il valore dalla riga successiva
+            //Read the next line for the version number
             line = buffer.slice(0, buffer.indexOf("\n")).trim();
             buffer = buffer.slice(buffer.indexOf("\n") + 1);
             tokens = line.split(/\s+/);
@@ -91,6 +93,7 @@ export class MeshLoader {
           }
           verticesLabels.push(tokens[3]);
         } else if (mode === "tetrahedra" && tokens.length === 5) {
+          //Note: converting to zero-based indexing and changing vertex order for correct face orientation
           tetrahedra.push(parseInt(tokens[1]) - 1);
           tetrahedra.push(parseInt(tokens[0]) - 1);
           tetrahedra.push(parseInt(tokens[2]) - 1);
@@ -98,7 +101,7 @@ export class MeshLoader {
           tetrahedraLabels.push(tokens[4]);
         } else if (mode === "triangles" && tokens.length === 4) {
           for (let i = 0; i < 3; i++) {
-            triangles.push(parseInt(tokens[i])); // Assicurati che i valori siano numeri interi
+            triangles.push(parseInt(tokens[i]));
           }
           trianglesLabels.push(tokens[3]);
         } else if (tokens[0] === "End") {
@@ -135,18 +138,18 @@ export class MeshLoader {
       }
     }
 
+    //Generate triangles and adjacency map from tetrahedra
     const tmp = this.generateTriangles(tetrahedra);
     triangles = tmp.triangles;
     adjacencyMap = tmp.adjacencyMap;
 
+    //Generate triangle soup for rendering
     var triangleSoup = this.generateTriangleSoup(vertices, triangles);
-
-    triangleSoup = new Float32Array(triangleSoup);
 
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute(
       "position",
-      new THREE.BufferAttribute(triangleSoup, 3)
+      new THREE.BufferAttribute(new Float32Array(triangleSoup), 3)
     );
 
     geometry.userData = {
@@ -155,7 +158,9 @@ export class MeshLoader {
       tetrahedra: tetrahedra,
       triangleSoup: triangleSoup,
       adjacencyMap: adjacencyMap,
-      polygonsColor: null,
+      polyCentroids: null,
+      polyColor: null,
+      polyDistortion: null,
     };
 
     return new VolumeMesh(geometry);
@@ -185,7 +190,8 @@ export class MeshLoader {
       faces.forEach((face) => {
         triangles.push(face[0], face[1], face[2]);
 
-        const key = [...face].sort((a, b) => a - b).join(","); // Converti la faccia in una stringa univoca
+        //Create and adjacency map key for each face and build the map
+        const key = [...face].sort((a, b) => a - b).join(",");
         if (!adjacencyMap.has(key)) {
           adjacencyMap.set(key, new Array());
         }
@@ -203,6 +209,7 @@ export class MeshLoader {
     var triangleSoup = new Array();
 
     for (let i = 0; i < triangles.length; i++) {
+      //Push each vertex coordinates
       var v = triangles[i];
 
       triangleSoup.push(

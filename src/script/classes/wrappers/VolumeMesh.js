@@ -1,12 +1,15 @@
 import * as THREE from "../../../libs/three/three.module.js";
+import * as utils from "../../main/utils.js";
 import { MeshSlicer } from "../slicer/MeshSlicer.js";
 
-const white = 0xffffff;
-const black = 0x000000;
-const yellow = 0xffff00;
+/* PolygonOffset to avoid z-fighting when rendering in external to internal order: 
+   wireframe -> mesh -> shell */
+const standardWireframeMaterial = new THREE.LineBasicMaterial({
+  color: utils.blackHex,
+});
 
 const standardMaterial = new THREE.MeshPhysicalMaterial({
-  color: white,
+  color: utils.whiteHex,
   side: THREE.DoubleSide,
   polygonOffset: true,
   polygonOffsetFactor: 1,
@@ -14,7 +17,7 @@ const standardMaterial = new THREE.MeshPhysicalMaterial({
 });
 
 const standardShellMaterial = new THREE.MeshPhysicalMaterial({
-  color: white,
+  color: utils.whiteHex,
   transparent: true,
   opacity: 0.5,
   polygonOffset: true,
@@ -22,41 +25,36 @@ const standardShellMaterial = new THREE.MeshPhysicalMaterial({
   polygonOffsetUnits: 2,
 });
 
-const standardWireframeMaterial = new THREE.LineBasicMaterial({
-  color: black,
-});
-
 export class VolumeMesh {
   mesh = null;
-  colorMaterial = null;
-  //textureMaterial = null;
-  wireframe = null;
-  boundingBox = null;
-  slicer = null;
+  plainColorMaterial = null;
 
-  constructor(geometry, color_ex = null, texture = null) {
-    this.colorMaterial = standardMaterial.clone();
-    //this.textureMaterial = standardMaterial.clone();
+  wireframe = null;
+  shell = null;
+
+  boundingBox = null;
+
+  constructor(geometry, color_ex = null) {
+    this.plainColorMaterial = standardMaterial.clone();
 
     if (color_ex) {
       this.changeColor(color_ex);
     }
-    /*
-    if (texture) {
-      this.changeTexture(texture);
-    }
-    */
-    this.mesh = new THREE.Mesh(geometry, this.colorMaterial);
-    this.mesh.renderOrder = 2;
+
+    this.mesh = new THREE.Mesh(geometry, this.plainColorMaterial);
 
     this.translateToOrigin();
     this.computeProperties();
 
     this.setWireframe();
+    this.setShell();
 
     this.setBoundingBox();
-    this.setSlicer();
-    this.setShell();
+
+    //RenderOrder to avoid z-fighting when rendering in external to internal order
+    this.wireframe.renderOrder = 3;
+    this.mesh.renderOrder = 2;
+    this.shell.renderOrder = 1;
   }
 
   getMesh() {
@@ -67,9 +65,17 @@ export class VolumeMesh {
     return this.wireframe;
   }
 
+  getShell() {
+    return this.shell;
+  }
+
+  getBoundingBox() {
+    return this.boundingBox;
+  }
+
   setWireframe() {
     const faces = this.mesh.geometry.userData.triangles;
-    var vertices = this.mesh.geometry.userData.vertices;
+    const vertices = this.mesh.geometry.userData.vertices;
 
     var segments = new Array();
 
@@ -81,22 +87,19 @@ export class VolumeMesh {
       segments.push(a, b, b, c, c, a);
     }
 
-    segments = new Uint32Array(segments);
-    vertices = new Float32Array(vertices);
-
     const wireframeGeometry = new THREE.BufferGeometry();
-    wireframeGeometry.setIndex(new THREE.BufferAttribute(segments, 1));
+    wireframeGeometry.setIndex(
+      new THREE.BufferAttribute(new Uint32Array(segments), 1)
+    );
     wireframeGeometry.setAttribute(
       "position",
-      new THREE.BufferAttribute(vertices, 3)
+      new THREE.BufferAttribute(new Float32Array(vertices), 3)
     );
 
     this.wireframe = new THREE.LineSegments(
       wireframeGeometry,
       standardWireframeMaterial.clone()
     );
-
-    this.wireframe.renderOrder = 3;
   }
 
   setShell() {
@@ -104,30 +107,12 @@ export class VolumeMesh {
       this.mesh.geometry.clone(),
       standardShellMaterial.clone()
     );
-
-    this.shell.renderOrder = 1;
-  }
-
-  getShell() {
-    return this.shell;
-  }
-
-  getBoundingBox() {
-    return this.boundingBox;
   }
 
   setBoundingBox() {
     const box = this.mesh.geometry.boundingBox;
 
-    this.boundingBox = new THREE.Box3Helper(box, yellow);
-  }
-
-  getSlicer() {
-    return this.slicer;
-  }
-
-  setSlicer() {
-    this.slicer = new MeshSlicer(this);
+    this.boundingBox = new THREE.Box3Helper(box, utils.yellowHex);
   }
 
   /* This method translates the mesh to origin */
@@ -142,13 +127,13 @@ export class VolumeMesh {
     const translationVector = new THREE.Vector3().subVectors(origin, centroid);
 
     // Translate the mesh to the origin
-    const positionAttribute = this.mesh.geometry.getAttribute("position");
-    const vertices = this.mesh.geometry.userData.vertices;
+    var vertices = this.mesh.geometry.userData.vertices;
+    var triangleSoup = this.mesh.geometry.userData.triangleSoup;
 
-    for (let i = 0; i < positionAttribute.count; i++) {
-      positionAttribute.array[i * 3] += translationVector.x;
-      positionAttribute.array[i * 3 + 1] += translationVector.y;
-      positionAttribute.array[i * 3 + 2] += translationVector.z;
+    for (let i = 0; i < triangleSoup.length; i += 3) {
+      triangleSoup[i] += translationVector.x;
+      triangleSoup[i + 1] += translationVector.y;
+      triangleSoup[i + 2] += translationVector.z;
     }
 
     for (let i = 0; i < vertices.length; i += 3) {
@@ -157,7 +142,10 @@ export class VolumeMesh {
       vertices[i + 2] += translationVector.z;
     }
 
-    positionAttribute.needsUpdate = true;
+    this.mesh.geometry.setAttribute(
+      "position",
+      new THREE.BufferAttribute(new Float32Array(triangleSoup), 3)
+    );
   }
 
   /* This method computes useful properties of the mesh's geometry :
@@ -167,7 +155,7 @@ export class VolumeMesh {
     this.mesh.geometry.computeVertexNormals();
 
     // Compute the centroids of the faces
-    const polys = this.mesh.geometry.userData.tetrahedras;
+    const polys = this.mesh.geometry.userData.tetrahedra;
     const numPolys = polys.length / 4;
 
     const vertices = this.mesh.geometry.userData.vertices;
@@ -175,67 +163,42 @@ export class VolumeMesh {
 
     for (let i = 0; i < numPolys; i++) {
       let centroid = [0, 0, 0];
-
+      //Visit every vertex of the poly
       for (let j = 0; j < 4; j++) {
         const vertexIndex = polys[i * 4 + j];
-
+        //Visit every coordinate of the vertex and sum it to the other corresponding coordinates
         for (let k = 0; k < 3; k++) {
           centroid[k] += vertices[vertexIndex * 3 + k];
         }
       }
 
+      //Average the sum of the corresponding coordinates and assign it
       for (let k = 0; k < 3; k++) {
-        centroid[k] /= 4; // Average the coordinates
+        centroid[k] /= 4;
         centroids[i * 3 + k] = centroid[k];
       }
     }
 
-    centroids = new Float32Array(centroids);
-    this.mesh.geometry.setAttribute(
-      "centroid",
-      new THREE.BufferAttribute(centroids, 3)
-    );
+    this.mesh.geometry.userData.polyCentroids = centroids;
   }
 
-  changeColor(color_ex) {
-    this.colorMaterial.color.set(color_ex);
-    this.colorMaterial.needsUpdate = true;
+  changePlainColor(color_ex) {
+    this.plainColorMaterial.color.set(color_ex);
+    this.plainColorMaterial.needsUpdate = true;
   }
 
-  applyMapColor(flag) {
+  toggleMapColor(flag) {
     if (flag) {
       this.mesh.material = standardMaterial.clone();
       this.mesh.material.color.set(null);
       this.mesh.material.vertexColors = true;
-      this.slicer.isMapActive = true;
-      this.slicer.setVisibleFaces();
     } else {
       this.mesh.material = this.colorMaterial;
-      this.slicer.isMapActive = false;
     }
+
     this.mesh.material.needsUpdate = true;
   }
-  /*
-  changeTexture(texture) {
-    this.textureMaterial.map = texture;
-    this.textureMaterial.needsUpdate = true;
-  }
 
-  toggleTexture(flag) {
-    if (this.textureMaterial.map) {
-      if (flag) {
-        this.mesh.material = this.textureMaterial;
-      } else {
-        this.mesh.material = this.colorMaterial;
-      }
-      this.mesh.material.needsUpdate = true;
-      return true;
-    } else {
-      console.log("Texture not loaded yet.");
-      return false;
-    }
-  }
-  */
   changeWireframeColor(color_ex) {
     this.wireframe.material.color.set(color_ex);
     this.wireframe.material.needsUpdate = true;

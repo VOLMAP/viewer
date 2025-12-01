@@ -1,6 +1,6 @@
 const white = "#ffffff";
 const red = "#ff0000";
-export class MeshMapperController {
+export class MapViewerController {
   meshMapper = null;
   mapSettingsContainer = null;
   modelInfoContainer = null;

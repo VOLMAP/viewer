@@ -35,7 +35,7 @@
   }
 }
 
-.axis {
+.axis-container {
   position: absolute;
   z-index: 1;
   left: 10px;
@@ -44,7 +44,7 @@
   height: 100px;
 }
 
-.orbital {
+.orbital-container {
   position: absolute;
   z-index: 1;
   right: 10px;
@@ -53,7 +53,7 @@
   height: 100px;
 }
 
-.slicer-settings-container {
+.slicer-settings {
   display: flex;
   flex-direction: column;
   position: absolute;
@@ -117,4 +117,8 @@ input[type="range"] {
 .reverse-button > img {
   width: auto;
   height: 100%;
+}
+
+.active-button {
+  border: solid 1px green;
 }

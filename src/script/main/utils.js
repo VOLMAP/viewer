@@ -16,14 +16,56 @@ function clampArray(arr, min, max) {
   }
 }
 
+//Binary Search Functions
+
+function binarySearchClosest(
+  arr,
+  evaluate,
+  target,
+  left = 0,
+  right = arr.length - 1,
+  bestMatch = -1
+) {
+  if (left > right) {
+    return bestMatch; // Return the index of the closest match found
+  }
+
+  const mid = Math.floor((left + right) / 2);
+  const midValue = evaluate(arr[mid]);
+
+  // If we don't have a bestMatch yet, or if midValue is closer than the current bestMatch, update it
+  if (
+    bestMatch === -1 ||
+    Math.abs(midValue - target) < Math.abs(evaluate(arr[bestMatch]) - target)
+  ) {
+    bestMatch = mid;
+  }
+
+  if (midValue === target) {
+    return mid; // Found exactly
+  } else if (midValue < target) {
+    return binarySearchClosest(
+      arr,
+      evaluate,
+      target,
+      mid + 1,
+      right,
+      bestMatch
+    );
+  } else {
+    return binarySearchClosest(arr, evaluate, target, left, mid - 1, bestMatch);
+  }
+}
+
 //Color Constants and Functions
 
 const whiteHex = 0xffffff;
+const greyHex = 0xf3f3f3;
 const blackHex = 0x000000;
-const redHex = 0xff0000;
-const greenHex = 0x00ff00;
-const blueHex = 0x0000ff;
-const yellowHex = 0xffff00;
+const redHex = 0xff8080;
+const greenHex = 0x80ff80;
+const blueHex = 0x8080ff;
+const yellowHex = 0xffff80;
 
 function hexToRGB(colorHex) {
   const r = ((colorHex >> 16) & 0xff) / 255;
@@ -71,7 +113,9 @@ function interpolateColor(start, end, t) {
 export {
   clamp,
   clampArray,
+  binarySearchClosest,
   whiteHex,
+  greyHex,
   blackHex,
   redHex,
   blueHex,

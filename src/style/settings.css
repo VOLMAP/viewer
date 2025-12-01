@@ -80,7 +80,7 @@
   flex-direction: column;
 }
 */
-.dropcontent.toggle {
+.dropcontent.open {
   display: flex;
   flex-direction: column;
 }

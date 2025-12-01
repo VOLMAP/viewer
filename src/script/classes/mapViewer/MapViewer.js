@@ -3,7 +3,7 @@ import * as utils from "../../main/utils.js";
 import * as Distortion from "../../main/distortion.js";
 import * as THREE from "../../../libs/three/three.module.js";
 
-export class MeshMapper {
+export class MapViewer {
   controller = null;
   meshRenderers = [];
 
@@ -32,7 +32,7 @@ export class MeshMapper {
     this.meshRenderers = meshRenderers;
 
     meshRenderers.forEach((meshRenderer) => {
-      meshRenderer.setMeshMapper(this);
+      meshRenderer.setMeshMapViewer(this);
     });
   }
 
