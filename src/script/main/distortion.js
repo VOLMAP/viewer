@@ -12,9 +12,18 @@ function jacobianMatrix(v0, v1, v2, v3, v0m, v1m, v2m, v3m) {
 
   const DtmTranspose = invertMatrix3x3(Dtm);
 
-  const jacobianMatrix = multiplyMatrices(Dt, DtmTranspose);
+  const J = multiplyMatrices(Dt, DtmTranspose);
 
-  return jacobianMatrix;
+  const detJ =
+    J[0][0] * (J[1][1] * J[2][2] - J[1][2] * J[2][1]) -
+    J[0][1] * (J[1][0] * J[2][2] - J[1][2] * J[2][0]) +
+    J[0][2] * (J[1][0] * J[2][1] - J[1][1] * J[2][0]);
+
+  if (detJ <= 0) {
+    throw new Error("Tetraedro degenere - determinante nullo o negativo");
+  }
+
+  return J;
 }
 
 function computeSingularValues(matrix) {
@@ -38,11 +47,6 @@ function invertMatrix3x3(m) {
     m[0][0] * (m[1][1] * m[2][2] - m[1][2] * m[2][1]) -
     m[0][1] * (m[1][0] * m[2][2] - m[1][2] * m[2][0]) +
     m[0][2] * (m[1][0] * m[2][1] - m[1][1] * m[2][0]);
-
-  if (det <= 0) {
-    // Usa una soglia per errori numerici
-    throw new Error("Tetraedro degenere - determinante nullo o negativo");
-  }
 
   const invDet = 1 / det;
 
