@@ -1,5 +1,5 @@
 import * as THREE from "../../../libs/three/three.module.js";
-import { MeshSlicer } from "../slicers/MeshSlicer.js";
+import { MeshSlicer } from "../mesh_inspection/MeshSlicer.js";
 
 const white = 0xffffff;
 const black = 0x000000;
