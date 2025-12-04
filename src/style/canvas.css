@@ -1,0 +1,66 @@
+.canvas-container {
+  position: relative;
+  height: 100%;
+}
+
+/*Smartphone and Tablet*/
+@media (max-width: 767px) {
+  .canvas-container {
+    height: 50%;
+  }
+
+  #mesh1_canvas {
+    border-bottom: 2px solid #010b13;
+  }
+}
+
+/*Desktop and Laptop*/
+@media (min-width: 768px) {
+  #mesh1_canvas {
+    border-right: 2px solid #010b13;
+  }
+}
+
+.axis {
+  position: absolute;
+  z-index: 1;
+  left: 10px;
+  bottom: 10px;
+  width: 100px;
+  height: 100px;
+}
+
+.orbital {
+  position: absolute;
+  z-index: 1;
+  right: 10px;
+  bottom: 10px;
+  width: 100px;
+  height: 100px;
+}
+
+.slicer-settings-container {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  z-index: 1;
+  left: 2px;
+  top: 2px;
+  visibility: hidden;
+}
+
+.X-slider {
+  accent-color: #ff8080;
+}
+
+.Y-slider {
+  accent-color: #8080ff;
+}
+
+.Z-slider {
+  accent-color: #80ff80;
+}
+
+.distortion-slider {
+  accent-color: orange;
+}

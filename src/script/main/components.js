@@ -5,6 +5,7 @@ async function loadComponent(file, i = null) {
   const res = await fetch(path);
   let template = await res.text();
 
+  // Replace index placeholders (with optional spaces like {{i}} or {{ i }}) if needed
   if (i) {
     const regex = new RegExp(`{{\\s*i\\s*}}`, "g");
     template = template.replace(regex, i);
@@ -14,20 +15,36 @@ async function loadComponent(file, i = null) {
 }
 
 async function initializeComponents() {
-  const menu = document.getElementById("menu");
-  const canvas = document.getElementById("canvas");
-  const info = document.getElementById("info");
+  const mainMenu = document.getElementById("main_menu");
+  const doubleCanvas = document.getElementById("double_canvas");
+  const statusBar = document.getElementById("status_bar");
 
-  const meshSettings1 = await loadComponent("meshSettings.html", 1);
-  const mapSettings = await loadComponent("mapSettings.html");
-  const meshSettings2 = await loadComponent("meshSettings.html", 2);
-  const meshRenderer1 = await loadComponent("meshRenderer.html", 1);
-  const meshRenderer2 = await loadComponent("meshRenderer.html", 2);
-  const infoPanel = await loadComponent("infoPanel.html");
+  const meshSettings1 = await loadComponent("mesh_settings.html", 1);
+  const mapSettings = await loadComponent("map_settings.html");
+  const meshSettings2 = await loadComponent("mesh_settings.html", 2);
+  const canvas1 = await loadComponent("canvas.html", 1);
+  const canvas2 = await loadComponent("canvas.html", 2);
+  const statusBarContent = await loadComponent("status_bar.html");
 
-  menu.innerHTML = meshSettings1 + mapSettings + meshSettings2;
-  canvas.innerHTML = meshRenderer1 + meshRenderer2;
-  info.innerHTML = infoPanel;
+  mainMenu.innerHTML = meshSettings1 + mapSettings + meshSettings2;
+  doubleCanvas.innerHTML = canvas1 + canvas2;
+  statusBar.innerHTML = statusBarContent;
+
+  const dropdowns = Array.from(mainMenu.getElementsByClassName("dropdown"));
+
+  dropdowns.forEach((dropdown) => {
+    const btn = dropdown.querySelector(".dropbtn");
+    const content = dropdown.querySelector(".dropcontent");
+    btn.addEventListener("click", function (e) {
+      e.stopPropagation();
+      // Close all others dropcontents
+      document.querySelectorAll(".dropcontent.open").forEach((dc) => {
+        if (dc !== content) dc.classList.remove("open");
+      });
+      // Toggle current dropcontent
+      content.classList.toggle("open");
+    });
+  });
 }
 
 export { initializeComponents };

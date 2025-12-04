@@ -8,17 +8,21 @@ body {
   background-color: #f3f3f3;
 }
 
-#menu {
+#main_menu {
   height: auto;
+  border: solid 2px #010b13;
 }
 
-#canvas {
+#double_canvas {
   height: 100%;
   overflow: auto;
+  border-left: solid 2px #010b13;
+  border-right: solid 2px #010b13;
 }
 
-#info {
+#status_bar {
   height: auto;
+  border: solid 2px #010b13;
 }
 
 p {

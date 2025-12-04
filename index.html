@@ -2,70 +2,34 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>VisualMap</title>
-    <link rel="icon" href="src/assets/img/logo.png" type="image" />
 
+    <!-- Title and icon-->
+    <title>VOLMAP viewer</title>
+    <link
+      rel="icon"
+      href="src/assets/img/VOLMAP_viewer_icon.png"
+      type="image"
+    />
+
+    <!-- Stylesheets -->
     <link rel="stylesheet" href="src/style/layout.css" />
     <link rel="stylesheet" href="src/style/style.css" />
-    <link rel="stylesheet" href="src/style/settings.css" />
-    <link rel="stylesheet" href="src/style/renderer.css" />
-    <link rel="stylesheet" href="src/style/info.css" />
+    <link rel="stylesheet" href="src/style/main_menu.css" />
+    <link rel="stylesheet" href="src/style/canvas.css" />
+    <link rel="stylesheet" href="src/style/status_bar.css" />
   </head>
   <body>
-    <div id="menu" class="colS-12 row"></div>
-    <div id="canvas" class="colS-12 row"></div>
-    <div id="info" class="colS-12 row"></div>
+    <!-- HTML structure -->
+    <div id="main_menu" class="colS-12 row"></div>
+    <div id="double_canvas" class="colS-12 row"></div>
+    <div id="status_bar" class="colS-12 row"></div>
 
+    <!-- JavaScript modules -->
     <script type="module" src="src/script/main/main.js"></script>
     <script type="module" src="src/script/main/components.js"></script>
-    <script type="module" src="src/script/main/distortion.js"></script>
     <script type="module" src="src/script/main/utils.js"></script>
 
-    <script
-      type="module"
-      src="src/script/classes/loaders/ObjLoader.js"
-    ></script>
-    <script
-      type="module"
-      src="src/script/classes/loaders/MeshLoader.js"
-    ></script>
-
-    <script
-      type="module"
-      src="src/script/classes/slicers/ObjSlicer.js"
-    ></script>
-    <script
-      type="module"
-      src="src/script/classes/slicers/MeshSlicer.js"
-    ></script>
-
-    <script
-      type="module"
-      src="src/script/classes/wrappers/SurfaceMesh.js"
-    ></script>
-    <script
-      type="module"
-      src="src/script/classes/wrappers/VolumeMesh.js"
-    ></script>
-
-    <script
-      type="module"
-      src="src/script/classes/mapper/MeshMapper.js"
-    ></script>
-    <script
-      type="module"
-      src="src/script/classes/mapper/MeshMapperController.js"
-    ></script>
-
-    <script
-      type="module"
-      src="src/script/classes/renderer/MeshRenderer.js"
-    ></script>
-    <script
-      type="module"
-      src="src/script/classes/renderer/MeshRendererController.js"
-    ></script>
-
+    <!-- THREE.js library -->
     <script type="module" src="src/libs/three/three.module.js"></script>
   </body>
 </html>

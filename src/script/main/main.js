@@ -1,12 +1,16 @@
 import { initializeComponents } from "./components.js";
+
+await initializeComponents();
+
+/*
 import { MeshRenderer } from "../classes/renderer/MeshRenderer.js";
 import { MeshRendererController } from "../classes/renderer/MeshRendererController.js";
 import { MeshMapper } from "../classes/mapper/MeshMapper.js";
 import { MeshMapperController } from "../classes/mapper/MeshMapperController.js";
 import { MeshLoader } from "../classes/loaders/MeshLoader.js";
+*/
 
-await initializeComponents();
-
+/*
 const n = 2;
 const renderers = [];
 
@@ -43,5 +47,4 @@ renderers[0].controller.reset();
 const codomainMesh = await loader.load(codomainBlob);
 renderers[1].setMesh(codomainMesh);
 renderers[1].controller.reset();
-
-export { renderers, mapper };
+*/

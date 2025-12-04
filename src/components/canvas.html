@@ -1,41 +1,37 @@
-<div id="mesh{{i}}_renderer" class="renderer-container col-6">
-  <!-- Axis -->
-  <div class="axis"></div>
-  <!-- Orbital -->
-  <div class="orbital"></div>
+<div id="mesh{{i}}_canvas" class="canvas-container col-6">
   <!-- Slicer -->
   <div class="slicer-settings-container">
     <!-- X -->
     <div class="setting">
       <input type="range" class="X-slider" min="-100" max="100" value="100" />
-      <label class="switch">
+      <label class="switch margin-left">
         <input type="checkbox" checked class="X-plane-toggle" />
         <span class="slider round"></span>
       </label>
-      <div class="reverse-button X-reverse">
-        <img src="./src/assets/img/reverse.png" />
+      <div class="img-button X-reverse margin-left">
+        <img src="./src/assets/img/right_arrow.png" />
       </div>
     </div>
     <!-- Y -->
     <div class="setting">
       <input type="range" class="Y-slider" min="-100" max="100" value="100" />
-      <label class="switch">
+      <label class="switch margin-left">
         <input type="checkbox" checked class="Y-plane-toggle" />
         <span class="slider round"></span>
       </label>
-      <div class="reverse-button Y-reverse">
-        <img src="./src/assets/img/reverse.png" />
+      <div class="img-button Y-reverse margin-left">
+        <img src="./src/assets/img/right_arrow.png" />
       </div>
     </div>
     <!-- Z -->
     <div class="setting">
       <input type="range" class="Z-slider" min="-100" max="100" value="100" />
-      <label class="switch">
+      <label class="switch margin-left">
         <input type="checkbox" checked class="Z-plane-toggle" />
         <span class="slider round"></span>
       </label>
-      <div class="reverse-button Z-reverse">
-        <img src="./src/assets/img/reverse.png" />
+      <div class="img-button Z-reverse margin-left">
+        <img src="./src/assets/img/right_arrow.png" />
       </div>
     </div>
     <!-- Distortion -->
@@ -47,12 +43,17 @@
         max="100"
         value="0"
       />
-      <div class="reverse-button distortion-reverse">
-        <img src="./src/assets/img/reverse.png" />
+      <div class="img-button degenerate-filter margin-left">
+        <img src="./src/assets/img/infinity_filter.png" />
       </div>
-      <div class="reverse-button degenerate-filter">
-        <p>Deg.</p>
+      <div class="img-button distortion-reverse margin-left">
+        <img src="./src/assets/img/right_arrow.png" />
       </div>
     </div>
   </div>
+
+  <!-- Axis -->
+  <div class="axis-container"></div>
+  <!-- Orbital -->
+  <div class="orbital-container"></div>
 </div>
