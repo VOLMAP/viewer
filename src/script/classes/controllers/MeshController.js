@@ -1,367 +1,308 @@
-import { ObjLoader } from "../loaders/ObjLoader.js";
-import { MeshLoader } from "../loaders/MeshLoader.js";
-import { renderers } from "../../main/main.js";
-//import { TextureLoader } from "three";
-
-const maxSliderValue = 100;
 const minSliderValue = -100;
+const maxSliderValue = 100;
 
-const white = "#ffffff";
-const black = "#000000";
-
-export class MeshRendererController {
-  meshRenderer = null;
-
-  modelInput = null;
-  //textureInput = null;
-
-  //textureToggle = null;
-  colorInput = null;
-
-  wireframeToggle = null;
+export class MeshController {
+  volumeMesh = null;
+  //Mesh
+  meshInput = null;
+  sampleMeshInput = null;
+  //Rendering
   shellToggle = null;
+  meshColorInput = null;
+  wireframeToggle = null;
   wireframeColorInput = null;
   boundingBoxToggle = null;
-
   slicerToggle = null;
+  resetRenderingButton = null;
+  //Slicing
+  slicerSettingsContainer = null;
   xSlider = null;
-  ySlider = null;
-  zSlider = null;
-  distortionSlider = null;
   xPlaneToggle = null;
-  yPlaneToggle = null;
-  zPlaneToggle = null;
   xReverseButton = null;
+  ySlider = null;
+  yPlaneToggle = null;
   yReverseButton = null;
+  zSlider = null;
+  zPlaneToggle = null;
   zReverseButton = null;
-
-  distortionReverseButton = null;
-
+  //Control
   axisToggle = null;
   orbitalToggle = null;
-  resetButton = null;
+  resetControlButton = null;
 
-  constructor(meshRenderer, settingsContainer) {
-    // Inizializzazione del controller renderer
-    this.meshRenderer = meshRenderer;
-    this.meshRenderer.controller = this;
+  constructor(volumeMesh, settingsContainer, canvasContainer) {
+    this.volumeMesh = volumeMesh;
 
-    const rendererContainer = meshRenderer.rendererContainer;
-    const getElement = (container, className) =>
-      container.getElementsByClassName(className)[0];
+    const getElement = (container, className) => container.getElementsByClassName(className)[0];
 
-    this.modelInput = getElement(settingsContainer, "mesh-input");
-    //this.textureInput = getElement(settingsContainer, "texture-input");
-
-    //this.textureToggle = getElement(settingsContainer, "texture-toggle");
-    this.colorInput = getElement(settingsContainer, "color-input");
-
-    this.wireframeToggle = getElement(settingsContainer, "wireframe-toggle");
+    // Mesh
+    this.meshInput = getElement(settingsContainer, "mesh-input");
+    this.sampleMeshInput = getElement(settingsContainer, "sample-mesh-input");
+    // Rendering
     this.shellToggle = getElement(settingsContainer, "shell-toggle");
-    this.wireframeColorInput = getElement(
-      settingsContainer,
-      "wireframe-color-input"
-    );
-    this.boundingBoxToggle = getElement(
-      settingsContainer,
-      "bounding-box-toggle"
-    );
-
-    this.degenerateFilter = getElement(rendererContainer, "degenerate-filter");
-
+    this.meshColorInput = getElement(settingsContainer, "mesh-color-input");
+    this.wireframeToggle = getElement(settingsContainer, "wireframe-toggle");
+    this.wireframeColorInput = getElement(settingsContainer, "wireframe-color-input");
+    this.boundingBoxToggle = getElement(settingsContainer, "bounding-box-toggle");
     this.slicerToggle = getElement(settingsContainer, "slicer-toggle");
-    this.xSlider = getElement(rendererContainer, "X-slider");
-    this.ySlider = getElement(rendererContainer, "Y-slider");
-    this.zSlider = getElement(rendererContainer, "Z-slider");
-    this.distortionSlider = getElement(rendererContainer, "distortion-slider");
-    this.xPlaneToggle = getElement(rendererContainer, "X-plane-toggle");
-    this.yPlaneToggle = getElement(rendererContainer, "Y-plane-toggle");
-    this.zPlaneToggle = getElement(rendererContainer, "Z-plane-toggle");
-    this.xReverseButton = getElement(rendererContainer, "X-reverse");
-    this.yReverseButton = getElement(rendererContainer, "Y-reverse");
-    this.zReverseButton = getElement(rendererContainer, "Z-reverse");
-    this.distortionReverseButton = getElement(
-      rendererContainer,
-      "distortion-reverse"
-    );
-
+    this.resetRenderingButton = getElement(settingsContainer, "reset-rendering");
+    // Slicing
+    this.slicerSettingsContainer = getElement(canvasContainer, "slicer-settings-container");
+    this.xSlider = getElement(this.slicerSettingsContainer, "X-slider");
+    this.xPlaneToggle = getElement(this.slicerSettingsContainer, "X-plane-toggle");
+    this.xReverseButton = getElement(this.slicerSettingsContainer, "X-reverse-button");
+    this.ySlider = getElement(this.slicerSettingsContainer, "Y-slider");
+    this.yPlaneToggle = getElement(this.slicerSettingsContainer, "Y-plane-toggle");
+    this.yReverseButton = getElement(this.slicerSettingsContainer, "Y-reverse-button");
+    this.zSlider = getElement(this.slicerSettingsContainer, "Z-slider");
+    this.zPlaneToggle = getElement(this.slicerSettingsContainer, "Z-plane-toggle");
+    this.zReverseButton = getElement(this.slicerSettingsContainer, "Z-reverse-button");
+    // Control
     this.axisToggle = getElement(settingsContainer, "axis-toggle");
     this.orbitalToggle = getElement(settingsContainer, "orbital-toggle");
-    this.resetButton = getElement(settingsContainer, "reset-button");
+    this.resetControlButton = getElement(settingsContainer, "reset-control");
 
-    this.dropdowns = Array.from(
-      settingsContainer.getElementsByClassName("dropdown")
-    );
-
-    this.appendEventListeners(this);
+    this.appendEventListeners(this.volumeMesh);
   }
 
-  appendEventListeners(controller) {
-    // Listener per tutti gli input della UI
-    this.modelInput.onchange = async function () {
+  appendEventListeners(volumeMesh) {
+    // Add event listeners to the HTML elements
+    // Mesh
+    this.meshInput.onchange = async function () {
       const file = this.files[0];
 
-      if (!file) {
-        console.error("No file selected");
-        return;
-      }
-
-      const fileName = file.name.toLowerCase(); // Converti il nome in minuscolo per evitare problemi di maiuscole
-      const fileExtension = fileName.split(".").pop(); // Ottieni l'estensione del file
-
-      if (fileExtension === "obj") {
-        const loader = new ObjLoader();
-        const surfaceMesh = await loader.load(file);
-        controller.meshRenderer.setMesh(surfaceMesh);
-        controller.reset();
-      } else if (fileExtension === "mesh") {
-        const loader = new MeshLoader();
-        const volumeMesh = await loader.load(file);
-        controller.meshRenderer.setMesh(volumeMesh);
-        controller.reset();
-      } else {
-        console.error("Invalid file format selected");
-      }
+      volumeMesh.loadMesh(file);
     };
-    /*
-    this.textureInput.onchange = function () {
-      const file = this.files[0];
+    this.sampleMeshInput.onchange = async function () {
+      const sample = this.value;
 
-      if (!file) {
-        console.error("No file selected");
-        return;
-      }
-
-      const fileURL = URL.createObjectURL(file);
-
-      const loader = new TextureLoader();
-      loader.load(fileURL, (texture) => {
-        controller.meshRenderer.changeTexture(texture);
-      });
+      volumeMesh.loadSampleMesh(sample);
     };
-
-    this.textureToggle.onchange = function () {
-      const isTextureVisible = this.checked;
-      if (!controller.meshRenderer.toggleTexture(isTextureVisible)) {
-        this.checked = false;
-      }
-    };
-    */
-    this.colorInput.onchange = function () {
-      const color_ex = parseInt(this.value.replace("#", ""), 16);
-
-      if (!controller.meshRenderer.changeColor(color_ex)) {
-        this.value = "#ffffff"; // Reset to white if the color change fails
-      }
-    };
-
-    this.wireframeToggle.onchange = function () {
-      const isWireframeVisible = this.checked;
-      if (!controller.meshRenderer.toggleWireframe(isWireframeVisible)) {
-        this.checked = false;
-      }
-    };
-
+    // Rendering
     this.shellToggle.onchange = function () {
-      const isShellVisible = this.checked;
-      if (!controller.meshRenderer.toggleShell(isShellVisible)) {
-        this.checked = false;
+      const flag = this.checked;
+
+      if (!volumeMesh.toggleShell(flag)) {
+        this.checked = !flag;
       }
     };
+    this.meshColorInput.oninput = function () {
+      if (!this.oldValue) {
+        // Save the first valid value
+        this.oldValue = this.value;
+      }
 
-    this.wireframeColorInput.onchange = function () {
-      const color_ex = parseInt(this.value.replace("#", ""), 16);
+      const colorEx = parseInt(this.value.replace("#", ""), 16);
 
-      if (!controller.meshRenderer.changeWireframeColor(color_ex)) {
-        this.value = "#000000"; // Reset to white if the color change fails
+      // Try to change color
+      if (!volumeMesh.changePlainColor(colorEx)) {
+        // Failed → restore old value
+        this.value = this.oldValue;
+      } else {
+        // Success → update old value
+        this.oldValue = this.value;
       }
     };
+    this.wireframeToggle.onchange = function () {
+      const flag = this.checked;
 
+      if (!volumeMesh.toggleWireframe(flag)) {
+        this.checked = !flag;
+      }
+    };
+    this.wireframeColorInput.oninput = function () {
+      if (!this.oldValue) {
+        // Save the first valid value
+        this.oldValue = this.value;
+      }
+      const colorEx = parseInt(this.value.replace("#", ""), 16);
+      // Try to change color
+      if (!volumeMesh.changeWireframeColor(colorEx)) {
+        // Failed → restore old value
+        this.value = this.oldValue;
+      } else {
+        // Success → update old value
+        this.oldValue = this.value;
+      }
+    };
     this.boundingBoxToggle.onchange = function () {
-      const isBoundingBoxVisible = this.checked;
-      if (!controller.meshRenderer.toggleBoundingBox(isBoundingBoxVisible)) {
-        this.checked = false;
+      const flag = this.checked;
+
+      if (!volumeMesh.toggleBoundingBox(flag)) {
+        this.checked = !flag;
       }
     };
-
     this.slicerToggle.onchange = function () {
-      const isSlicerVisible = this.checked;
-      if (!controller.meshRenderer.toggleSlicer(isSlicerVisible)) {
-        this.checked = false;
-      }
+      const flag = this.checked;
 
-      if (!isSlicerVisible) {
-        controller.xSlider.value = maxSliderValue;
-        controller.ySlider.value = maxSliderValue;
-        controller.zSlider.value = maxSliderValue;
-        controller.xPlaneToggle.checked = true;
-        controller.yPlaneToggle.checked = true;
-        controller.zPlaneToggle.checked = true;
+      if (!volumeMesh.toggleSlicer(flag)) {
+        this.checked = !flag;
+      } else {
+        volumeMesh.controller.toggleSlicer(flag);
       }
     };
-
+    this.resetRenderingButton.onclick = function () {
+      volumeMesh.reset();
+      volumeMesh.controller.resetRendering();
+    };
+    // Slicing
     this.xSlider.oninput = function () {
-      const sliceValue = this.value;
+      if (!this.oldValue) {
+        // Save the first valid value
+        this.oldValue = this.value;
+      }
+      const value = this.value;
 
-      //let start = performance.now();
-      controller.meshRenderer.sliceX(sliceValue);
-      /*
-      let end = performance.now();
-      let numTriangles =
-        controller.meshRenderer.mesh.getMesh().geometry.userData.triangles
-          .length / 3;
-      console.log(
-        "Tempo esecuzione slicing X:",
-        (end - start).toFixed(3),
-        "ms",
-        "Numero di triangoli:",
-        numTriangles
-      );
-      */
-    };
-
-    this.ySlider.oninput = function () {
-      const sliceValue = this.value;
-
-      controller.meshRenderer.sliceY(sliceValue);
-    };
-
-    this.zSlider.oninput = function () {
-      const sliceValue = this.value;
-
-      controller.meshRenderer.sliceZ(sliceValue);
-    };
-
-    this.distortionSlider.oninput = function () {
-      const sliceValue = this.value;
-
-      if (
-        !renderers[0].sliceDistortion(sliceValue) ||
-        !renderers[1].sliceDistortion(sliceValue)
-      ) {
-        renderers[0].controller.distortionSlider.value = maxSliderValue;
-        renderers[1].controller.distortionSlider.value = maxSliderValue;
+      if (!volumeMesh.slice(value, 0)) {
+        // Failed → restore old value
+        this.value = this.oldValue;
       } else {
-        renderers[0].controller.distortionSlider.value = sliceValue;
-        renderers[1].controller.distortionSlider.value = sliceValue;
+        // Success → update old value
+        this.oldValue = this.value;
       }
     };
-
-    this.degenerateFilter.onclick = function () {
-      if (
-        renderers[0].sliceDistortion(Infinity) &&
-        renderers[1].sliceDistortion(Infinity)
-      ) {
-        renderers[0].controller.distortionSlider.value = maxSliderValue;
-        renderers[1].controller.distortionSlider.value = maxSliderValue;
-      }
-    };
-
     this.xPlaneToggle.onchange = function () {
-      const isPlaneYZVisible = this.checked;
-      if (!controller.meshRenderer.togglePlaneYZ(isPlaneYZVisible)) {
-        this.checked = false;
+      const flag = this.checked;
+
+      if (!volumeMesh.toggleSlicingPlane(flag, 0)) {
+        this.checked = !flag;
       }
     };
+    this.xReverseButton.onclick = function () {
+      if (!this.isReversed) this.isReversed = false;
 
-    this.yPlaneToggle.onchange = function () {
-      const isPlaneXZVisible = this.checked;
-      if (!controller.meshRenderer.togglePlaneXZ(isPlaneXZVisible)) {
-        this.checked = false;
+      const img = this.getElementsByTagName("img")[0];
+
+      if (volumeMesh.reverseSlicingDirection(0)) {
+        this.isReversed = !this.isReversed;
+        img.src = this.isReversed
+          ? "./src/assets/img/left_arrow.png"
+          : "./src/assets/img/right_arrow.png";
       }
     };
-
-    this.zPlaneToggle.onchange = function () {
-      const isPlaneXYVisible = this.checked;
-      if (!controller.meshRenderer.togglePlaneXY(isPlaneXYVisible)) {
-        this.checked = false;
+    this.ySlider.oninput = function () {
+      if (!this.oldValue) {
+        // Save the first valid value
+        this.oldValue = this.value;
       }
-    };
-
-    this.axisToggle.onchange = function () {
-      const isAxisVisible = this.checked;
-      controller.meshRenderer.toggleAxis(isAxisVisible);
-    };
-
-    this.orbitalToggle.onchange = function () {
-      const isOrbitalVisible = this.checked;
-      controller.meshRenderer.toggleOrbital(isOrbitalVisible);
-    };
-
-    this.resetButton.onclick = function () {
-      controller.meshRenderer.reset();
-      controller.reset();
-
-      if (renderers[0] !== controller.meshRenderer) {
-        renderers[0].resetDistortion();
-        renderers[0].controller.resetDistortion();
+      const value = this.value;
+      if (!volumeMesh.slice(value, 1)) {
+        // Failed → restore old value
+        this.value = this.oldValue;
       } else {
-        renderers[1].resetDistortion();
-        renderers[1].controller.resetDistortion();
+        // Success → update old value
+        this.oldValue = this.value;
       }
     };
-
-    this.xReverseButton.addEventListener("click", () => {
-      controller.meshRenderer.reverseX(this.xSlider.value);
-    });
-
-    this.yReverseButton.addEventListener("click", () => {
-      controller.meshRenderer.reverseY(this.ySlider.value);
-    });
-
-    this.zReverseButton.addEventListener("click", () => {
-      controller.meshRenderer.reverseZ(this.zSlider.value);
-    });
-
-    this.distortionReverseButton.addEventListener("click", () => {
-      renderers[0].reverseDistortion(this.distortionSlider.value);
-      renderers[1].reverseDistortion(this.distortionSlider.value);
-    });
+    this.yPlaneToggle.onchange = function () {
+      const flag = this.checked;
+      if (!volumeMesh.toggleSlicingPlane(flag, 1)) {
+        this.checked = !flag;
+      }
+    };
+    this.yReverseButton.onclick = function () {
+      if (!this.isReversed) this.isReversed = false;
+      const img = this.getElementsByTagName("img")[0];
+      if (volumeMesh.reverseSlicingDirection(1)) {
+        this.isReversed = !this.isReversed;
+        img.src = this.isReversed
+          ? "./src/assets/img/left_arrow.png"
+          : "./src/assets/img/right_arrow.png";
+      }
+    };
+    this.zSlider.oninput = function () {
+      if (!this.oldValue) {
+        // Save the first valid value
+        this.oldValue = this.value;
+      }
+      const value = this.value;
+      if (!volumeMesh.slice(value, 2)) {
+        // Failed → restore old value
+        this.value = this.oldValue;
+      } else {
+        // Success → update old value
+        this.oldValue = this.value;
+      }
+    };
+    this.zPlaneToggle.onchange = function () {
+      const flag = this.checked;
+      if (!volumeMesh.toggleSlicingPlane(flag, 2)) {
+        this.checked = !flag;
+      }
+    };
+    this.zReverseButton.onclick = function () {
+      if (!this.isReversed) this.isReversed = false;
+      const img = this.getElementsByTagName("img")[0];
+      if (volumeMesh.reverseSlicingDirection(2)) {
+        this.isReversed = !this.isReversed;
+        img.src = this.isReversed
+          ? "./src/assets/img/left_arrow.png"
+          : "./src/assets/img/right_arrow.png";
+      }
+    };
+    // Control
+    this.axisToggle.onchange = function () {
+      const flag = this.checked;
+      volumeMesh.meshRenderer.toggleAxis(flag);
+    };
+    this.orbitalToggle.onchange = function () {
+      const flag = this.checked;
+      volumeMesh.meshRenderer.toggleOrbital(flag);
+    };
+    this.resetControlButton.onclick = function () {
+      volumeMesh.meshRenderer.reset();
+      volumeMesh.controller.resetControl();
+    };
 
     window.addEventListener("resize", () => {
-      // Aggiorna la dimensione del renderer al resize della finestra
-      controller.meshRenderer.resize();
-    });
-
-    this.dropdowns.forEach((dropdown) => {
-      const btn = dropdown.querySelector(".dropbtn");
-      const content = dropdown.querySelector(".dropcontent");
-      btn.addEventListener("click", function (e) {
-        e.stopPropagation();
-        // Chiudi tutti gli altri
-        document.querySelectorAll(".dropcontent.toggle").forEach((dc) => {
-          if (dc !== content) dc.classList.remove("toggle");
-        });
-        // Toggle classe
-        content.classList.toggle("toggle");
-      });
+      //Update renderer size on window resize
+      volumeMesh.meshRenderer.resize();
     });
   }
 
-  reset() {
-    // Reset di tutti i toggle e slider alle impostazioni iniziali
-    this.wireframeToggle.checked = true;
+  resetRendering() {
+    //Reset of all UI elements to default values
     this.shellToggle.checked = true;
+    this.meshColorInput.value = "#ffffff";
+    this.wireframeToggle.checked = true;
+    this.wireframeColorInput.value = "#000000";
     this.boundingBoxToggle.checked = false;
-
     this.slicerToggle.checked = false;
-    this.xSlider.value = maxSliderValue;
-    this.ySlider.value = maxSliderValue;
-    this.zSlider.value = maxSliderValue;
-    this.xPlaneToggle.checked = true;
-    this.yPlaneToggle.checked = true;
-    this.zPlaneToggle.checked = true;
+    this.toggleSlicer(false);
+  }
 
+  resetSlicer() {
+    //Reset of all UI elements to default values
+    this.xSlider.value = maxSliderValue;
+    this.xPlaneToggle.checked = true;
+    this.xReverseButton.isReversed = false;
+    this.xReverseButton.getElementsByTagName("img")[0].src = "./src/assets/img/right_arrow.png";
+    this.ySlider.value = maxSliderValue;
+    this.yPlaneToggle.checked = true;
+    this.yReverseButton.isReversed = false;
+    this.yReverseButton.getElementsByTagName("img")[0].src = "./src/assets/img/right_arrow.png";
+    this.zSlider.value = maxSliderValue;
+    this.zPlaneToggle.checked = true;
+    this.zReverseButton.isReversed = false;
+    this.zReverseButton.getElementsByTagName("img")[0].src = "./src/assets/img/right_arrow.png";
+  }
+
+  toggleSlicer(flag) {
+    if (flag) {
+      this.slicerSettingsContainer.style.visibility = "visible";
+    } else {
+      this.slicerSettingsContainer.style.visibility = "hidden";
+      this.resetSlicer();
+    }
+  }
+
+  updatePickerSliceSlider(sliderValue) {
+    this.xSlider.value = sliderValue;
+  }
+
+  resetControl() {
+    //Reset of all UI elements to default values
     this.axisToggle.checked = false;
     this.orbitalToggle.checked = false;
-
-    this.colorInput.value = white;
-    this.wireframeColorInput.value = black;
-
-    this.resetDistortion();
-  }
-
-  resetDistortion() {
-    this.distortionSlider.value = 0;
   }
 }

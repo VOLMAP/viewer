@@ -35,9 +35,7 @@ function computeSingularValues(matrix) {
   const eigenvalues = jacobiEigenvaluesOnly(AAt);
 
   // Calcola i valori singolari come radice quadrata del valore assoluto degli autovalori
-  const singularValues = eigenvalues.map((eigenvalue) =>
-    Math.sqrt(Math.abs(eigenvalue))
-  );
+  const singularValues = eigenvalues.map((eigenvalue) => Math.sqrt(Math.abs(eigenvalue)));
 
   return singularValues;
 }
@@ -89,10 +87,7 @@ function computeDistortion(s_max, s_mid, s_min, energy) {
       );
     case "ARAP":
       const EPSILON = 1e-12;
-      const val =
-        Math.pow(s_max - 1, 2) +
-        Math.pow(s_mid - 1, 2) +
-        Math.pow(s_min - 1, 2);
+      const val = Math.pow(s_max - 1, 2) + Math.pow(s_mid - 1, 2) + Math.pow(s_min - 1, 2);
       return val < EPSILON ? 0 : val;
     case "MIPS3D":
       return (
@@ -119,14 +114,10 @@ function transpose(matrix) {
 // Funzione per moltiplicare due matrici
 function multiplyMatrices(A, B) {
   if (!Array.isArray(A) || !A.every((row) => Array.isArray(row))) {
-    throw new Error(
-      "A deve essere una matrice bidimensionale (array di array)."
-    );
+    throw new Error("A deve essere una matrice bidimensionale (array di array).");
   }
   if (!Array.isArray(B) || !B.every((row) => Array.isArray(row))) {
-    throw new Error(
-      "B deve essere una matrice bidimensionale (array di array)."
-    );
+    throw new Error("B deve essere una matrice bidimensionale (array di array).");
   }
 
   const rowsA = A.length;
@@ -135,9 +126,7 @@ function multiplyMatrices(A, B) {
   const colsB = B[0].length;
 
   if (colsA !== rowsB) {
-    throw new Error(
-      "Il numero di colonne di A deve essere uguale al numero di righe di B."
-    );
+    throw new Error("Il numero di colonne di A deve essere uguale al numero di righe di B.");
   }
 
   const result = [];
@@ -187,8 +176,7 @@ function jacobiEigenvaluesOnly(A, epsilon = 1e-10, maxIterations = 100) {
     const { max, p, q } = maxOffDiagonal(matrix);
     if (max < epsilon) break;
 
-    const theta =
-      0.5 * Math.atan2(2 * matrix[p][q], matrix[q][q] - matrix[p][p]);
+    const theta = 0.5 * Math.atan2(2 * matrix[p][q], matrix[q][q] - matrix[p][p]);
     const c = Math.cos(theta);
     const s = Math.sin(theta);
 
@@ -217,3 +205,37 @@ function jacobiEigenvaluesOnly(A, epsilon = 1e-10, maxIterations = 100) {
 }
 
 export { computeDistortion, jacobianMatrix, computeSingularValues };
+
+function clamp(val, min, max) {
+  //We use infinity as a distortion value to identify degenerate tetrahedra
+  if (isNaN(val)) return Infinity;
+
+  let res = Math.max(val, min);
+  res = Math.min(res, max);
+  res = (res - min) / (max - min);
+  return res;
+}
+
+function clampArray(arr, min, max) {
+  for (let i = 0; i < arr.length; i++) {
+    arr[i] = clamp(arr[i], min, max);
+  }
+}
+
+//Custom interpolation between two colors with t as interpolation factor (0-1)
+function interpolateColor(start, end, t) {
+  const whiteRGB = { r: 1, g: 1, b: 1 };
+  const isWhite = (c) => c.r === 1 && c.g === 1 && c.b === 1;
+
+  if (isWhite(start) || isWhite(end)) {
+    //Linear interpolation: white → end or start → white
+    return lerpColor(start, end, t);
+  } else {
+    //Custom interpolation: start → white → end
+    if (t < 0.5) {
+      return lerpColor(start, whiteRGB, t * 2);
+    } else {
+      return lerpColor(whiteRGB, end, (t - 0.5) * 2);
+    }
+  }
+}

@@ -1,14 +1,14 @@
 <div id="map_settings" class="settings-container col-2 rowS">
   <!-- Map -->
   <div class="dropdown colS-12">
-    <div class="dropbtn flex-row">
+    <div class="dropbtn">
       <p>Map</p>
       <img src="./src/assets/img/dropdown_arrow.png" />
     </div>
 
     <div class="dropcontent float-left">
       <!-- Map Viewer -->
-      <div class="setting flex-row">
+      <div class="setting">
         <p>Map Viewer:</p>
         <label class="switch">
           <input type="checkbox" class="map-toggle" />
@@ -16,7 +16,7 @@
         </label>
       </div>
       <!-- Energy -->
-      <div class="setting flex-row">
+      <div class="setting">
         <p>Energy:</p>
         <select class="energy-input" name="energy-input">
           <option value="CONFORMAL">Conformal</option>
@@ -27,36 +27,28 @@
         </select>
       </div>
       <!-- Clamping -->
-      <div class="setting flex-row">
+      <div class="setting">
         <p>Clamping:</p>
         <input type="number" class="clamp-start-input" value="1" />
         <input type="number" class="clamp-end-input margin-left" value="12" />
       </div>
       <!-- Gradient -->
-      <div class="setting flex-row">
+      <div class="setting">
         <p>Gradient:</p>
         <input type="color" class="gradient-start-input" value="#ffffff" />
-        <input
-          type="color"
-          class="gradient-end-input margin-left"
-          value="#ff0000"
-        />
+        <input type="color" class="gradient-end-input margin-left" value="#ff0000" />
       </div>
       <!-- Degenerate -->
-      <div class="setting flex-row">
+      <div class="setting">
         <p>Degenerate:</p>
         <label class="switch">
           <input type="checkbox" class="degenerate-color-toggle" />
           <span class="slider round"></span>
         </label>
-        <input
-          type="color"
-          class="degenerate-color-input margin-left"
-          value="#ffff00"
-        />
+        <input type="color" class="degenerate-color-input margin-left" value="#ffff00" />
       </div>
       <!-- Map -->
-      <div class="setting flex-row">
+      <div class="setting">
         <p>Reverse Mapping:</p>
         <div class="reverse-mapping-button img-button">
           <img src="./src/assets/img/right_arrow.png" />

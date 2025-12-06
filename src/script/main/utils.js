@@ -1,69 +1,84 @@
-function clamp(val, min, max) {
-  if (isNaN(val)) return Infinity;
+//Utility Functions
+function binarySearchClosest(
+  arr,
+  evaluate,
+  target,
+  left = 0,
+  right = arr.length - 1,
+  bestMatch = -1
+) {
+  if (left > right) {
+    // Return the index of the closest match found
+    return bestMatch;
+  }
 
-  let res = Math.max(val, min);
-  res = Math.min(res, max);
-  res = (res - min) / (max - min);
-  return res;
-}
+  const mid = Math.floor((left + right) / 2);
+  const midValue = evaluate(arr[mid]);
 
-function clampArray(arr, min, max) {
-  for (let i = 0; i < arr.length; i++) {
-    arr[i] = clamp(arr[i], min, max);
+  // If we don't have a bestMatch yet, or if midValue is closer than the current bestMatch, update it
+  if (
+    bestMatch === -1 ||
+    Math.abs(midValue - target) < Math.abs(evaluate(arr[bestMatch]) - target)
+  ) {
+    bestMatch = mid;
+  }
+
+  if (midValue === target) {
+    // Found exact match
+    return mid;
+  } else if (midValue < target) {
+    // Search in the right half
+    return binarySearchClosest(arr, evaluate, target, mid + 1, right, bestMatch);
+  } else {
+    // Search in the left half
+    return binarySearchClosest(arr, evaluate, target, left, mid - 1, bestMatch);
   }
 }
 
-const white = 0xffffff;
-const red = 0xff0000;
+//Color Constants and Functions
+const whiteHex = 0xffffff;
+const greyHex = 0xf3f3f3;
+const blackHex = 0x000000;
+const redHex = 0xff8080;
+const greenHex = 0x80ff80;
+const blueHex = 0x8080ff;
+const yellowHex = 0xffff80;
 
-function hexToRGB(colorInt) {
-  const r = ((colorInt >> 16) & 0xff) / 255;
-  const g = ((colorInt >> 8) & 0xff) / 255;
-  const b = (colorInt & 0xff) / 255;
+function hexToRGB(colorHex) {
+  const r = ((colorHex >> 16) & 0xff) / 255;
+  const g = ((colorHex >> 8) & 0xff) / 255;
+  const b = (colorHex & 0xff) / 255;
 
   return { r, g, b };
 }
 
 function RGBToHex({ r, g, b }) {
-  const rInt = Math.round(r * 255);
-  const gInt = Math.round(g * 255);
-  const bInt = Math.round(b * 255);
+  const rHex = Math.round(r * 255);
+  const gHex = Math.round(g * 255);
+  const bHex = Math.round(b * 255);
 
-  return (rInt << 16) | (gInt << 8) | bInt;
+  return (rHex << 16) | (gHex << 8) | bHex;
 }
 
-function lerpColor(c1, c2, t) {
+//Linear interpolation between two colors with t as interpolation factor (0-1)
+function lerpColor(start, end, t) {
   return {
-    r: c1.r + (c2.r - c1.r) * t,
-    g: c1.g + (c2.g - c1.g) * t,
-    b: c1.b + (c2.b - c1.b) * t,
+    r: start.r + (end.r - start.r) * t,
+    g: start.g + (end.g - start.g) * t,
+    b: start.b + (end.b - start.b) * t,
   };
 }
 
-function interpolateColor(start, end, t) {
-  const white = { r: 1, g: 1, b: 1 };
-  const isWhite = ({ r, g, b }) => r == 1 && g == 1 && b == 1;
-
-  if (isWhite(start) || isWhite(end)) {
-    // Interpolazione diretta
-    return lerpColor(start, end, t);
-  } else {
-    // Interpolazione in due fasi: start → bianco → end
-    if (t < 0.5) {
-      return lerpColor(start, white, t * 2);
-    } else {
-      return lerpColor(white, end, (t - 0.5) * 2);
-    }
-  }
-}
-
 export {
-  clamp,
-  clampArray,
-  white,
-  red,
+  binarySearchClosest,
+  whiteHex,
+  greyHex,
+  blackHex,
+  redHex,
+  blueHex,
+  greenHex,
+  yellowHex,
   hexToRGB,
   RGBToHex,
   lerpColor,
-  interpolateColor,
 };

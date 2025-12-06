@@ -1,29 +1,23 @@
 import { initializeComponents } from "./components.js";
+import { VolumeMesh } from "../classes/wrappers/VolumeMesh.js";
 
 await initializeComponents();
 
-/*
-import { MeshRenderer } from "../classes/renderer/MeshRenderer.js";
-import { MeshRendererController } from "../classes/renderer/MeshRendererController.js";
-import { MeshMapper } from "../classes/mapper/MeshMapper.js";
-import { MeshMapperController } from "../classes/mapper/MeshMapperController.js";
-import { MeshLoader } from "../classes/loaders/MeshLoader.js";
-*/
+const volumeMeshes = [];
 
-/*
-const n = 2;
-const renderers = [];
-
-for (let i = 1; i <= n; i++) {
-  const rendererContainer = document.getElementById(`mesh${i}_renderer`);
-  const renderer = new MeshRenderer(rendererContainer);
-
+for (let i = 1; i <= 2; i++) {
   const settingsContainer = document.getElementById(`mesh${i}_settings`);
-  new MeshRendererController(renderer, settingsContainer);
+  const canvasContainer = document.getElementById(`mesh${i}_canvas`);
 
-  renderers.push(renderer);
+  const volumeMesh = new VolumeMesh(settingsContainer, canvasContainer);
+
+  volumeMeshes.push(volumeMesh);
 }
 
+volumeMeshes[0].loadSampleMesh("hand_aigerman.mesh");
+volumeMeshes[1].loadSampleMesh("hand_pc_aigerman.mesh");
+
+/*
 const mapper = new MeshMapper(renderers);
 
 const mapSettingsContainer = document.getElementById(`map_settings`);

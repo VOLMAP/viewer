@@ -1,12 +1,19 @@
 import * as THREE from "../../../libs/three/three.module.js";
+import * as utils from "../../main/utils.js";
+import { MeshController } from "../controllers/MeshController.js";
+import { MeshLoader } from "../loaders/MeshLoader.js";
+import { MeshRenderer } from "../mesh_inspection/MeshRenderer.js";
 import { MeshSlicer } from "../mesh_inspection/MeshSlicer.js";
+//import { VolumeMap } from "./VolumeMap.js";
 
-const white = 0xffffff;
-const black = 0x000000;
-const yellow = 0xffff00;
+/* PolygonOffset to avoid z-fighting when rendering, in external to internal order: 
+   wireframe -> mesh -> shell */
+const standardWireframeMaterial = new THREE.LineBasicMaterial({
+  color: utils.blackHex,
+});
 
 const standardMaterial = new THREE.MeshPhysicalMaterial({
-  color: white,
+  color: utils.whiteHex,
   side: THREE.DoubleSide,
   polygonOffset: true,
   polygonOffsetFactor: 1,
@@ -14,123 +21,89 @@ const standardMaterial = new THREE.MeshPhysicalMaterial({
 });
 
 const standardShellMaterial = new THREE.MeshPhysicalMaterial({
-  color: white,
+  color: utils.whiteHex,
   transparent: true,
-  opacity: 0.5,
+  opacity: 0.3,
   polygonOffset: true,
   polygonOffsetFactor: 2,
   polygonOffsetUnits: 2,
 });
 
-const standardWireframeMaterial = new THREE.LineBasicMaterial({
-  color: black,
-});
-
 export class VolumeMesh {
   mesh = null;
-  colorMaterial = null;
-  //textureMaterial = null;
+  plainColor = utils.whiteHex;
+
+  shell = null;
   wireframe = null;
   boundingBox = null;
-  slicer = null;
 
-  constructor(geometry, color_ex = null, texture = null) {
-    this.colorMaterial = standardMaterial.clone();
-    //this.textureMaterial = standardMaterial.clone();
+  controller = null;
+  meshRenderer = null;
+  meshSlicer = null;
+  //volumeMap = null;
 
-    if (color_ex) {
-      this.changeColor(color_ex);
-    }
-    /*
-    if (texture) {
-      this.changeTexture(texture);
-    }
-    */
-    this.mesh = new THREE.Mesh(geometry, this.colorMaterial);
-    this.mesh.renderOrder = 2;
+  constructor(settingsContainer, canvasContainer) {
+    this.controller = new MeshController(this, settingsContainer, canvasContainer);
+    this.meshRenderer = new MeshRenderer(canvasContainer);
+    this.meshSlicer = new MeshSlicer();
+  }
 
+  setMesh(mesh) {
+    this.mesh = mesh;
+    // Initial set up
     this.translateToOrigin();
-    this.computeProperties();
-
-    this.setWireframe();
-
     this.setBoundingBox();
-    this.setSlicer();
+
+    this.computeCentroids();
+
+    /*Update visible faces builds the surface mesh from the volume mesh, 
+      in this case is also used to build the wireframe (setting his index attribute)
+      and shell (cloning the built surface mesh) */
+    this.setWireframe();
+    this.updateVisibleFaces(false, false);
     this.setShell();
-  }
 
-  getMesh() {
-    return this.mesh;
-  }
-
-  getWireframe() {
-    return this.wireframe;
-  }
-
-  setWireframe() {
-    const faces = this.mesh.geometry.userData.triangles;
-    var vertices = this.mesh.geometry.userData.vertices;
-
-    var segments = new Array();
-
-    for (let i = 0; i < faces.length; i += 3) {
-      const a = faces[i];
-      const b = faces[i + 1];
-      const c = faces[i + 2];
-
-      segments.push(a, b, b, c, c, a);
-    }
-
-    segments = new Uint32Array(segments);
-    vertices = new Float32Array(vertices);
-
-    const wireframeGeometry = new THREE.BufferGeometry();
-    wireframeGeometry.setIndex(new THREE.BufferAttribute(segments, 1));
-    wireframeGeometry.setAttribute(
-      "position",
-      new THREE.BufferAttribute(vertices, 3)
-    );
-
-    this.wireframe = new THREE.LineSegments(
-      wireframeGeometry,
-      standardWireframeMaterial.clone()
-    );
-
+    //RenderOrder to avoid z-fighting when rendering in external to internal order
     this.wireframe.renderOrder = 3;
+    this.mesh.renderOrder = 2;
+    this.shell.renderOrder = 1;
+
+    this.meshRenderer.updateMesh(this);
+    this.meshSlicer.updateMesh(this);
+    //this.volumeMap.updateMesh();
+
+    this.meshRenderer.toggleObject(true, this.mesh);
+    this.reset(true);
+    this.controller.resetRendering();
   }
 
   setShell() {
-    this.shell = new THREE.Mesh(
-      this.mesh.geometry.clone(),
-      standardShellMaterial.clone()
-    );
-
-    this.shell.renderOrder = 1;
+    this.shell = new THREE.Mesh(this.mesh.geometry.clone(), standardShellMaterial.clone());
   }
 
-  getShell() {
-    return this.shell;
-  }
+  setWireframe() {
+    const vertices = this.mesh.geometry.userData.vertices;
 
-  getBoundingBox() {
-    return this.boundingBox;
+    const segments = new Array();
+
+    const wireframeGeometry = new THREE.BufferGeometry();
+    const segmentsAttribute = new THREE.BufferAttribute(new Uint32Array(segments), 1);
+    const positionsAttribute = new THREE.BufferAttribute(new Float32Array(vertices), 3);
+
+    wireframeGeometry.setIndex(segmentsAttribute);
+    wireframeGeometry.setAttribute("position", positionsAttribute);
+
+    this.wireframe = new THREE.LineSegments(wireframeGeometry, standardWireframeMaterial.clone());
   }
 
   setBoundingBox() {
+    this.mesh.geometry.computeBoundingBox();
     const box = this.mesh.geometry.boundingBox;
 
-    this.boundingBox = new THREE.Box3Helper(box, yellow);
+    this.boundingBox = new THREE.Box3Helper(box, utils.yellowHex);
   }
 
-  getSlicer() {
-    return this.slicer;
-  }
-
-  setSlicer() {
-    this.slicer = new MeshSlicer(this);
-  }
-
-  /* This method translates the mesh to origin */
+  // This method translates the mesh to origin
   translateToOrigin() {
     // Compute the bounding box of the geometry
     this.mesh.geometry.computeBoundingBox();
@@ -138,17 +111,17 @@ export class VolumeMesh {
 
     // Calculate the translation vector
     const origin = new THREE.Vector3(0, 0, 0);
-    const centroid = box.getCenter(new THREE.Vector3());
-    const translationVector = new THREE.Vector3().subVectors(origin, centroid);
+    const boxCentroid = box.getCenter(new THREE.Vector3());
+    const translationVector = new THREE.Vector3().subVectors(origin, boxCentroid);
 
     // Translate the mesh to the origin
-    const positionAttribute = this.mesh.geometry.getAttribute("position");
-    const vertices = this.mesh.geometry.userData.vertices;
+    var vertices = this.mesh.geometry.userData.vertices;
+    var triangleSoup = this.mesh.geometry.userData.triangleSoup;
 
-    for (let i = 0; i < positionAttribute.count; i++) {
-      positionAttribute.array[i * 3] += translationVector.x;
-      positionAttribute.array[i * 3 + 1] += translationVector.y;
-      positionAttribute.array[i * 3 + 2] += translationVector.z;
+    for (let i = 0; i < triangleSoup.length; i += 3) {
+      triangleSoup[i] += translationVector.x;
+      triangleSoup[i + 1] += translationVector.y;
+      triangleSoup[i + 2] += translationVector.z;
     }
 
     for (let i = 0; i < vertices.length; i += 3) {
@@ -157,87 +130,367 @@ export class VolumeMesh {
       vertices[i + 2] += translationVector.z;
     }
 
-    positionAttribute.needsUpdate = true;
+    const positionAttribute = new THREE.BufferAttribute(new Float32Array(triangleSoup), 3);
+    this.mesh.geometry.setAttribute("position", positionAttribute);
   }
 
-  /* This method computes useful properties of the mesh's geometry :
-    bounding box, vertex normals and face centroids */
-  computeProperties() {
-    this.mesh.geometry.computeBoundingBox();
-    this.mesh.geometry.computeVertexNormals();
-
-    // Compute the centroids of the faces
-    const polys = this.mesh.geometry.userData.tetrahedras;
-    const numPolys = polys.length / 4;
-
+  // This method computes the centroids of the mesh's tetrahedra
+  computeCentroids() {
+    const tetrahedra = this.mesh.geometry.userData.tetrahedra;
     const vertices = this.mesh.geometry.userData.vertices;
-    let centroids = new Array(numPolys * 3);
 
-    for (let i = 0; i < numPolys; i++) {
+    const numTetrahedra = tetrahedra.length / 4;
+    let centroids = new Array(numTetrahedra * 3);
+
+    for (let i = 0; i < numTetrahedra; i++) {
       let centroid = [0, 0, 0];
-
+      //Visit every vertex of the tetrahedron
       for (let j = 0; j < 4; j++) {
-        const vertexIndex = polys[i * 4 + j];
-
+        const vertexIndex = tetrahedra[i * 4 + j];
+        //Visit every coordinate of the vertex and sum it to the other corresponding coordinates
         for (let k = 0; k < 3; k++) {
           centroid[k] += vertices[vertexIndex * 3 + k];
         }
       }
 
+      //Average the sum of the corresponding coordinates and assign it
       for (let k = 0; k < 3; k++) {
-        centroid[k] /= 4; // Average the coordinates
+        centroid[k] /= 4;
         centroids[i * 3 + k] = centroid[k];
       }
     }
 
-    centroids = new Float32Array(centroids);
-    this.mesh.geometry.setAttribute(
-      "centroid",
-      new THREE.BufferAttribute(centroids, 3)
-    );
+    this.mesh.geometry.userData.polyCentroids = centroids;
   }
 
-  changeColor(color_ex) {
-    this.colorMaterial.color.set(color_ex);
-    this.colorMaterial.needsUpdate = true;
-  }
+  updateVisibleFaces(isSlicerActive, isMapActive) {
+    const adjacencyMap = this.mesh.geometry.userData.adjacencyMap;
+    const vertices = this.mesh.geometry.userData.vertices;
+    //Mesh attributes
+    var tmpTriangleSoup = new Array();
+    var tmpColor = new Array();
+    var tmpPoly = new Array();
+    //Wireframe attributes
+    var tmpSegments = new Array();
 
-  applyMapColor(flag) {
-    if (flag) {
-      this.mesh.material = standardMaterial.clone();
-      this.mesh.material.color.set(null);
-      this.mesh.material.vertexColors = true;
-      this.slicer.isMapActive = true;
-      this.slicer.setVisibleFaces();
-    } else {
-      this.mesh.material = this.colorMaterial;
-      this.slicer.isMapActive = false;
-    }
-    this.mesh.material.needsUpdate = true;
-  }
-  /*
-  changeTexture(texture) {
-    this.textureMaterial.map = texture;
-    this.textureMaterial.needsUpdate = true;
-  }
+    for (const key of adjacencyMap.keys()) {
+      const value = adjacencyMap.get(key);
 
-  toggleTexture(flag) {
-    if (this.textureMaterial.map) {
-      if (flag) {
-        this.mesh.material = this.textureMaterial;
+      var sortedFace = null;
+      var polyIndex = null;
+
+      if (value.length == 2) {
+        //Check the visibility of the two adjacent tetrahedra
+        const isVisible1 =
+          (!isSlicerActive || this.meshSlicer.isPolyVisible(value[0].polyIndex)) &&
+          (!isMapActive || this.meshSlicer.isPolyVisibleByDistortion(value[0].polyIndex));
+        const isVisible2 =
+          (!isSlicerActive || this.meshSlicer.isPolyVisible(value[1].polyIndex)) &&
+          (!isMapActive || this.meshSlicer.isPolyVisibleByDistortion(value[1].polyIndex));
+        //If only one of the two is visible, add the face to the triangle soup
+        if (isVisible1 !== isVisible2) {
+          sortedFace = isVisible1 ? value[0].sortedFace : value[1].sortedFace;
+          polyIndex = isVisible1 ? value[0].polyIndex : value[1].polyIndex;
+        }
+      } else if (value.length == 1) {
+        //Check the visibility of the adjacent tetrahedra
+        const isVisible =
+          (!isSlicerActive || this.meshSlicer.isPolyVisible(value[0].polyIndex)) &&
+          (!isMapActive || this.meshSlicer.isPolyVisibleByDistortion(value[0].polyIndex));
+        //If it's visible, add the face to the triangle soup
+        if (isVisible) {
+          sortedFace = value[0].sortedFace;
+          polyIndex = value[0].polyIndex;
+        }
       } else {
-        this.mesh.material = this.colorMaterial;
+        console.error(
+          "Adjacency map entry with less than 1 or more than 2 adjacent polyhedra found."
+        );
       }
-      this.mesh.material.needsUpdate = true;
-      return true;
+      //If the face has to be added
+      if (sortedFace) {
+        for (let i = 0; i < sortedFace.length; i++) {
+          // Get vertex index
+          const v = sortedFace[i];
+          // Push vertex coordinates
+          tmpTriangleSoup.push(vertices[v * 3]);
+          tmpTriangleSoup.push(vertices[v * 3 + 1]);
+          tmpTriangleSoup.push(vertices[v * 3 + 2]);
+        }
+        // Push polyhedron index
+        tmpPoly.push(polyIndex);
+        // If map is active
+        if (isMapActive) {
+          const color = this.mesh.geometry.userData.polyColor[polyIndex];
+          for (let i = 0; i < sortedFace.length; i++) {
+            // Push vertex color
+            tmpColor.push(color.r, color.g, color.b);
+          }
+        }
+        // Push wireframe segments (for each face, create its 3 edges)
+        tmpSegments.push(sortedFace[0], sortedFace[1]);
+        tmpSegments.push(sortedFace[1], sortedFace[2]);
+        tmpSegments.push(sortedFace[2], sortedFace[0]);
+      }
+    }
+    //Update mesh geometry
+    const positionsAttribute = new THREE.BufferAttribute(new Float32Array(tmpTriangleSoup), 3);
+    this.mesh.geometry.setAttribute("position", positionsAttribute);
+    const polyAttribute = new THREE.BufferAttribute(new Uint32Array(tmpPoly), 1);
+    this.mesh.geometry.setAttribute("poly", polyAttribute);
+    if (isMapActive) {
+      const colorAttribute = new THREE.BufferAttribute(new Float32Array(tmpColor), 3);
+      this.mesh.geometry.setAttribute("color", colorAttribute);
+    }
+    //Compute normals for proper lighting
+    this.mesh.geometry.computeVertexNormals();
+    this.mesh.geometry.needsUpdate = true;
+    //Update wireframe
+    const segmentsAttribute = new THREE.BufferAttribute(new Uint32Array(tmpSegments), 1);
+    this.wireframe.geometry.setIndex(segmentsAttribute);
+    this.wireframe.geometry.needsUpdate = true;
+  }
+
+  async loadMesh(file) {
+    //Convert the filename to lowercase for case-insensitive comparison
+    const fileName = file.name.toLowerCase();
+    //Get the file format from its extension
+    const fileFormat = fileName.split(".").pop();
+
+    var mesh = null;
+
+    if (fileFormat === "mesh") {
+      const loader = new MeshLoader();
+      try {
+        mesh = await loader.load(file);
+      } catch (error) {
+        console.error("Error loading .mesh file:", error);
+      }
     } else {
-      console.log("Texture not loaded yet.");
+      console.error("Invalid file format selected");
+    }
+
+    if (mesh) {
+      this.setMesh(mesh);
+    }
+  }
+
+  async loadSampleMesh(fileName) {
+    const url = `./src/assets/sample_maps/${fileName}`;
+    const response = await fetch(url);
+    const blob = await response.blob();
+    const file = new File([blob], fileName);
+
+    await this.loadMesh(file);
+  }
+
+  toggleShell(flag) {
+    if (!this.shell) {
+      console.warn("Shell not loaded yet");
       return false;
     }
+
+    this.meshRenderer.toggleObject(flag, this.shell);
+    return true;
   }
-  */
+
+  changePlainColor(color_ex) {
+    if (!this.mesh) {
+      console.warn("Mesh not loaded yet");
+      return false;
+    }
+
+    this.plainColor = color_ex;
+    // TODO Change color only if map is not active !this.volumeMap.isMapActive
+    if (true) {
+      this.mesh.material.color.set(color_ex);
+      this.mesh.material.needsUpdate = true;
+    }
+
+    return true;
+  }
+
+  toggleWireframe(flag) {
+    if (!this.wireframe) {
+      console.warn("Wireframe not loaded yet");
+      return false;
+    }
+
+    this.meshRenderer.toggleObject(flag, this.wireframe);
+    return true;
+  }
+
   changeWireframeColor(color_ex) {
+    if (!this.wireframe) {
+      console.warn("Wireframe not loaded yet");
+      return false;
+    }
+
     this.wireframe.material.color.set(color_ex);
     this.wireframe.material.needsUpdate = true;
+  }
+
+  toggleBoundingBox(flag) {
+    if (!this.boundingBox) {
+      console.warn("Bounding box not loaded yet");
+      return false;
+    }
+
+    this.meshRenderer.toggleObject(flag, this.boundingBox);
+    return true;
+  }
+
+  toggleMapColor(flag) {
+    if (flag) {
+      this.mesh.material.color.set(null);
+      this.mesh.material.vertexColors = true;
+    } else {
+      this.mesh.material.color.set(this.plainColor);
+      this.mesh.material.vertexColors = false;
+    }
+
+    this.mesh.material.needsUpdate = true;
+  }
+
+  toggleSlicer(flag, setMesh = false) {
+    if (!this.mesh) {
+      console.warn("Mesh not loaded yet");
+      return false;
+    }
+
+    if (flag) {
+      this.meshSlicer.setActive(true);
+      this.toggleSlicingPlane(true, 0);
+      this.toggleSlicingPlane(true, 1);
+      this.toggleSlicingPlane(true, 2);
+      //TODO use this.volumeMap.isMapActive
+      this.updateVisibleFaces(true, false);
+    } else {
+      this.meshSlicer.setActive(false, setMesh);
+      this.toggleSlicingPlane(false, 0);
+      this.toggleSlicingPlane(false, 1);
+      this.toggleSlicingPlane(false, 2);
+      if (!setMesh) {
+        /*If not setting a new mesh, update the visible faces
+          if setting a new mesh, it has just been done*/
+        this.updateVisibleFaces(false, false);
+      }
+    }
+    return true;
+  }
+
+  slice(sliderValue, axisIndex) {
+    if (!this.mesh) {
+      console.warn("Mesh not loaded yet");
+      return false;
+    }
+
+    const result = this.meshSlicer.slice(sliderValue, axisIndex);
+
+    if (result) {
+      //TODO use this.volumeMap.isMapActive
+      this.updateVisibleFaces(this.meshSlicer.isActive, false);
+    }
+
+    return result;
+  }
+
+  toggleSlicingPlane(flag, axisIndex) {
+    if (!this.mesh) {
+      console.warn("Mesh not loaded yet");
+      return false;
+    }
+
+    const plane = this.meshSlicer.getSlicingPlane(axisIndex);
+
+    this.meshRenderer.toggleObject(flag, plane);
+    return true;
+  }
+
+  reverseSlicingDirection(axisIndex) {
+    if (!this.mesh) {
+      console.warn("Mesh not loaded yet");
+      return false;
+    }
+
+    const result = this.meshSlicer.reverseSlicingDirection(axisIndex);
+
+    if (result) {
+      //TODO use this.volumeMap.isMapActive
+      this.updateVisibleFaces(this.meshSlicer.isActive, false);
+    }
+
+    return result;
+  }
+
+  distortionSlice(sliderValue) {
+    if (!this.mesh) {
+      console.warn("Mesh not loaded yet");
+      return false;
+    }
+
+    const result = this.meshSlicer.distortionSlice(sliderValue);
+
+    if (result) {
+      //TODO use this.volumeMap.isMapActive
+      this.updateVisibleFaces(this.meshSlicer.isActive, false);
+    }
+    return result;
+  }
+
+  toggleDegenerateFilter(flag) {
+    if (!this.mesh) {
+      console.warn("Mesh not loaded yet");
+      return false;
+    }
+
+    const result = this.meshSlicer.toggleDegenerateFilter(flag);
+
+    if (result) {
+      //TODO use this.volumeMap.isMapActive
+      this.updateVisibleFaces(this.meshSlicer.isActive, false);
+    }
+
+    return result;
+  }
+
+  reverseDistortionSlicingDirection() {
+    if (!this.mesh) {
+      console.warn("Mesh not loaded yet");
+      return false;
+    }
+
+    const result = this.meshSlicer.reverseDistortionSlicingDirection();
+
+    if (result) {
+      //TODO use this.volumeMap.isMapActive
+      this.updateVisibleFaces(this.meshSlicer.isActive, false);
+    }
+    return result;
+  }
+
+  pickerSlice(lastVisiblePolyhedra) {
+    if (!this.mesh) {
+      console.warn("Mesh not loaded yet");
+      return false;
+    }
+
+    const result = this.meshSlicer.pickerSlice(lastVisiblePolyhedra);
+
+    if (result) {
+      //TODO use this.volumeMap.isMapActive
+      this.updateVisibleFaces(true, false);
+    }
+
+    return result;
+  }
+
+  reset(setMesh = false) {
+    this.toggleShell(true);
+    this.changePlainColor(utils.whiteHex);
+    this.toggleWireframe(true);
+    this.changeWireframeColor(utils.blackHex);
+    this.toggleBoundingBox(false);
+    this.toggleSlicer(false, setMesh);
   }
 }

@@ -1,5 +1,5 @@
 <div id="mesh{{i}}_settings" class="settings-container col-5 rowS">
-  <!-- Mesh Load -->
+  <!-- Mesh -->
   <div class="dropdown colS-4">
     <div class="dropbtn">
       <p>Mesh {{i}}</p>
@@ -7,10 +7,18 @@
     </div>
 
     <div class="dropcontent float-left">
-      <!-- Mesh -->
+      <!-- Load Mesh -->
       <div class="setting">
-        <p>Mesh:</p>
+        <p>Load:</p>
         <input type="file" class="mesh-input" accept=".mesh" />
+      </div>
+      <!-- Load Sample Mesh -->
+      <div class="setting">
+        <p>Load sample:</p>
+        <select class="sample-mesh-input" name="sample-mesh-input">
+          <option value="hand_aigerman.mesh">Hand Aigerman (Domain)</option>
+          <option value="hand_pc_aigerman.mesh">Hand Aigerman (Codomain)</option>
+        </select>
       </div>
     </div>
   </div>
@@ -43,11 +51,7 @@
           <input type="checkbox" checked="true" class="wireframe-toggle" />
           <span class="slider round"></span>
         </label>
-        <input
-          type="color"
-          class="wireframe-color-input margin-left"
-          value="#000000"
-        />
+        <input type="color" class="wireframe-color-input margin-left" value="#000000" />
       </div>
       <!-- Bounding Box -->
       <div class="setting">
@@ -68,7 +72,7 @@
       <!-- Reset -->
       <div class="setting">
         <p>Reset:</p>
-        <button class="reset-button"></button>
+        <button class="reset-button reset-rendering"></button>
       </div>
     </div>
   </div>
@@ -96,6 +100,11 @@
           <input type="checkbox" class="orbital-toggle" />
           <span class="slider round"></span>
         </label>
+      </div>
+      <!-- Reset -->
+      <div class="setting">
+        <p>Reset:</p>
+        <button class="reset-button reset-control"></button>
       </div>
     </div>
   </div>

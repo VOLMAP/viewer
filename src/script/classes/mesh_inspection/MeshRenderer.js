@@ -1,25 +1,15 @@
 import * as THREE from "../../../libs/three/three.module.js";
+import * as utils from "../../main/utils.js";
 import { ArcballControls } from "../../../libs/three/addons/controls/ArcballControls.js";
-
-const white = 0xffffff;
-const black = 0x000000;
-const red = 0xff8080;
-const green = 0x80ff80;
-const blue = 0x8080ff;
 
 const defaultFOV = 50;
 const defaultFar = 1000;
 const defaultNear = 0.1;
 
 export class MeshRenderer {
-  mesh = null;
-  meshMapper = null;
-
-  rendererContainer = null;
+  canvasContainer = null;
   axisContainer = null;
   orbitalContainer = null;
-  slicerSettingsContainer = null;
-  distortionContainer = null;
 
   renderer = null;
   axisRenderer = null;
@@ -31,21 +21,14 @@ export class MeshRenderer {
 
   camera = null;
   light = null;
+  ambientLight = null;
   axis = null;
   controls = null;
 
-  constructor(rendererContainer) {
-    this.rendererContainer = rendererContainer;
-    this.axisContainer =
-      this.rendererContainer.getElementsByClassName("axis")[0];
-    this.orbitalContainer =
-      this.rendererContainer.getElementsByClassName("orbital")[0];
-    this.slicerSettingsContainer =
-      this.rendererContainer.getElementsByClassName(
-        "slicer-settings-container"
-      )[0];
-    this.distortionContainer =
-      this.rendererContainer.getElementsByClassName("distortion")[0];
+  constructor(canvasContainer) {
+    this.canvasContainer = canvasContainer;
+    this.axisContainer = this.canvasContainer.getElementsByClassName("axis-container")[0];
+    this.orbitalContainer = this.canvasContainer.getElementsByClassName("orbital-container")[0];
 
     this.setRenderers();
     this.setScenes();
@@ -54,21 +37,43 @@ export class MeshRenderer {
     this.updateLightAndAxis();
   }
 
+  updateMesh(volumeMesh) {
+    this.clearScene();
+    //Adjust camera parameters based on mesh size
+    volumeMesh.mesh.geometry.computeBoundingBox();
+    const box = volumeMesh.mesh.geometry.boundingBox;
+    const size = box.getSize(new THREE.Vector3());
+    const diag = Math.sqrt(Math.pow(size.x, 2) + Math.pow(size.y, 2) + Math.pow(size.z, 2));
+
+    const far = Math.min(diag * 100, 100000);
+    this.camera.far = far;
+
+    const near = Math.max(diag / 100, 0.1);
+    this.camera.near = near;
+
+    const fov = this.camera.fov * (Math.PI / 180);
+    var distance = (diag / 2 / Math.tan(fov / 2)) * 1.2;
+
+    if (far === 100000) {
+      distance = (diag / 2) * 1.2;
+    }
+
+    this.camera.userData.resetPosition = new THREE.Vector3(0, 0, distance);
+
+    this.resetCameraAndControls();
+  }
+
   setRenderers() {
+    //Activate antialiasis to improve resolution
     this.renderer = new THREE.WebGLRenderer({
       antialias: true,
     });
-    this.renderer.setSize(
-      this.rendererContainer.clientWidth,
-      this.rendererContainer.clientHeight
-    );
-    this.renderer.setClearColor(0xf3f3f3);
-    this.rendererContainer.appendChild(this.renderer.domElement);
-    this.renderer.domElement.classList.add("renderer");
-
-    const aspect =
-      this.rendererContainer.clientWidth / this.rendererContainer.clientHeight;
-
+    this.renderer.setSize(this.canvasContainer.clientWidth, this.canvasContainer.clientHeight);
+    this.renderer.setClearColor(utils.greyHex);
+    this.canvasContainer.appendChild(this.renderer.domElement);
+    this.renderer.domElement.classList.add("mesh-renderer");
+    //Get aspect ratio to maintain perspective in the additional scenes also
+    const aspect = this.canvasContainer.clientWidth / this.canvasContainer.clientHeight;
     if (aspect > 1) {
       const newHeight = 100 / aspect;
       this.axisContainer.style.width = "100px";
@@ -87,11 +92,9 @@ export class MeshRenderer {
       alpha: true,
       antialias: true,
     });
-    this.axisRenderer.setSize(
-      this.axisContainer.clientWidth,
-      this.axisContainer.clientHeight
-    );
-    this.axisRenderer.setClearColor(white, 0); // Make the background transparent
+    this.axisRenderer.setSize(this.axisContainer.clientWidth, this.axisContainer.clientHeight);
+    // Make the background transparent using alpha
+    this.axisRenderer.setClearColor(utils.whiteHex, 0);
     this.axisContainer.appendChild(this.axisRenderer.domElement);
 
     this.orbitalRenderer = new THREE.WebGLRenderer({
@@ -102,7 +105,8 @@ export class MeshRenderer {
       this.orbitalContainer.clientWidth,
       this.orbitalContainer.clientHeight
     );
-    this.orbitalRenderer.setClearColor(white, 0); // Make the background transparent
+    // Make the background transparent using alpha
+    this.orbitalRenderer.setClearColor(utils.whiteHex, 0);
     this.orbitalContainer.appendChild(this.orbitalRenderer.domElement);
 
     this.renderer.setAnimationLoop(() => {
@@ -121,31 +125,33 @@ export class MeshRenderer {
   setCameraAndLight() {
     this.camera = new THREE.PerspectiveCamera(
       defaultFOV,
-      this.rendererContainer.clientWidth / this.rendererContainer.clientHeight,
+      this.canvasContainer.clientWidth / this.canvasContainer.clientHeight,
       defaultNear,
       defaultFar
     );
     this.camera.position.set(0, 0, 5);
     this.camera.lookAt(0, 0, 0);
+    this.camera.aspect = this.canvasContainer.clientWidth / this.canvasContainer.clientHeight;
     this.camera.updateProjectionMatrix();
-    this.camera.userData = { resetPosistion: new THREE.Vector3(0, 0, 5) };
-
-    this.light = new THREE.DirectionalLight(white, Math.PI);
+    this.camera.userData = { resetPosition: new THREE.Vector3(0, 0, 5) };
+    // Create a directional light to simulate the main light source
+    this.light = new THREE.DirectionalLight(utils.whiteHex, Math.PI);
     this.light.position.set(0, 0, 5);
     this.scene.add(this.light);
-
-    const light = new THREE.AmbientLight(white, Math.PI / 100);
-    this.scene.add(light);
+    // Create an ambient light to simulate the environment light
+    this.ambientLight = new THREE.AmbientLight(utils.whiteHex, Math.PI / 100);
+    this.scene.add(this.ambientLight);
   }
 
   setAxisAndControls() {
     this.axis = new THREE.AxesHelper(1);
-    this.axis.setColors(red, blue, green);
+    this.axis.setColors(utils.redHex, utils.blueHex, utils.greenHex);
     this.axis.material.transparent = true;
     this.axis.material.opacity = 0.6;
     this.axisScene.add(this.axis);
 
     this.controls = new ArcballControls(this.camera, this.renderer.domElement);
+    //Added Event Listeners to replicate gizmos interactions into axis and camera movements into light
     this.controls.addEventListener("change", () => {
       this.updateLightAndAxis();
     });
@@ -158,132 +164,11 @@ export class MeshRenderer {
     this.orbitalScene.add(this.controls._gizmos);
   }
 
-  setMeshMapper(meshMapper) {
-    this.meshMapper = meshMapper;
-  }
-
-  getMesh() {
-    if (this.mesh) {
-      return this.mesh;
-    } else {
-      console.log("Mesh not loaded yet");
-      return null;
-    }
-  }
-
-  setMesh(mesh) {
-    if (this.mesh) {
-      this.reset();
-      this.scene.remove(this.mesh.getMesh());
-      this.toggleWireframe(false);
-      this.toggleShell(false);
-    }
-
-    this.meshMapper.reset();
-
-    this.mesh = mesh;
-
-    const box = mesh.getMesh().geometry.boundingBox;
-    const size = box.getSize(new THREE.Vector3());
-    const diag = Math.sqrt(
-      Math.pow(size.x, 2) + Math.pow(size.y, 2) + Math.pow(size.z, 2)
-    );
-
-    const far = Math.min(diag * 100, 100000);
-    this.camera.far = far;
-
-    const near = Math.max(diag / 100, 0.1);
-    this.camera.near = near;
-
-    const fov = this.camera.fov * (Math.PI / 180);
-    var distance = (diag / 2 / Math.tan(fov / 2)) * 1.2;
-
-    if (far === 100000) {
-      distance = (diag / 2) * 1.2;
-    }
-
-    this.camera.userData.resetPosistion = new THREE.Vector3(0, 0, distance);
-
-    this.scene.add(this.mesh.getMesh());
-    this.toggleWireframe(true);
-    this.toggleShell(true);
-    this.resetCameraAndControls();
-  }
-
-  changeColor(color_ex) {
-    if (this.mesh) {
-      this.mesh.changeColor(color_ex);
-      return true;
-    } else {
-      console.log("Mesh not loaded yet");
-      return false;
-    }
-  }
-  /*
-  changeTexture(texture) {
-    if (this.mesh) {
-      this.mesh.changeTexture(texture);
-      return true;
-    } else {
-      console.log("Mesh not loaded yet");
-      return false;
-    }
-  }
-
-  toggleTexture(flag) {
-    if (this.mesh) {
-      return this.mesh.toggleTexture(flag);
-    } else {
-      console.log("Mesh not loaded yet");
-      return false;
-    }
-  }
-  */
-  changeWireframeColor(color_ex) {
-    if (this.mesh) {
-      this.mesh.changeWireframeColor(color_ex);
-      return true;
-    } else {
-      console.log("Mesh not loaded yet");
-      return false;
-    }
-  }
-
   updateLightAndAxis() {
     this.light.position.copy(this.camera.position.clone());
 
     this.axis.position.copy(this.controls._gizmos.position.clone());
-    this.axis.scale.set(
-      this.controls._tbRadius,
-      this.controls._tbRadius,
-      this.controls._tbRadius
-    );
-  }
-
-  reset() {
-    this.toggleBoundingBox(false);
-    this.toggleWireframe(true);
-    this.toggleShell(true);
-    this.toggleSlicer(false);
-    this.toggleAxis(false);
-    this.toggleOrbital(false);
-    this.changeColor(white);
-    this.changeWireframeColor(black);
-
-    this.resetCameraAndControls();
-  }
-
-  resetCameraAndControls() {
-    this.controls.reset();
-
-    this.camera.position.copy(this.camera.userData.resetPosistion);
-    this.camera.lookAt(0, 0, 0);
-
-    this.controls.update();
-
-    this.updateLightAndAxis();
-
-    this.camera.updateProjectionMatrix();
+    this.axis.scale.set(this.controls._tbRadius, this.controls._tbRadius, this.controls._tbRadius);
   }
 
   toggleAxis(flag) {
@@ -306,36 +191,68 @@ export class MeshRenderer {
     }
   }
 
+  toggleObject(flag, object) {
+    if (flag) {
+      this.scene.add(object);
+    } else {
+      this.scene.remove(object);
+    }
+  }
+
+  clearScene() {
+    for (let i = this.scene.children.length - 1; i >= 0; i--) {
+      const child = this.scene.children[i];
+      if (
+        child !== this.axis &&
+        child !== this.controls._gizmos &&
+        child !== this.camera &&
+        child !== this.light &&
+        child !== this.ambientLight
+      ) {
+        this.scene.remove(child);
+      }
+    }
+  }
+
+  reset() {
+    this.toggleAxis(false);
+    this.toggleOrbital(false);
+
+    this.resetCameraAndControls();
+  }
+
+  resetCameraAndControls() {
+    this.controls.reset();
+
+    this.camera.position.copy(this.camera.userData.resetPosition);
+    this.camera.lookAt(0, 0, 0);
+
+    this.controls.update();
+
+    this.updateLightAndAxis();
+
+    this.camera.updateProjectionMatrix();
+  }
+
   resize() {
-    this.renderer.setSize(
-      this.rendererContainer.clientWidth,
-      this.rendererContainer.clientHeight
-    );
-
-    const aspect = () =>
-      this.rendererContainer.clientWidth / this.rendererContainer.clientHeight;
-
+    this.renderer.setSize(this.canvasContainer.clientWidth, this.canvasContainer.clientHeight);
+    //Get aspect ratio to maintain perspective in the additional scenes also
+    const aspect = () => this.canvasContainer.clientWidth / this.canvasContainer.clientHeight;
     if (aspect() > 1) {
       const newHeight = 100 / aspect();
       this.axisContainer.style.width = "100px";
       this.orbitalContainer.style.width = "100px";
       this.axisContainer.style.height = `${newHeight}px`;
       this.orbitalContainer.style.height = `${newHeight}px`;
-      console.log("Aspect ratio is greater than 1, adjusting height.");
     } else {
       const newWidth = 100 * aspect();
       this.axisContainer.style.height = "100px";
       this.orbitalContainer.style.height = "100px";
       this.axisContainer.style.width = `${newWidth}px`;
       this.orbitalContainer.style.width = `${newWidth}px`;
-      console.log("Aspect ratio is lesser than 1, adjusting width.");
     }
 
-    this.axisRenderer.setSize(
-      this.axisContainer.clientWidth,
-      this.axisContainer.clientHeight
-    );
-
+    this.axisRenderer.setSize(this.axisContainer.clientWidth, this.axisContainer.clientHeight);
     this.orbitalRenderer.setSize(
       this.orbitalContainer.clientWidth,
       this.orbitalContainer.clientHeight
@@ -343,157 +260,5 @@ export class MeshRenderer {
 
     this.camera.aspect = aspect();
     this.camera.updateProjectionMatrix();
-  }
-
-  toggleBoundingBox(flag) {
-    if (!this.mesh) {
-      console.log("Mesh not loaded yet");
-      return false;
-    }
-
-    if (flag) {
-      this.scene.add(this.mesh.getBoundingBox());
-    } else {
-      this.scene.remove(this.mesh.getBoundingBox());
-    }
-
-    return true;
-  }
-
-  toggleWireframe(flag) {
-    if (!this.mesh) {
-      console.log("Mesh not loaded yet");
-      return false;
-    }
-
-    if (flag) {
-      this.scene.add(this.mesh.getWireframe());
-    } else {
-      this.scene.remove(this.mesh.getWireframe());
-    }
-
-    return true;
-  }
-
-  toggleShell(flag) {
-    if (!this.mesh) {
-      console.log("Mesh not loaded yet");
-      return false;
-    }
-
-    if (flag) {
-      this.scene.add(this.mesh.getShell());
-    } else {
-      this.scene.remove(this.mesh.getShell());
-    }
-
-    return true;
-  }
-
-  toggleSlicer(flag) {
-    if (!this.mesh) {
-      console.log("Mesh not loaded yet");
-      return false;
-    }
-
-    if (flag) {
-      this.slicerSettingsContainer.style.visibility = "visible";
-    } else {
-      this.slicerSettingsContainer.style.visibility = "hidden";
-      this.mesh.getSlicer().reset();
-    }
-
-    this.togglePlaneYZ(flag);
-    this.togglePlaneXZ(flag);
-    this.togglePlaneXY(flag);
-
-    return true;
-  }
-
-  togglePlaneYZ(flag) {
-    if (!this.mesh) {
-      console.log("Mesh not loaded yet");
-      return false;
-    }
-
-    const slicer = this.mesh.getSlicer();
-
-    if (flag) {
-      this.scene.add(slicer.getPlaneYZ());
-    } else {
-      this.scene.remove(slicer.getPlaneYZ());
-    }
-
-    return true;
-  }
-
-  togglePlaneXZ(flag) {
-    if (!this.mesh) {
-      console.log("Mesh not loaded yet");
-      return false;
-    }
-
-    const slicer = this.mesh.getSlicer();
-
-    if (flag) {
-      this.scene.add(slicer.getPlaneXZ());
-    } else {
-      this.scene.remove(slicer.getPlaneXZ());
-    }
-
-    return true;
-  }
-
-  togglePlaneXY(flag) {
-    if (!this.mesh) {
-      console.log("Mesh not loaded yet");
-      return false;
-    }
-
-    const slicer = this.mesh.getSlicer();
-
-    if (flag) {
-      this.scene.add(slicer.getPlaneXY());
-    } else {
-      this.scene.remove(slicer.getPlaneXY());
-    }
-
-    return true;
-  }
-
-  sliceX(value) {
-    this.mesh.getSlicer().sliceX(value);
-  }
-
-  sliceY(value) {
-    this.mesh.getSlicer().sliceY(value);
-  }
-
-  sliceZ(value) {
-    this.mesh.getSlicer().sliceZ(value);
-  }
-
-  sliceDistortion(value) {
-    return this.mesh.getSlicer().sliceDistortion(value);
-  }
-
-  reverseX(value) {
-    return this.mesh.getSlicer().reverseX(value);
-  }
-
-  reverseY(value) {
-    return this.mesh.getSlicer().reverseY(value);
-  }
-
-  reverseZ(value) {
-    return this.mesh.getSlicer().reverseZ(value);
-  }
-
-  reverseDistortion(value) {
-    return this.mesh.getSlicer().reverseDistortion(value);
-  }
-
-  resetDistortion() {
-    this.mesh.getSlicer().resetDistortion();
   }
 }

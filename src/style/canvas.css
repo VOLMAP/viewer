@@ -21,7 +21,7 @@
   }
 }
 
-.axis {
+.axis-container {
   position: absolute;
   z-index: 1;
   left: 10px;
@@ -30,7 +30,7 @@
   height: 100px;
 }
 
-.orbital {
+.orbital-container {
   position: absolute;
   z-index: 1;
   right: 10px;

@@ -15,6 +15,7 @@ async function loadComponent(file, i = null) {
 }
 
 async function initializeComponents() {
+  // Load main menu, canvases, and status bar
   const mainMenu = document.getElementById("main_menu");
   const doubleCanvas = document.getElementById("double_canvas");
   const statusBar = document.getElementById("status_bar");
@@ -29,7 +30,7 @@ async function initializeComponents() {
   mainMenu.innerHTML = meshSettings1 + mapSettings + meshSettings2;
   doubleCanvas.innerHTML = canvas1 + canvas2;
   statusBar.innerHTML = statusBarContent;
-
+  // Set up dropdown menus
   const dropdowns = Array.from(mainMenu.getElementsByClassName("dropdown"));
 
   dropdowns.forEach((dropdown) => {
@@ -44,6 +45,37 @@ async function initializeComponents() {
       // Toggle current dropcontent
       content.classList.toggle("open");
     });
+  });
+  // Set up sample mesh options
+  const domainOptions = [
+    { value: "hand_aigerman.mesh", label: "Hand Aigerman (Domain)" },
+    { value: "max.mesh", label: "Max (Domain)" },
+    { value: "bunny_input.mesh", label: "Bunny (Domain)" },
+    { value: "duck_input.mesh", label: "Duck (Domain)" },
+  ];
+
+  const codomainOptions = [
+    { value: "hand_pc_aigerman.mesh", label: "Hand Aigerman (Codomain)" },
+    { value: "max_pc.mesh", label: "Max (Codomain)" },
+    { value: "bunny_output.mesh", label: "Bunny (Codomain)" },
+    { value: "duck_output.mesh", label: "Duck (Codomain)" },
+  ];
+
+  const selects = mainMenu.querySelectorAll(".sample-mesh-input");
+  const select1 = selects[0];
+  const select2 = selects[1];
+
+  fillSelect(select1, domainOptions);
+  fillSelect(select2, codomainOptions);
+}
+
+function fillSelect(select, options) {
+  select.innerHTML = ""; // clear existing options
+  options.forEach((opt) => {
+    const option = document.createElement("option");
+    option.value = opt.value;
+    option.textContent = opt.label;
+    select.appendChild(option);
   });
 }
 
