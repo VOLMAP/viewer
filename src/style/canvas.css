@@ -64,3 +64,29 @@
 .distortion-slider {
   accent-color: orange;
 }
+
+.distortion-slicer-settings-container {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  z-index: 1;
+  visibility: hidden;
+}
+
+/*Smartphone and Tablet*/
+@media (max-width: 767px) {
+  .distortion-slicer-settings-container {
+    top: 50%;
+    transform: translateY(-50%);
+    right: 2px;
+  }
+}
+
+/*Desktop and Laptop*/
+@media (min-width: 768px) {
+  .distortion-slicer-settings-container {
+    left: 50%;
+    transform: translateX(-50%);
+    top: 2px;
+  }
+}

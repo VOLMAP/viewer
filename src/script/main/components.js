@@ -25,10 +25,11 @@ async function initializeComponents() {
   const meshSettings2 = await loadComponent("mesh_settings.html", 2);
   const canvas1 = await loadComponent("canvas.html", 1);
   const canvas2 = await loadComponent("canvas.html", 2);
+  const distortionSlicerSettings = await loadComponent("distortion_slicer_settings.html");
   const statusBarContent = await loadComponent("status_bar.html");
 
   mainMenu.innerHTML = meshSettings1 + mapSettings + meshSettings2;
-  doubleCanvas.innerHTML = canvas1 + canvas2;
+  doubleCanvas.innerHTML = canvas1 + canvas2 + distortionSlicerSettings;
   statusBar.innerHTML = statusBarContent;
   // Set up dropdown menus
   const dropdowns = Array.from(mainMenu.getElementsByClassName("dropdown"));

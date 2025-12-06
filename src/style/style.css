@@ -14,6 +14,7 @@ body {
 }
 
 #double_canvas {
+  position: relative;
   height: 100%;
   overflow: auto;
   border-left: solid 2px #010b13;
