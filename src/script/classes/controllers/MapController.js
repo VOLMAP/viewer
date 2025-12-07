@@ -216,7 +216,7 @@ export class MapController {
   }
 
   resetMapViewerSettings() {
-    this.energyInput.value = "CONFORMAL";
+    this.energyInput.value = "Conformal";
     this.clampStartInput.value = "1";
     this.clampEndInput.value = "12";
     this.gradientStartInput.value = "#ffffff";

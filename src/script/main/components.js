@@ -53,6 +53,7 @@ async function initializeComponents() {
     { value: "max.mesh", label: "Max (Domain)" },
     { value: "bunny_input.mesh", label: "Bunny (Domain)" },
     { value: "duck_input.mesh", label: "Duck (Domain)" },
+    { value: "bimba_input.mesh", label: "Bimba (Domain)" },
   ];
 
   const codomainOptions = [
@@ -60,6 +61,7 @@ async function initializeComponents() {
     { value: "max_pc.mesh", label: "Max (Codomain)" },
     { value: "bunny_output.mesh", label: "Bunny (Codomain)" },
     { value: "duck_output.mesh", label: "Duck (Codomain)" },
+    { value: "bimba_output.mesh", label: "Bimba (Codomain)" },
   ];
 
   const selects = mainMenu.querySelectorAll(".sample-mesh-input");

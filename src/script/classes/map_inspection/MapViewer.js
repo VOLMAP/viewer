@@ -10,7 +10,7 @@ export class MapViewer {
   clampedPolyDistortion = null;
   polyColor = null;
 
-  energy = "CONFORMAL";
+  energy = "Conformal";
   clampStart = 1;
   clampEnd = 12;
   gradientStart = utils.whiteHex;
@@ -103,14 +103,14 @@ export class MapViewer {
 
   computeTetDistortion(s_max, s_mid, s_min, energy) {
     switch (energy) {
-      case "CONFORMAL":
+      case "Conformal":
         return (
           (s_max * s_max + s_mid * s_mid + s_min * s_min) /
           (3 * Math.pow(s_max * s_mid * s_min, 2 / 3))
         );
-      case "DIRICHLET":
+      case "Dirichlet":
         return (s_max * s_max + s_mid * s_mid + s_min * s_min) / 3;
-      case "SYMMETRIC-DIRICHLET":
+      case "Sym-Dirichlet":
         return (
           (s_max * s_max +
             s_mid * s_mid +
@@ -124,7 +124,7 @@ export class MapViewer {
         const EPSILON = 1e-12;
         const val = Math.pow(s_max - 1, 2) + Math.pow(s_mid - 1, 2) + Math.pow(s_min - 1, 2);
         return val < EPSILON ? 0 : val;
-      case "MIPS3D":
+      case "MIPS-3D":
         return (
           (1 / 8) *
           (s_max / s_mid + s_mid / s_max) *
@@ -132,7 +132,7 @@ export class MapViewer {
           (s_mid / s_min + s_min / s_mid)
         );
       default:
-        throw "unkwnonw energy";
+        console.error("Unknown energy type: " + energy);
     }
   }
 
@@ -165,23 +165,23 @@ export class MapViewer {
   }
 
   setDefaultClampRange() {
-    if (this.energy == "CONFORMAL") {
+    if (this.energy == "Conformal") {
       this.clampStart = 1;
       this.clampEnd = 12;
-    } else if (this.energy == "DIRICHLET") {
+    } else if (this.energy == "Dirichlet") {
       this.clampStart = 2;
       this.clampEnd = 8;
-    } else if (this.energy == "SYMMETRIC-DIRICHLET") {
+    } else if (this.energy == "Sym-Dirichlet") {
       this.clampStart = 3;
       this.clampEnd = 12;
     } else if (this.energy == "ARAP") {
       this.clampStart = 0;
       this.clampEnd = 2;
-    } else if (this.energy == "MIPS3D") {
+    } else if (this.energy == "MIPS-3D") {
       this.clampStart = 1;
       this.clampEnd = 12;
     } else {
-      console.log("Unknown energy type");
+      console.error("Unknown energy type: " + this.energy);
     }
   }
 
@@ -237,7 +237,7 @@ export class MapViewer {
   }
 
   resetSettings() {
-    this.energy = "CONFORMAL";
+    this.energy = "Conformal";
     this.setDefaultClampRange();
     this.gradientStart = utils.whiteHex;
     this.gradientEnd = "0xff0000";
