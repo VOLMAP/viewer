@@ -138,11 +138,11 @@ export class MeshController {
       if (!volumeMesh.toggleSlicer(flag)) {
         this.checked = !flag;
       } else {
-        volumeMesh.controller.toggleSlicer(flag);
+        volumeMesh.controller.toggleSlicerContainer(flag);
       }
     };
     this.resetRenderingButton.onclick = function () {
-      volumeMesh.reset();
+      volumeMesh.resetRendering();
       volumeMesh.controller.resetRendering();
     };
     // Slicing
@@ -163,7 +163,6 @@ export class MeshController {
     };
     this.xPlaneToggle.onchange = function () {
       const flag = this.checked;
-
       if (!volumeMesh.toggleSlicingPlane(flag, 0)) {
         this.checked = !flag;
       }
@@ -250,7 +249,7 @@ export class MeshController {
       volumeMesh.meshRenderer.toggleOrbital(flag);
     };
     this.resetControlButton.onclick = function () {
-      volumeMesh.meshRenderer.reset();
+      volumeMesh.meshRenderer.resetControl();
       volumeMesh.controller.resetControl();
     };
 
@@ -260,6 +259,10 @@ export class MeshController {
     });
   }
 
+  toggleSlicerContainer(flag) {
+    this.slicerSettingsContainer.style.visibility = flag ? "visible" : "hidden";
+  }
+
   resetRendering() {
     //Reset of all UI elements to default values
     this.shellToggle.checked = true;
@@ -267,8 +270,6 @@ export class MeshController {
     this.wireframeToggle.checked = true;
     this.wireframeColorInput.value = "#000000";
     this.boundingBoxToggle.checked = false;
-    this.slicerToggle.checked = false;
-    this.toggleSlicer(false);
   }
 
   resetSlicer() {
@@ -287,18 +288,11 @@ export class MeshController {
     this.zReverseButton.getElementsByTagName("img")[0].src = "./src/assets/img/right_arrow.png";
   }
 
-  toggleSlicer(flag) {
-    if (flag) {
-      this.slicerSettingsContainer.style.visibility = "visible";
-    } else {
-      this.slicerSettingsContainer.style.visibility = "hidden";
-      this.resetSlicer();
-    }
-  }
-
+  /*
   updatePickerSliceSlider(sliderValue) {
     this.xSlider.value = sliderValue;
   }
+  */
 
   resetControl() {
     //Reset of all UI elements to default values

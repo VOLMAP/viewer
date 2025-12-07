@@ -106,21 +106,19 @@
 
 /*----------------------------The inputs----------------------------*/
 .switch {
-  display: inline-block;
   position: relative;
-  width: 46px;
-  height: 20px;
+  width: 38px;
+  height: 17px;
 }
 
 /* Hide default HTML checkbox */
 .switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
+  display: none;
 }
 
 .slider {
   position: absolute;
+  z-index: 1;
   top: 0;
   left: 0;
   right: 0;
@@ -133,10 +131,11 @@
 
 .slider:before {
   position: absolute;
-  left: 3px;
+  z-index: 1;
+  left: 4px;
   bottom: 3px;
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
   background-color: black;
   transition: 0.4s;
   content: "";
@@ -151,11 +150,11 @@ input:checked + .slider {
 }
 
 input:checked + .slider:before {
-  transform: translateX(26px);
+  transform: translateX(18px);
 }
 
 .slider.round {
-  border-radius: 24px;
+  border-radius: 20px;
 }
 
 .slider.round:before {
@@ -166,45 +165,47 @@ input[type="color"],
 input[type="number"],
 .reset-button,
 .img-button {
-  width: 46px;
-  height: 20px;
-  border: none;
-  border-radius: 24px;
+  width: 38px;
+  height: 17px;
+  border-radius: 20px;
   background: #f3f3f3;
   border: 1px solid black;
   cursor: pointer;
 }
 
-.reset-button.active,
 .img-button.active {
   background: #d5cbb2;
 }
 
+input[type="number"] {
+  width: 57px;
+}
+
 select {
-  border-radius: 24px;
+  border-radius: 20px;
   background: #f3f3f3;
   border: 1px solid black;
   padding: 2px;
 }
 
 input[type="color"]::-webkit-color-swatch {
-  width: 36px;
-  height: 10px;
-  border-radius: 19px;
+  width: 30px;
+  height: 9px;
+  border-radius: 16px;
   margin-top: -2px;
 }
 
 input[type="color"]::-o-color-swatch {
-  width: 36px;
-  height: 10px;
-  border-radius: 19px;
+  width: 30px;
+  height: 9px;
+  border-radius: 16px;
   margin-top: -2px;
 }
 
 input[type="color"]::-moz-color-swatch {
-  width: 36px;
-  height: 10px;
-  border-radius: 19px;
+  width: 30px;
+  height: 9px;
+  border-radius: 16px;
   margin-top: -2px;
 }
 

@@ -25,7 +25,10 @@ export class MeshRenderer {
   axis = null;
   controls = null;
 
-  constructor(canvasContainer) {
+  volumeMesh = null;
+
+  constructor(volumeMesh, canvasContainer) {
+    this.volumeMesh = volumeMesh;
     this.canvasContainer = canvasContainer;
     this.axisContainer = this.canvasContainer.getElementsByClassName("axis-container")[0];
     this.orbitalContainer = this.canvasContainer.getElementsByClassName("orbital-container")[0];
@@ -37,11 +40,11 @@ export class MeshRenderer {
     this.updateLightAndAxis();
   }
 
-  updateMesh(volumeMesh) {
+  updateMesh() {
     this.clearScene();
     //Adjust camera parameters based on mesh size
-    volumeMesh.mesh.geometry.computeBoundingBox();
-    const box = volumeMesh.mesh.geometry.boundingBox;
+    this.volumeMesh.mesh.geometry.computeBoundingBox();
+    const box = this.volumeMesh.mesh.geometry.boundingBox;
     const size = box.getSize(new THREE.Vector3());
     const diag = Math.sqrt(Math.pow(size.x, 2) + Math.pow(size.y, 2) + Math.pow(size.z, 2));
 
@@ -61,6 +64,8 @@ export class MeshRenderer {
     this.camera.userData.resetPosition = new THREE.Vector3(0, 0, distance);
 
     this.resetCameraAndControls();
+    //Add mesh to the scene
+    this.scene.add(this.volumeMesh.mesh);
   }
 
   setRenderers() {
@@ -214,7 +219,7 @@ export class MeshRenderer {
     }
   }
 
-  reset() {
+  resetControl() {
     this.toggleAxis(false);
     this.toggleOrbital(false);
 

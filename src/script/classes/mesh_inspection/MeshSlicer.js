@@ -4,9 +4,6 @@ import * as utils from "../../main/utils.js";
 const minSliderValue = -100;
 const maxSliderValue = 100;
 
-const minDistSliderValue = 0;
-const maxDistSliderValue = 100;
-
 function AxisData() {
   return {
     plane: null,
@@ -24,56 +21,58 @@ export class MeshSlicer {
   y = AxisData();
   z = AxisData();
 
-  isDegenerateFilterActive = false;
-
-  distData = {
-    polyByDistortion: null,
-    polyVisibility: null,
-    isReversed: false,
-  };
-
   volumeMesh = null;
-  volumeMap = null;
 
-  constructor() {}
-
-  updateMesh(volumeMesh) {
+  constructor(volumeMesh) {
     this.volumeMesh = volumeMesh;
+  }
 
+  updateMesh() {
+    this.computeCentroids();
+    this.setPlanesAndReversed();
     this.setPolyByCentroidAndVisibility();
-    this.setPlanes();
   }
 
-  updateMap(volumeMap) {
-    this.volumeMap = volumeMap;
-
-    this.setPolyByDistortionAndVisibility();
-  }
-
-  isPolyVisible(polyIndex) {
-    return (
-      this.x.polyVisibility[polyIndex] &&
-      this.y.polyVisibility[polyIndex] &&
-      this.z.polyVisibility[polyIndex]
-    );
-  }
-
-  isPolyVisibleByDistortion(polyIndex) {
-    if (this.isDegenerateFilterActive) {
-      const distortion = this.volumeMap.clampedPolyDistortion[polyIndex];
-      return distortion == Infinity;
-    } else {
-      return this.distData.polyVisibility[polyIndex];
+  getSlicingPlane(axisIndex) {
+    if (!this.volumeMesh.mesh) {
+      console.warn("Mesh not loaded yet");
+      return null;
     }
+
+    return axisIndex === 0 ? this.x.plane : axisIndex === 1 ? this.y.plane : this.z.plane;
   }
 
-  setActive(flag, setMesh = false) {
-    if (flag) {
-      this.isActive = true;
-    } else {
-      this.isActive = false;
-      this.reset(setMesh);
+  setActive(flag) {
+    this.isActive = flag;
+  }
+
+  // This method computes the centroids of the mesh's tetrahedra
+  computeCentroids() {
+    const tetrahedra = this.volumeMesh.mesh.geometry.userData.tetrahedra;
+    const vertices = this.volumeMesh.mesh.geometry.userData.vertices;
+
+    const numTetrahedra = tetrahedra.length / 4;
+    let centroids = new Array(numTetrahedra * 3);
+
+    for (let i = 0; i < numTetrahedra; i++) {
+      let centroid = [0, 0, 0];
+      //Visit every vertex of the tetrahedron
+      for (let j = 0; j < 4; j++) {
+        const vertexIndex = tetrahedra[i * 4 + j];
+        //Visit every coordinate of the vertex and sum it to the other corresponding coordinates
+        for (let k = 0; k < 3; k++) {
+          centroid[k] += vertices[vertexIndex * 3 + k];
+        }
+      }
+
+      //Average the sum of the corresponding coordinates and assign it
+      for (let k = 0; k < 3; k++) {
+        centroid[k] /= 4;
+        centroids[i * 3 + k] = centroid[k];
+      }
     }
+
+    this.volumeMesh.mesh.geometry.userData.polyCentroids = centroids;
   }
 
   setPolyByCentroidAndVisibility() {
@@ -97,34 +96,13 @@ export class MeshSlicer {
     this.x.polyByCentroid = Array.from(tmpPoly).sort(sortByCoord(0));
     this.y.polyByCentroid = Array.from(tmpPoly).sort(sortByCoord(1));
     this.z.polyByCentroid = Array.from(tmpPoly).sort(sortByCoord(2));
-
+    //Initial visibility arrays
     this.x.polyVisibility = new Array(tmpPoly.length).fill(true);
     this.y.polyVisibility = new Array(tmpPoly.length).fill(true);
     this.z.polyVisibility = new Array(tmpPoly.length).fill(true);
   }
 
-  setPolyByDistortionAndVisibility() {
-    const polyDistortion = this.volumeMap.clampedPolyDistortion;
-    //Polyhedra indexes array
-    var tmpPoly = new Array(polyDistortion.length);
-    for (let j = 0; j < polyDistortion.length; j++) {
-      tmpPoly[j] = j;
-    }
-
-    //Sorting function by comparing distortion values
-    function sortByDistortion(aIndex, bIndex) {
-      const aDistortion = polyDistortion[aIndex];
-      const bDistortion = polyDistortion[bIndex];
-      return aDistortion - bDistortion;
-    }
-
-    //Sorted polyhedra array
-    this.distortion.polyByDistortion = Array.from(tmpPoly.sort(sortByDistortion));
-
-    this.distortion.polyVisibility = new Array(tmpPoly.length).fill(true);
-  }
-
-  setPlanes() {
+  setPlanesAndReversed() {
     const box = this.volumeMesh.mesh.geometry.boundingBox;
     const size = box.getSize(new THREE.Vector3());
     const distance = new THREE.Vector3(size.x / 2, size.y / 2, size.z / 2);
@@ -170,12 +148,29 @@ export class MeshSlicer {
     this.x.plane = createPlaneHelper(size.z, size.y, distance.x, utils.redHex, 0);
     this.y.plane = createPlaneHelper(size.x, size.z, distance.y, utils.blueHex, 1);
     this.z.plane = createPlaneHelper(size.x, size.y, distance.z, utils.greenHex, 2);
+    //Initial reversed flags
+    this.x.isReversed = false;
+    this.y.isReversed = false;
+    this.z.isReversed = false;
+  }
+
+  isPolyVisible(polyIndex) {
+    if (!this.volumeMesh.mesh) {
+      console.warn("Mesh not loaded yet");
+      return null;
+    }
+
+    return (
+      this.x.polyVisibility[polyIndex] &&
+      this.y.polyVisibility[polyIndex] &&
+      this.z.polyVisibility[polyIndex]
+    );
   }
 
   //Slice along a given axis (0=x, 1=y, 2=z)
   slice(sliderValue, axisIndex) {
-    if (!this.volumeMesh) {
-      console.warn("Mesh not updated yet");
+    if (!this.volumeMesh.mesh) {
+      console.warn("Mesh not loaded yet");
       return false;
     }
 
@@ -222,13 +217,9 @@ export class MeshSlicer {
     return true;
   }
 
-  getSlicingPlane(axisIndex) {
-    return axisIndex === 0 ? this.x.plane : axisIndex === 1 ? this.y.plane : this.z.plane;
-  }
-
   reverseSlicingDirection(axisIndex) {
-    if (!this.volumeMesh) {
-      console.warn("Mesh not updated yet");
+    if (!this.volumeMesh.mesh) {
+      console.warn("Mesh not loaded yet");
       return false;
     }
 
@@ -243,88 +234,10 @@ export class MeshSlicer {
     return true;
   }
 
-  distortionSlice(sliderValue) {
-    if (!this.volumeMap) {
-      console.warn("Map not updated yet");
-      return false;
-    }
-
-    const clampedPolyDistortion = this.volumeMap.clampedPolyDistortion;
-    //Calculate distortion value based on slider and clamp range (0-1)
-    const distortion = sliderValue * (1 / maxDistSliderValue);
-
-    var firstVisiblePoly = utils.binarySearchClosest(
-      this.polysByDistortion,
-      (i) => clampedPolyDistortion[i],
-      distortion
-    );
-
-    //Include all polyhedra with the same distortion value as the first visible one
-    if (!this.distData.isReversed) {
-      for (let i = firstVisiblePoly - 1; i >= 0; i--) {
-        if (
-          clampedPolyDistortion[this.polysByDistortion[i]] ===
-          clampedPolyDistortion[this.polysByDistortion[firstVisiblePoly]]
-        ) {
-          firstVisiblePoly = i;
-        } else {
-          break;
-        }
-      }
-    } else {
-      for (let i = firstVisiblePoly + 1; i < this.polysByDistortion.length; i++) {
-        if (
-          clampedPolyDistortion[this.polysByDistortion[i]] ===
-          clampedPolyDistortion[this.polysByDistortion[firstVisiblePoly]]
-        ) {
-          firstVisiblePoly = i;
-        } else {
-          break;
-        }
-      }
-    }
-
-    for (let i = 0; i < this.polysByDistortion.length; i++) {
-      // PolysToKeep and PolysToRemove are reversed when isReversed is true
-      if (i >= firstVisiblePoly) {
-        this.distData.polyVisibility[this.distData.polyByDistortion[i]] = !this.distData.isReversed;
-      } else {
-        this.distData.polyVisibility[this.distData.polyByDistortion[i]] = this.distData.isReversed;
-      }
-    }
-
-    return true;
-  }
-
-  toggleDegenerateFilter(flag) {
-    if (!this.volumeMap) {
-      console.warn("Map not updated yet");
-      return false;
-    }
-
-    this.isDegenerateFilterActive = flag;
-
-    return true;
-  }
-
-  reverseDistortionSlicingDirection() {
-    if (!this.volumeMap) {
-      console.warn("Map not updated yet");
-      return false;
-    }
-
-    this.distData.isReversed = !this.distData.isReversed;
-    for (let i = 0; i < this.distData.polyByDistortion.length; i++) {
-      this.distData.polyVisibility[this.distData.polyByDistortion[i]] =
-        !this.distData.polyVisibility[this.distData.polyByDistortion[i]];
-    }
-
-    return true;
-  }
-
+  /*
   pickerSlice(pickedPolyhedra) {
-    if (!this.volumeMesh) {
-      console.warn("Mesh not updated yet");
+    if (!this.volumeMesh.mesh) {
+      console.warn("Mesh not loaded yet");
       return false;
     }
 
@@ -338,30 +251,19 @@ export class MeshSlicer {
 
     return this.slice(sliderValue, 0);
   }
+  */
 
-  reset(setMesh = false) {
-    if (!setMesh) {
-      /*If not setting a new mesh, reset the slicer planes and visibility
-        if setting a new mesh, it has just been done*/
-      this.x.polyVisibility.fill(true);
-      this.y.polyVisibility.fill(true);
-      this.z.polyVisibility.fill(true);
-
-      this.x.plane.position.x = this.x.plane.geometry.userData.resetPosition;
-      this.y.plane.position.y = this.y.plane.geometry.userData.resetPosition;
-      this.z.plane.position.z = this.z.plane.geometry.userData.resetPosition;
-    }
+  resetSlicer() {
+    this.x.plane.position.x = this.x.plane.geometry.userData.resetPosition;
+    this.y.plane.position.y = this.y.plane.geometry.userData.resetPosition;
+    this.z.plane.position.z = this.z.plane.geometry.userData.resetPosition;
 
     this.x.isReversed = false;
     this.y.isReversed = false;
     this.z.isReversed = false;
 
-    //TODO use map.isActive
-    if (false) {
-      this.isDegenerateFilterActive = false;
-
-      this.distData.polyVisibility.fill(true);
-      this.distData.isReversed = false;
-    }
+    this.x.polyVisibility.fill(true);
+    this.y.polyVisibility.fill(true);
+    this.z.polyVisibility.fill(true);
   }
 }

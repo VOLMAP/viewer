@@ -44,37 +44,38 @@ export class VolumeMesh {
 
   constructor(settingsContainer, canvasContainer) {
     this.controller = new MeshController(this, settingsContainer, canvasContainer);
-    this.meshRenderer = new MeshRenderer(canvasContainer);
-    this.meshSlicer = new MeshSlicer();
+    this.meshRenderer = new MeshRenderer(this, canvasContainer);
+    this.meshSlicer = new MeshSlicer(this);
   }
 
   setMesh(mesh) {
     this.mesh = mesh;
-    // Initial set up
+    // Translate mesh to origin and compute bounding box
     this.translateToOrigin();
     this.setBoundingBox();
-
-    this.computeCentroids();
-
-    /*Update visible faces builds the surface mesh from the volume mesh, 
-      in this case is also used to build the wireframe (setting his index attribute)
-      and shell (cloning the built surface mesh) */
+    //Reset wireframe and generate surface mesh and wireframe
     this.setWireframe();
     this.updateVisibleFaces(false, false);
+    // Generate shell from the surface mesh
     this.setShell();
-
     //RenderOrder to avoid z-fighting when rendering in external to internal order
     this.wireframe.renderOrder = 3;
     this.mesh.renderOrder = 2;
     this.shell.renderOrder = 1;
-
-    this.meshRenderer.updateMesh(this);
-    this.meshSlicer.updateMesh(this);
+    //Update the slicer with the new mesh and reset it
+    this.meshSlicer.updateMesh();
+    this.controller.resetSlicer();
     //this.volumeMap.updateMesh();
-
-    this.meshRenderer.toggleObject(true, this.mesh);
-    this.reset(true);
+    //Update the renderer with the new mesh and reset it
+    this.meshRenderer.updateMesh();
     this.controller.resetRendering();
+    //Reset the scene to default rendering objects and colors
+    this.resetRendering();
+    if (this.meshSlicer.isActive) {
+      this.toggleSlicingPlane(true, 0);
+      this.toggleSlicingPlane(true, 1);
+      this.toggleSlicingPlane(true, 2);
+    }
   }
 
   setShell() {
@@ -134,35 +135,6 @@ export class VolumeMesh {
     this.mesh.geometry.setAttribute("position", positionAttribute);
   }
 
-  // This method computes the centroids of the mesh's tetrahedra
-  computeCentroids() {
-    const tetrahedra = this.mesh.geometry.userData.tetrahedra;
-    const vertices = this.mesh.geometry.userData.vertices;
-
-    const numTetrahedra = tetrahedra.length / 4;
-    let centroids = new Array(numTetrahedra * 3);
-
-    for (let i = 0; i < numTetrahedra; i++) {
-      let centroid = [0, 0, 0];
-      //Visit every vertex of the tetrahedron
-      for (let j = 0; j < 4; j++) {
-        const vertexIndex = tetrahedra[i * 4 + j];
-        //Visit every coordinate of the vertex and sum it to the other corresponding coordinates
-        for (let k = 0; k < 3; k++) {
-          centroid[k] += vertices[vertexIndex * 3 + k];
-        }
-      }
-
-      //Average the sum of the corresponding coordinates and assign it
-      for (let k = 0; k < 3; k++) {
-        centroid[k] /= 4;
-        centroids[i * 3 + k] = centroid[k];
-      }
-    }
-
-    this.mesh.geometry.userData.polyCentroids = centroids;
-  }
-
   updateVisibleFaces(isSlicerActive, isMapActive) {
     const adjacencyMap = this.mesh.geometry.userData.adjacencyMap;
     const vertices = this.mesh.geometry.userData.vertices;
@@ -219,11 +191,11 @@ export class VolumeMesh {
         }
         // Push polyhedron index
         tmpPoly.push(polyIndex);
-        // If map is active
-        if (isMapActive) {
-          const color = this.mesh.geometry.userData.polyColor[polyIndex];
+        // If present, push color information
+        const polyColor = this.mesh.geometry.userData.polyColor;
+        if (polyColor) {
+          const color = polyColor[polyIndex];
           for (let i = 0; i < sortedFace.length; i++) {
-            // Push vertex color
             tmpColor.push(color.r, color.g, color.b);
           }
         }
@@ -238,14 +210,12 @@ export class VolumeMesh {
     this.mesh.geometry.setAttribute("position", positionsAttribute);
     const polyAttribute = new THREE.BufferAttribute(new Uint32Array(tmpPoly), 1);
     this.mesh.geometry.setAttribute("poly", polyAttribute);
-    if (isMapActive) {
-      const colorAttribute = new THREE.BufferAttribute(new Float32Array(tmpColor), 3);
-      this.mesh.geometry.setAttribute("color", colorAttribute);
-    }
+    const colorAttribute = new THREE.BufferAttribute(new Float32Array(tmpColor), 3);
+    this.mesh.geometry.setAttribute("color", colorAttribute);
     //Compute normals for proper lighting
     this.mesh.geometry.computeVertexNormals();
     this.mesh.geometry.needsUpdate = true;
-    //Update wireframe
+    //Update wireframe geometry
     const segmentsAttribute = new THREE.BufferAttribute(new Uint32Array(tmpSegments), 1);
     this.wireframe.geometry.setIndex(segmentsAttribute);
     this.wireframe.geometry.needsUpdate = true;
@@ -352,30 +322,23 @@ export class VolumeMesh {
     this.mesh.material.needsUpdate = true;
   }
 
-  toggleSlicer(flag, setMesh = false) {
+  toggleSlicer(flag) {
     if (!this.mesh) {
       console.warn("Mesh not loaded yet");
       return false;
     }
 
-    if (flag) {
-      this.meshSlicer.setActive(true);
-      this.toggleSlicingPlane(true, 0);
-      this.toggleSlicingPlane(true, 1);
-      this.toggleSlicingPlane(true, 2);
-      //TODO use this.volumeMap.isMapActive
-      this.updateVisibleFaces(true, false);
-    } else {
-      this.meshSlicer.setActive(false, setMesh);
-      this.toggleSlicingPlane(false, 0);
-      this.toggleSlicingPlane(false, 1);
-      this.toggleSlicingPlane(false, 2);
-      if (!setMesh) {
-        /*If not setting a new mesh, update the visible faces
-          if setting a new mesh, it has just been done*/
-        this.updateVisibleFaces(false, false);
-      }
+    this.meshSlicer.setActive(flag);
+    this.toggleSlicingPlane(flag, 0);
+    this.toggleSlicingPlane(flag, 1);
+    this.toggleSlicingPlane(flag, 2);
+
+    if (!flag) {
+      this.meshSlicer.resetSlicer();
+      this.controller.resetSlicer();
+      this.updateVisibleFaces(this.meshSlicer.isActive, false);
     }
+
     return true;
   }
 
@@ -485,12 +448,11 @@ export class VolumeMesh {
     return result;
   }
 
-  reset(setMesh = false) {
+  resetRendering() {
     this.toggleShell(true);
     this.changePlainColor(utils.whiteHex);
     this.toggleWireframe(true);
     this.changeWireframeColor(utils.blackHex);
     this.toggleBoundingBox(false);
-    this.toggleSlicer(false, setMesh);
   }
 }

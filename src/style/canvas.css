@@ -1,5 +1,15 @@
 .canvas-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   position: relative;
+  height: 100%;
+  width: 50%;
+}
+
+.mesh-renderer {
+  display: flex !important;
+  width: 100%;
   height: 100%;
 }
 
@@ -7,16 +17,17 @@
 @media (max-width: 767px) {
   .canvas-container {
     height: 50%;
+    width: 100%;
   }
 
-  #mesh1_canvas {
+  .canvas-container:first-child {
     border-bottom: 2px solid #010b13;
   }
 }
 
 /*Desktop and Laptop*/
 @media (min-width: 768px) {
-  #mesh1_canvas {
+  .canvas-container:first-child {
     border-right: 2px solid #010b13;
   }
 }
@@ -24,8 +35,6 @@
 .axis-container {
   position: absolute;
   z-index: 1;
-  left: 10px;
-  bottom: 10px;
   width: 100px;
   height: 100px;
 }
@@ -33,20 +42,59 @@
 .orbital-container {
   position: absolute;
   z-index: 1;
-  right: 10px;
-  bottom: 10px;
   width: 100px;
   height: 100px;
+  right: 10px;
+  bottom: 10px;
+}
+
+/*Smartphone and Tablet*/
+@media (max-width: 767px) {
+  .axis-container {
+    right: 10px;
+    top: 10px;
+  }
+}
+
+/*Desktop and Laptop*/
+@media (min-width: 768px) {
+  .axis-container {
+    left: 10px;
+    bottom: 10px;
+  }
 }
 
 .slicer-settings-container {
-  display: flex;
-  flex-direction: column;
   position: absolute;
   z-index: 1;
-  left: 2px;
-  top: 2px;
+  display: flex;
+  flex-direction: column;
   visibility: hidden;
+}
+
+.canvas-container:first-child .slicer-settings-container {
+  top: 2px;
+  left: 2px;
+}
+
+/*Smartphone and Tablet*/
+@media (max-width: 767px) {
+  .canvas-container:last-child .slicer-settings-container {
+    bottom: 2px;
+    left: 2px;
+  }
+}
+
+/*Desktop and Laptop*/
+@media (min-width: 768px) {
+  .canvas-container:last-child .slicer-settings-container {
+    top: 2px;
+    right: 2px;
+  }
+}
+
+input[type="range"] {
+  width: 100px;
 }
 
 .X-slider {
@@ -78,7 +126,7 @@
   .distortion-slicer-settings-container {
     top: 50%;
     transform: translateY(-50%);
-    right: 2px;
+    left: 2px;
   }
 }
 
