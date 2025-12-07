@@ -1,213 +1,190 @@
-const white = "#ffffff";
-const red = "#ff0000";
-export class MeshMapperController {
-  meshMapper = null;
-  mapSettingsContainer = null;
-  modelInfoContainer = null;
-  mapInfoContainer = null;
-  pickerInfoContainer = null;
+const minDistSliderValue = -100;
+const maxDistSliderValue = 100;
 
-  mapToggle = null;
+export class MapController {
+  volumeMap = null;
+  // Map Settings Elements
+  mapViewerToggle = null;
   energyInput = null;
-  gradientStartInput = null;
-  gradientEndInput = null;
-  reverseToggle = null;
   clampStartInput = null;
   clampEndInput = null;
-  resetButton = null;
-
-  verticesInfo = null;
-  facesInfo = null;
-  polyhedraInfo = null;
-
-  energyInfo = null;
-  clampInfo = null;
-  gradientInfo = null;
-
-  polyhedronInfo = null;
-  distortionInfo = null;
-
-  degenerateToggle = null;
+  gradientStartInput = null;
+  gradientEndInput = null;
+  degenerateColorToggle = null;
   degenerateColorInput = null;
+  reverseMapButton = null;
+  resetButton = null;
+  distortionSlicerToggle = null;
+  // Model Info
+  verticesCount = null;
+  facesCount = null;
+  polyhedraCount = null;
+  // Map Info
+  mapEnergy = null;
+  mapClamp = null;
+  mapGradint = null;
+  // Picker Info
+  pickerPolyhedron = null;
+  pickerDistortion = null;
+  // Distortion Slicer
+  distortionSlicerContainer = null;
 
-  constructor(meshMapper, mapSettingsContainer) {
-    this.meshMapper = meshMapper;
-    this.meshMapper.controller = this;
-    this.mapSettingsContainer = mapSettingsContainer;
+  constructor(volumeMap, settingsContainer, statusBarContainer) {
+    this.volumeMap = volumeMap;
 
-    this.modelInfoContainer = document.getElementById("model-info");
-    this.mapInfoContainer = document.getElementById("map-info");
-    this.pickerInfoContainer = document.getElementById("picker-info");
+    const getElement = (container, className) => container.getElementsByClassName(className)[0];
 
-    const getElement = (container, className) =>
-      container.getElementsByClassName(className)[0];
+    //Map Settings Elements
+    this.mapViewerToggle = getElement(settingsContainer, "map-viewer-toggle");
+    this.energyInput = getElement(settingsContainer, "map-energy-input");
+    this.clampStartInput = getElement(settingsContainer, "map-clamp-start-input");
+    this.clampEndInput = getElement(settingsContainer, "map-clamp-end-input");
+    this.gradientStartInput = getElement(settingsContainer, "map-gradient-start-input");
+    this.gradientEndInput = getElement(settingsContainer, "map-gradient-end-input");
+    this.degenerateColorToggle = getElement(settingsContainer, "degenerate-color-toggle");
+    this.degenerateColorInput = getElement(settingsContainer, "degenerate-color-input");
+    this.reverseMapButton = getElement(settingsContainer, "reverse-map-button");
+    this.resetButton = getElement(settingsContainer, "reset-button");
+    this.distortionSlicerToggle = getElement(settingsContainer, "distortion-slicer-toggle");
+    // Model Info
+    this.verticesCount = getElement(statusBarContainer, "vertices-info");
+    this.facesCount = getElement(statusBarContainer, "faces-info");
+    this.polyhedraCount = getElement(statusBarContainer, "polyhedra-info");
+    // Map Info
+    this.mapEnergy = getElement(statusBarContainer, "map-energy");
+    this.mapClamp = getElement(statusBarContainer, "map-clamp");
+    this.mapGradient = getElement(statusBarContainer, "map-gradient");
+    // Picker Info
+    this.pickerPolyhedron = getElement(statusBarContainer, "picker-polyhedron");
+    this.pickerDistortion = getElement(statusBarContainer, "picker-distortion");
+    //Distortion Slicer
+    this.distortionSlicerContainer = getElement(document, "distortion-slicer-settings-container");
 
-    this.mapToggle = getElement(mapSettingsContainer, "map-toggle");
-    this.energyInput = getElement(mapSettingsContainer, "energy-input");
-    this.gradientStartInput = getElement(
-      mapSettingsContainer,
-      "gradient-start-input"
-    );
-
-    this.gradientEndInput = getElement(
-      mapSettingsContainer,
-      "gradient-end-input"
-    );
-
-    this.reverseToggle = getElement(mapSettingsContainer, "reverse-toggle");
-
-    this.clampStartInput = getElement(
-      mapSettingsContainer,
-      "clamp-start-input"
-    );
-    this.clampEndInput = getElement(mapSettingsContainer, "clamp-end-input");
-
-    this.resetButton = getElement(mapSettingsContainer, "reset-button");
-
-    this.degenerateToggle = getElement(
-      mapSettingsContainer,
-      "degenerate-toggle"
-    );
-    this.degenerateColorInput = getElement(
-      mapSettingsContainer,
-      "degenerate-color-input"
-    );
-
-    this.dropdowns = Array.from(
-      mapSettingsContainer.getElementsByClassName("dropdown")
-    );
-
-    this.verticesInfo = getElement(this.modelInfoContainer, "vertices-count");
-    this.facesInfo = getElement(this.modelInfoContainer, "faces-count");
-    this.polyhedraInfo = getElement(this.modelInfoContainer, "polyhedra-count");
-
-    this.energyInfo = getElement(this.mapInfoContainer, "map-energy");
-    this.gradientInfo = getElement(this.mapInfoContainer, "map-gradient");
-    this.clampInfo = getElement(this.mapInfoContainer, "map-clamp");
-
-    this.polyhedronInfo = getElement(
-      this.pickerInfoContainer,
-      "picker-polyhedron"
-    );
-    this.distortionInfo = getElement(
-      this.pickerInfoContainer,
-      "picker-distortion"
-    );
-
-    this.appendEventListeners(this);
+    this.appendEventListeners(this.volumeMap);
   }
 
-  appendEventListeners(controller) {
-    this.mapToggle.onchange = function () {
-      const isMapActive = this.checked;
+  appendEventListeners(volumeMap) {
+    this.mapViewerToggle.addEventListener("change", function () {
+      const flag = this.checked;
 
-      let start = performance.now();
-      if (!controller.meshMapper.toggleMap(isMapActive)) {
-        this.checked = false;
+      if (!volumeMap.toggleMapViewer(flag)) {
+        this.checked = !flag;
       }
-      let end = performance.now();
-      let numTetrahedra =
-        controller.meshMapper.meshRenderers[0].mesh.getMesh().geometry.userData
-          .tetrahedras.length / 4;
-      console.log(
-        "Tempo esecuzione mapping:",
-        (end - start).toFixed(3),
-        "ms",
-        "Numero di tetraedri:",
-        numTetrahedra
-      );
-    };
+    });
 
-    this.energyInput.oninput = function () {
-      controller.meshMapper.changeEnergy(this.value);
-    };
+    this.energyInput.addEventListener("change", function () {
+      if (!this.oldValue) this.oldValue = this.value;
 
-    this.gradientStartInput.oninput = function () {
-      const previousValue = this.dataset.previousValue || this.value;
+      const energy = this.value;
 
-      if (!controller.meshMapper.changeGradientStart(this.value)) {
-        this.value = previousValue;
+      if (!volumeMap.changeEnergy(energy)) {
+        this.value = this.oldValue;
+      } else {
+        this.oldValue = this.value;
+      }
+    });
+
+    this.clampStartInput.addEventListener("change", function () {
+      if (!this.dataset.previousValue) this.dataset.previousValue = this.value;
+
+      const value = Number(this.value);
+
+      if (!volumeMap.changeClampStart(value)) {
+        this.value = this.dataset.previousValue;
       } else {
         this.dataset.previousValue = this.value;
       }
-    };
+    });
 
-    this.gradientEndInput.oninput = function () {
-      const previousValue = this.dataset.previousValue || this.value;
-
-      if (!controller.meshMapper.changeGradientEnd(this.value)) {
-        this.value = previousValue;
+    this.clampEndInput.addEventListener("change", function () {
+      if (!this.dataset.previousValue) this.dataset.previousValue = this.value;
+      const value = Number(this.value);
+      if (!volumeMap.changeClampEnd(value)) {
+        this.value = this.dataset.previousValue;
       } else {
         this.dataset.previousValue = this.value;
       }
-    };
+    });
 
-    this.reverseToggle.onchange = function () {
-      controller.meshMapper.reverse(this.checked);
-    };
+    this.gradientStartInput.addEventListener("change", function () {
+      if (!this.oldValue) this.oldValue = this.value;
 
-    this.clampStartInput.onchange = function () {
-      const previousValue = this.dataset.previousValue || this.value;
-
-      if (!controller.meshMapper.changeClampStart(Number(this.value))) {
-        this.value = previousValue;
+      const color = this.value;
+      if (!volumeMap.changeGradientStart(color)) {
+        this.value = this.oldValue;
       } else {
-        this.dataset.previousValue = this.value;
+        this.oldValue = this.value;
       }
-    };
+    });
 
-    this.clampEndInput.onchange = function () {
-      const previousValue = this.dataset.previousValue || this.value;
-
-      if (!controller.meshMapper.changeClampEnd(Number(this.value))) {
-        this.value = previousValue;
+    this.gradientEndInput.addEventListener("change", function () {
+      if (!this.oldValue) this.oldValue = this.value;
+      const color = this.value;
+      if (!volumeMap.changeGradientEnd(color)) {
+        this.value = this.oldValue;
       } else {
-        this.dataset.previousValue = this.value;
+        this.oldValue = this.value;
       }
-    };
+    });
 
-    this.resetButton.onclick = function () {
-      controller.meshMapper.reset();
-    };
+    this.degenerateColorToggle.addEventListener("change", function () {
+      const flag = this.checked;
 
-    this.degenerateToggle.onchange = function () {
-      controller.meshMapper.changeDegenerateToggle(this.checked);
-    };
+      if (!volumeMap.toggleDegenerateColor(flag)) {
+        this.checked = !flag;
+      }
+    });
 
-    this.degenerateColorInput.oninput = function () {
-      controller.meshMapper.changeDegenerateColor(this.value);
-    };
+    this.degenerateColorInput.addEventListener("change", function () {
+      if (!this.oldValue) this.oldValue = this.value;
 
-    this.dropdowns.forEach((dropdown) => {
-      const btn = dropdown.querySelector(".dropbtn");
-      const content = dropdown.querySelector(".dropcontent");
-      btn.addEventListener("click", function (e) {
-        e.stopPropagation();
-        // Chiudi tutti gli altri
-        document.querySelectorAll(".dropcontent.toggle").forEach((dc) => {
-          if (dc !== content) dc.classList.remove("toggle");
-        });
-        // Toggle classe
-        content.classList.toggle("toggle");
-      });
+      const color = this.value;
+      if (!volumeMap.changeDegenerateColor(color)) {
+        this.value = this.oldValue;
+      } else {
+        this.oldValue = this.value;
+      }
+    });
+
+    this.reverseMapButton.addEventListener("click", function () {
+      if (!this.isReversed) this.isReversed = false;
+
+      const img = this.getElementsByTagName("img")[0];
+
+      if (volumeMap.reverseMapDirection()) {
+        this.isReversed = !this.isReversed;
+        img.src = this.isReversed
+          ? "./src/assets/img/left_arrow.png"
+          : "./src/assets/img/right_arrow.png";
+      }
+    });
+
+    this.resetButton.addEventListener("click", function () {
+      volumeMap.resetMapSettings();
+      volumeMap.controller.resetMapSettings();
+    });
+
+    this.distortionSlicerToggle.addEventListener("change", function () {
+      const flag = this.checked;
+
+      if (!volumeMap.toggleDistortionSlicer(flag)) {
+        this.checked = !flag;
+      } else {
+        volumeMap.controller.toggleDistortionSlicerContainer(flag);
+      }
     });
   }
 
-  reset() {
-    this.mapToggle.checked = false;
+  resetMapSettings() {
     this.energyInput.value = "CONFORMAL";
-    this.gradientStartInput.value = white;
-    this.gradientEndInput.value = red;
-    this.reverseToggle.checked = false;
-    this.degenerateToggle.checked = false;
-    this.degenerateColorInput.value = "#ffff00";
-  }
-
-  updateClamping(start, end) {
-    this.clampStartInput.value = start;
-    this.clampStartInput.dataset.previousValue = start;
-    this.clampEndInput.value = end;
-    this.clampEndInput.dataset.previousValue = end;
+    this.clampStartInput.value = "1";
+    this.clampEndInput.value = "12";
+    this.gradientStartInput.value = "#ffffff";
+    this.gradientEndInput.value = "#ff0000";
+    this.degenerateColorToggle.checked = false;
+    this.degenerateColorInput.value = "#ffff00ff";
+    this.reverseMapButton.isReversed = false;
+    this.reverseMapButton.getElementsByTagName("img")[0].src = "./src/assets/img/right_arrow.png";
   }
 
   updateModelInfo(numVertices, numFaces, numPolyhedra) {
@@ -216,51 +193,36 @@ export class MeshMapperController {
     this.polyhedraInfo.textContent = numPolyhedra;
   }
 
-  updateMapInfo(
-    energy,
-    gradientStart,
-    gradientEnd,
-    whiteMid,
-    clampStart,
-    clampEnd
-  ) {
-    this.updateEnergy(energy);
-    this.updateGradient(gradientStart, gradientEnd, whiteMid);
+  updateMapInfo(energy, gradientStart, gradientEnd, whiteMid, clampStart, clampEnd) {
+    this.updateEnergyInfo(energy);
     this.updateClampInfo(clampStart, clampEnd);
+    this.updateGradientInfo(gradientStart, gradientEnd, whiteMid);
   }
 
-  updateEnergy(energy) {
-    this.energyInfo.textContent = energy;
-  }
-
-  updateGradient(start, end, whiteMid) {
-    start = "#" + start.toString(16).padStart(6, "0");
-    end = "#" + end.toString(16).padStart(6, "0");
-
-    console.log(getComputedStyle(this.gradientInfo).background);
-    if (whiteMid) {
-      const gradientMid = "#ffffff";
-      this.gradientInfo.style.setProperty(
-        "background",
-        `linear-gradient(to right, ${start}, ${gradientMid}, ${end})`
-      );
-      console.log(
-        `linear-gradient(to right, ${start}, ${gradientMid}, ${end})`
-      );
-    } else {
-      this.gradientInfo.style.setProperty(
-        "background",
-        `linear-gradient(to right, ${start}, ${end})`
-      );
-      console.log(`linear-gradient(to right, ${start}, ${end})`);
-    }
-    setTimeout(() => {
-      console.log(getComputedStyle(this.gradientInfo).background);
-    }, 2);
+  updateEnergyInfo(energy) {
+    this.mapEnergy.textContent = energy;
   }
 
   updateClampInfo(start, end) {
-    this.clampInfo.textContent = `[${start}, ${end}]`;
+    this.mapClamp.textContent = `[${start}, ${end}]`;
+  }
+
+  updateGradientInfo(start, end, whiteMid) {
+    start = "#" + start.toString(16).padStart(6, "0");
+    end = "#" + end.toString(16).padStart(6, "0");
+
+    if (whiteMid) {
+      const gradientMid = "#ffffff";
+      this.mapGradient.style.setProperty(
+        "background",
+        `linear-gradient(to right, ${start}, ${gradientMid}, ${end})`
+      );
+    } else {
+      this.mapGradient.style.setProperty(
+        "background",
+        `linear-gradient(to right, ${start}, ${end})`
+      );
+    }
   }
 
   updatePickerInfo(polyhedronIndex, distortion) {
