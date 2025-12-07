@@ -172,6 +172,7 @@ export class MeshLoader {
       polyCentroids: null,
       polyColor: null,
       polyDistortion: null,
+      clampedPolyDistortion: null,
     };
 
     return new THREE.Mesh(geometry, standardMaterial.clone());

@@ -4,7 +4,6 @@ import { MeshController } from "../controllers/MeshController.js";
 import { MeshLoader } from "../loaders/MeshLoader.js";
 import { MeshRenderer } from "../mesh_inspection/MeshRenderer.js";
 import { MeshSlicer } from "../mesh_inspection/MeshSlicer.js";
-//import { VolumeMap } from "./VolumeMap.js";
 
 /* PolygonOffset to avoid z-fighting when rendering, in external to internal order: 
    wireframe -> mesh -> shell */
@@ -40,7 +39,7 @@ export class VolumeMesh {
   controller = null;
   meshRenderer = null;
   meshSlicer = null;
-  //volumeMap = null;
+  volumeMap = null;
 
   constructor(settingsContainer, canvasContainer) {
     this.controller = new MeshController(this, settingsContainer, canvasContainer);
@@ -65,7 +64,7 @@ export class VolumeMesh {
     //Update the slicer with the new mesh and reset it
     this.meshSlicer.updateMesh();
     this.controller.resetSlicer();
-    //this.volumeMap.updateMesh();
+    this.volumeMap.updateMesh();
     //Update the renderer with the new mesh and reset it
     this.meshRenderer.updateMesh();
     this.controller.resetRendering();
@@ -209,7 +208,7 @@ export class VolumeMesh {
     const positionsAttribute = new THREE.BufferAttribute(new Float32Array(tmpTriangleSoup), 3);
     this.mesh.geometry.setAttribute("position", positionsAttribute);
     const polyAttribute = new THREE.BufferAttribute(new Uint32Array(tmpPoly), 1);
-    this.mesh.geometry.setAttribute("poly", polyAttribute);
+    this.mesh.geometry.setAttribute("polyIndex", polyAttribute);
     const colorAttribute = new THREE.BufferAttribute(new Float32Array(tmpColor), 3);
     this.mesh.geometry.setAttribute("color", colorAttribute);
     //Compute normals for proper lighting
@@ -219,6 +218,28 @@ export class VolumeMesh {
     const segmentsAttribute = new THREE.BufferAttribute(new Uint32Array(tmpSegments), 1);
     this.wireframe.geometry.setIndex(segmentsAttribute);
     this.wireframe.geometry.needsUpdate = true;
+  }
+
+  updateVisibleFacesColor() {
+    const polyIndex = this.mesh.geometry.getAttribute("polyIndex");
+
+    var tmpColor = new Array();
+
+    for (let i = 0; i < polyIndex.count; i++) {
+      const pIndex = polyIndex.array[i];
+      const polyColor = this.mesh.geometry.userData.polyColor;
+      if (polyColor) {
+        const color = polyColor[pIndex];
+        //One color per vertex
+        for (let j = 0; j < 3; j++) {
+          tmpColor.push(color.r, color.g, color.b);
+        }
+      }
+    }
+
+    const colorAttribute = new THREE.BufferAttribute(new Float32Array(tmpColor), 3);
+    this.mesh.geometry.setAttribute("color", colorAttribute);
+    this.mesh.geometry.needsUpdate = true;
   }
 
   async loadMesh(file) {

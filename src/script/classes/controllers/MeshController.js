@@ -89,7 +89,7 @@ export class MeshController {
     this.meshColorInput.oninput = function () {
       if (!this.oldValue) {
         // Save the first valid value
-        this.oldValue = this.value;
+        this.oldValue = "#ffffff";
       }
 
       const colorEx = parseInt(this.value.replace("#", ""), 16);
@@ -113,7 +113,7 @@ export class MeshController {
     this.wireframeColorInput.oninput = function () {
       if (!this.oldValue) {
         // Save the first valid value
-        this.oldValue = this.value;
+        this.oldValue = "#000000";
       }
       const colorEx = parseInt(this.value.replace("#", ""), 16);
       // Try to change color

@@ -1,0 +1,2 @@
+lastPickedPolygonIndex = null;
+lastPickedPolygonColor = null;

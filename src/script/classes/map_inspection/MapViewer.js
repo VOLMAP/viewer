@@ -1,171 +1,170 @@
-import { VolumeMesh } from "../wrappers/VolumeMesh.js";
-import * as utils from "../../main/utils.js";
-import * as Distortion from "../../main/distortion.js";
 import * as THREE from "../../../libs/three/three.module.js";
+import * as utils from "../../main/utils.js";
+import * as matrixUtils from "./matrixUtils.js";
 
-export class MeshMapper {
-  controller = null;
-  meshRenderers = [];
+export class MapViewer {
+  isActive = false;
 
-  isMap = null;
-  isMapActive = false;
+  degeneratePolyhedra = null;
+  polyDistortion = null;
+  clampedPolyDistortion = null;
+  polyColor = null;
 
   energy = "CONFORMAL";
-  polygonsDistortion = null;
-  clampedPolygonsDistortion = null;
-  polygonsColor = null;
-
-  gradientStart = utils.white;
-  gradientEnd = utils.red;
-
-  lastPickedPolygonIndex = null;
-  lastPickedPolygonColor = null;
-
-  isMappingReversed = false;
   clampStart = 1;
   clampEnd = 12;
+  gradientStart = utils.whiteHex;
+  gradientEnd = "0xff0000";
 
-  degenerateColor = utils.hexToRGB(0xffff00);
-  degenerateToggle = false;
+  isDegenerateColorActive = false;
+  degenerateColor = "0xffff00";
 
-  constructor(meshRenderers) {
-    this.meshRenderers = meshRenderers;
+  isMapDirectionReversed = false;
 
-    meshRenderers.forEach((meshRenderer) => {
-      meshRenderer.setMeshMapper(this);
-    });
+  volumeMap = null;
+
+  constructor(volumeMap) {
+    this.volumeMap = volumeMap;
   }
 
-  checkMap() {
-    const mesh1 = this.meshRenderers[0].getMesh();
-    const mesh2 = this.meshRenderers[1].getMesh();
-
-    if (mesh1 == null || mesh2 == null) {
-      console.log("mesh1 or mesh2 is null");
-      return false;
-    } else if (
-      !(mesh1 instanceof VolumeMesh) ||
-      !(mesh2 instanceof VolumeMesh)
-    ) {
-      console.log("mesh1 or mesh2 not instanceof VolumeMesh");
-      return false;
-    } else {
-      const vertices1 = mesh1.getMesh().geometry.userData.vertices;
-      const vertices2 = mesh2.getMesh().geometry.userData.vertices;
-      const tetrahedras1 = mesh1.getMesh().geometry.userData.tetrahedras;
-      const tetrahedras2 = mesh2.getMesh().geometry.userData.tetrahedras;
-
-      if (vertices1.length != vertices2.length) {
-        console.log("vertLen");
-        return false;
-      } else if (tetrahedras1.length != tetrahedras2.length) {
-        console.log("polyLen");
-        return false;
-      } else {
-        for (let i = 0; i < tetrahedras1.length; i += 4) {
-          if (
-            tetrahedras1[i] != tetrahedras2[i] ||
-            tetrahedras1[i + 1] != tetrahedras2[i + 1] ||
-            tetrahedras1[i + 2] != tetrahedras2[i + 2] ||
-            tetrahedras1[i + 3] != tetrahedras2[i + 3]
-          ) {
-            console.log("polyIndex");
-            return false;
-          }
-        }
-        return true;
-      }
-    }
+  updateMap() {
+    this.computeDistortion();
+    this.computeColor();
+    this.volumeMap.volumeMesh1.updateVisibleFacesColor();
+    this.volumeMap.volumeMesh2.updateVisibleFacesColor();
   }
 
-  calculateDistorsion() {
-    this.polygonsDistortion = new Array();
+  setActive(flag) {
+    this.isActive = flag;
+    this.volumeMap.volumeMesh1.toggleMapColor(flag);
+    this.volumeMap.volumeMesh2.toggleMapColor(flag);
+  }
+
+  computeDistortion() {
+    const tmpPolyDistortion = new Array();
     this.degeneratePolyhedra = 0;
-
-    let mesh1 = this.meshRenderers[0].getMesh().getMesh();
-    let mesh2 = this.meshRenderers[1].getMesh().getMesh();
-
-    if (this.isMappingReversed) {
-      const temp = mesh1;
-      mesh1 = mesh2;
-      mesh2 = temp;
-    }
+    // Based on the mapping direction, choose which mesh is source and which is target
+    const mesh1 = this.isMapDirectionReversed
+      ? this.volumeMap.volumeMesh2.mesh
+      : this.volumeMap.volumeMesh1.mesh;
+    const mesh2 = this.isMapDirectionReversed
+      ? this.volumeMap.volumeMesh1.mesh
+      : this.volumeMap.volumeMesh2.mesh;
 
     const vertices1 = mesh1.geometry.userData.vertices;
     const vertices2 = mesh2.geometry.userData.vertices;
-    const tetrahedras = mesh1.geometry.userData.tetrahedras;
+    const tetrahedra = mesh1.geometry.userData.tetrahedra;
 
-    for (let i = 0; i < tetrahedras.length; i += 4) {
-      const tetraVertices1 = new Array();
-      const tetraVertices2 = new Array();
+    for (let i = 0; i < tetrahedra.length; i += 4) {
+      const tetrahedra1 = new Array();
+      const tetrahedra2 = new Array();
 
-      for (let j = 0; j <= 3; j++) {
-        const vIndex = tetrahedras[i + j];
-
+      for (let j = 0; j < 4; j++) {
+        // Get vertex index
+        const vIndex = tetrahedra[i + j];
+        // Get vertex coordinates
         const v1 = {
           x: vertices1[vIndex * 3],
           y: vertices1[vIndex * 3 + 1],
           z: vertices1[vIndex * 3 + 2],
         };
-
         const v2 = {
           x: vertices2[vIndex * 3],
           y: vertices2[vIndex * 3 + 1],
           z: vertices2[vIndex * 3 + 2],
         };
-
-        tetraVertices1.push(v1);
-        tetraVertices2.push(v2);
+        // Store vertex coordinates
+        tetrahedra1.push(v1);
+        tetrahedra2.push(v2);
       }
 
       let distortion = null;
 
-      try {
-        const J = Distortion.jacobianMatrix(
-          tetraVertices1[0],
-          tetraVertices1[1],
-          tetraVertices1[2],
-          tetraVertices1[3],
-          tetraVertices2[0],
-          tetraVertices2[1],
-          tetraVertices2[2],
-          tetraVertices2[3]
-        );
+      const J = matrixUtils.jacobianMatrix(tetrahedra1, tetrahedra2);
 
-        const S = Distortion.computeSingularValues(J);
-
-        distortion = Distortion.computeDistortion(
-          S[0],
-          S[1],
-          S[2],
-          this.energy
-        );
-      } catch (error) {
-        if (
-          error.message === "Tetraedro degenere - determinante nullo o negativo"
-        ) {
-          distortion = NaN; // Degeneri
-          this.degeneratePolyhedra++;
-        } else {
-          throw error;
-        }
+      if (matrixUtils.determinant3x3(J) <= 0) {
+        distortion = NaN;
+        this.degeneratePolyhedra++;
+      } else {
+        const S = matrixUtils.computeSingularValues(J);
+        distortion = this.computeTetDistortion(S[0], S[1], S[2], this.energy);
       }
 
-      this.polygonsDistortion.push(distortion);
+      tmpPolyDistortion.push(distortion);
     }
 
-    mesh1.geometry.userData.polygonsDistortion =
-      this.polygonsDistortion.slice();
-    mesh2.geometry.userData.polygonsDistortion =
-      this.polygonsDistortion.slice();
+    // Store the distortion values in both meshes
+    this.polyDistortion = tmpPolyDistortion;
+    mesh1.geometry.userData.polyDistortion = tmpPolyDistortion;
+    mesh2.geometry.userData.polyDistortion = tmpPolyDistortion;
 
-    console.log(`Degenerate polyhedra: ${this.degeneratePolyhedra}`);
-
-    this.resetClamping();
-    this.clampDistorsion();
+    this.clampDistortion();
   }
 
-  resetClamping() {
+  computeTetDistortion(s_max, s_mid, s_min, energy) {
+    switch (energy) {
+      case "CONFORMAL":
+        return (
+          (s_max * s_max + s_mid * s_mid + s_min * s_min) /
+          (3 * Math.pow(s_max * s_mid * s_min, 2 / 3))
+        );
+      case "DIRICHLET":
+        return (s_max * s_max + s_mid * s_mid + s_min * s_min) / 3;
+      case "SYMMETRIC-DIRICHLET":
+        return (
+          (s_max * s_max +
+            s_mid * s_mid +
+            s_min * s_min +
+            1 / (s_max * s_max) +
+            1 / (s_mid * s_mid) +
+            1 / (s_min * s_min)) /
+          6
+        );
+      case "ARAP":
+        const EPSILON = 1e-12;
+        const val = Math.pow(s_max - 1, 2) + Math.pow(s_mid - 1, 2) + Math.pow(s_min - 1, 2);
+        return val < EPSILON ? 0 : val;
+      case "MIPS3D":
+        return (
+          (1 / 8) *
+          (s_max / s_mid + s_mid / s_max) *
+          (s_min / s_max + s_max / s_min) *
+          (s_mid / s_min + s_min / s_mid)
+        );
+      default:
+        throw "unkwnonw energy";
+    }
+  }
+
+  clampDistortion() {
+    const tmpClampedPolyDistortion = this.polyDistortion.slice();
+
+    this.clampArray(tmpClampedPolyDistortion, this.clampStart, this.clampEnd);
+
+    this.clampedPolyDistortion = tmpClampedPolyDistortion;
+    this.volumeMap.volumeMesh1.mesh.geometry.userData.clampedPolyDistortion =
+      tmpClampedPolyDistortion;
+    this.volumeMap.volumeMesh2.mesh.geometry.userData.clampedPolyDistortion =
+      tmpClampedPolyDistortion;
+  }
+
+  clamp(val, min, max) {
+    //We use infinity as a distortion value to identify degenerate tetrahedra
+    if (isNaN(val)) return Infinity;
+
+    let res = Math.max(val, min);
+    res = Math.min(res, max);
+    res = (res - min) / (max - min);
+    return res;
+  }
+
+  clampArray(arr, min, max) {
+    for (let i = 0; i < arr.length; i++) {
+      arr[i] = this.clamp(arr[i], min, max);
+    }
+  }
+
+  setDefaultClampRange() {
     if (this.energy == "CONFORMAL") {
       this.clampStart = 1;
       this.clampEnd = 12;
@@ -184,470 +183,81 @@ export class MeshMapper {
     } else {
       console.log("Unknown energy type");
     }
-
-    this.controller.updateClamping(this.clampStart, this.clampEnd);
-    this.controller.updateClampInfo(this.clampStart, this.clampEnd);
   }
 
-  clampDistorsion() {
-    this.clampedPolygonsDistortion = this.polygonsDistortion.slice();
-    utils.clampArray(
-      this.clampedPolygonsDistortion,
-      this.clampStart,
-      this.clampEnd
-    );
+  computeColor() {
+    const tmpPolyColor = new Array();
 
-    this.meshRenderers[0]
-      .getMesh()
-      .slicer.setPolyhedraByDistortion(this.clampedPolygonsDistortion);
-    this.meshRenderers[1]
-      .getMesh()
-      .slicer.setPolyhedraByDistortion(this.clampedPolygonsDistortion);
-  }
+    const mesh1 = this.volumeMap.volumeMesh1.mesh;
+    const mesh2 = this.volumeMap.volumeMesh2.mesh;
 
-  calculateColor() {
-    this.color = new Array();
+    const tetrahedra = mesh1.geometry.userData.tetrahedra;
 
-    const mesh1 = this.meshRenderers[0].getMesh().getMesh();
-    const mesh2 = this.meshRenderers[1].getMesh().getMesh();
+    for (var i = 0; i < tetrahedra.length / 4; i++) {
+      let color = null;
 
-    const tetrahedras = mesh1.geometry.userData.tetrahedras;
-
-    for (var i = 0; i < tetrahedras.length / 4; i++) {
-      var color = null;
-
-      if (isNaN(this.polygonsDistortion[i])) {
-        if (this.degenerateToggle) {
+      if (this.clampedPolyDistortion[i] == Infinity) {
+        if (this.isDegenerateColorActive) {
           color = this.degenerateColor;
         } else {
           color = utils.hexToRGB(this.gradientEnd);
         }
       } else {
-        color = utils.interpolateColor(
+        color = this.interpolateColor(
           utils.hexToRGB(this.gradientStart),
           utils.hexToRGB(this.gradientEnd),
-          this.clampedPolygonsDistortion[i]
+          this.clampedPolyDistortion[i]
         );
       }
 
-      this.color.push(color);
+      tmpPolyColor.push(color);
     }
 
-    mesh1.geometry.userData.polygonsColor = this.color;
-    mesh2.geometry.userData.polygonsColor = this.color;
+    this.polyColor = tmpPolyColor;
+    mesh1.geometry.userData.polyColor = tmpPolyColor;
+    mesh2.geometry.userData.polyColor = tmpPolyColor;
   }
 
-  toggleMap(flag) {
-    if (this.isMap == null) {
-      this.isMap = this.checkMap();
-      if (this.isMap) {
-        this.calculateDistorsion();
-        this.calculateColor();
+  //Custom interpolation between two colors with t as interpolation factor (0-1)
+  interpolateColor(start, end, t) {
+    const whiteRGB = { r: 1, g: 1, b: 1 };
+    const isWhite = (c) => c.r === 1 && c.g === 1 && c.b === 1;
 
-        const verticesCount =
-          this.meshRenderers[0].getMesh().getMesh().geometry.userData.vertices
-            .length / 3;
-        const facesCount = this.meshRenderers[0].getMesh().getMesh().geometry
-          .userData.adjacencyMap.size;
-        const polyhedraCount =
-          this.meshRenderers[0].getMesh().getMesh().geometry.userData
-            .tetrahedras.length / 4;
-        this.controller.updateModelInfo(
-          verticesCount,
-          facesCount,
-          polyhedraCount
-        );
+    if (isWhite(start) || isWhite(end)) {
+      //Linear interpolation: white → end or start → white
+      return utils.lerpColor(start, end, t);
+    } else {
+      //Custom interpolation: start → white → end
+      if (t < 0.5) {
+        return utils.lerpColor(start, whiteRGB, t * 2);
       } else {
-        alert("The meshes are not compatible for mapping.");
-      }
-    }
-
-    if (this.isMap) {
-      this.isMapActive = flag;
-
-      this.togglePicker(this, this.meshRenderers, this.isMapActive);
-      this.meshRenderers[0].getMesh().applyMapColor(this.isMapActive);
-      this.meshRenderers[1].getMesh().applyMapColor(this.isMapActive);
-
-      this.controller.updateMapInfo(
-        this.energy,
-        this.gradientStart,
-        this.gradientEnd,
-        this.gradientStart != utils.white && this.gradientEnd != utils.white,
-        this.clampStart,
-        this.clampEnd
-      );
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  changeEnergy(energy) {
-    this.energy = energy;
-
-    if (this.isMap) {
-      this.calculateDistorsion();
-      this.calculateColor();
-      if (this.isMapActive) {
-        this.meshRenderers[0].getMesh().applyMapColor(true);
-        this.meshRenderers[1].getMesh().applyMapColor(true);
-      }
-    }
-
-    this.controller.updateEnergy(this.energy);
-  }
-
-  reverse(flag) {
-    this.isMappingReversed = flag;
-
-    if (this.isMap) {
-      this.calculateDistorsion();
-      this.calculateColor();
-      if (this.isMapActive) {
-        this.meshRenderers[0].getMesh().applyMapColor(true);
-        this.meshRenderers[1].getMesh().applyMapColor(true);
+        return utils.lerpColor(whiteRGB, end, (t - 0.5) * 2);
       }
     }
   }
 
-  changeGradientStart(color) {
-    color = parseInt(color.replace("#", ""), 16);
-
-    if (color != this.gradientEnd) {
-      this.gradientStart = color;
-      if (this.isMap) {
-        this.calculateColor();
-        if (this.isMapActive) {
-          this.meshRenderers[0].getMesh().applyMapColor(true);
-          this.meshRenderers[1].getMesh().applyMapColor(true);
-        }
-      }
-
-      this.controller.updateGradient(
-        this.gradientStart,
-        this.gradientEnd,
-        this.gradientStart != utils.white && this.gradientEnd != utils.white
-      );
-      return true;
-    } else {
-      alert("Invalid color value.");
-      return false;
-    }
-  }
-
-  changeGradientEnd(color) {
-    color = parseInt(color.replace("#", ""), 16);
-
-    if (color != this.gradientStart) {
-      this.gradientEnd = color;
-      if (this.isMap) {
-        this.calculateColor();
-        if (this.isMapActive) {
-          this.meshRenderers[0].getMesh().applyMapColor(true);
-          this.meshRenderers[1].getMesh().applyMapColor(true);
-        }
-      }
-
-      this.controller.updateGradient(
-        this.gradientStart,
-        this.gradientEnd,
-        this.gradientStart != utils.white && this.gradientEnd != utils.white
-      );
-      return true;
-    } else {
-      alert("Invalid color value.");
-      return false;
-    }
-  }
-
-  changeClampStart(value) {
-    if (value < this.clampEnd) {
-      this.clampStart = value;
-      if (this.isMap) {
-        this.clampDistorsion();
-        this.calculateColor();
-        if (this.isMapActive) {
-          this.meshRenderers[0].getMesh().applyMapColor(true);
-          this.meshRenderers[1].getMesh().applyMapColor(true);
-        }
-      }
-
-      this.controller.updateClampInfo(this.clampStart, this.clampEnd);
-      return true;
-    } else {
-      alert("Invalid clamp start value.");
-      return false;
-    }
-  }
-
-  changeClampEnd(value) {
-    if (value > this.clampStart) {
-      this.clampEnd = value;
-      if (this.isMap) {
-        this.clampDistorsion();
-        this.calculateColor();
-        if (this.isMapActive) {
-          this.meshRenderers[0].getMesh().applyMapColor(true);
-          this.meshRenderers[1].getMesh().applyMapColor(true);
-        }
-      }
-
-      this.controller.updateClampInfo(this.clampStart, this.clampEnd);
-      return true;
-    } else {
-      alert("Invalid clamp end value.");
-      return false;
-    }
-  }
-
-  reset() {
-    this.isMap = null;
-    this.isMapActive = false;
-    this.polygonsDistortion = null;
-    this.clampedPolygonsDistortion = null;
-    this.polygonsColor = null;
+  resetSettings() {
     this.energy = "CONFORMAL";
-    this.gradientStart = utils.white;
-    this.gradientEnd = utils.red;
-    this.isMappingReversed = false;
-    this.degenerateColor = utils.hexToRGB(0xffff00);
-    this.degenerateToggle = false;
-
-    this.resetClamping();
-
-    this.togglePicker(this, this.meshRenderers, false);
-
-    const mesh0 = this.meshRenderers[0].getMesh();
-    if (mesh0 && mesh0 instanceof VolumeMesh) {
-      mesh0.applyMapColor(false);
-    }
-    const mesh1 = this.meshRenderers[1].getMesh();
-    if (mesh1 && mesh1 instanceof VolumeMesh) {
-      mesh1.applyMapColor(false);
-    }
-    this.resetPicker();
-
-    this.controller.reset();
-
-    this.controller.updateModelInfo(0, 0, 0);
-    this.controller.updateMapInfo(
-      "CONFORMAL",
-      utils.white,
-      utils.red,
+    this.setDefaultClampRange();
+    this.gradientStart = utils.whiteHex;
+    this.gradientEnd = "0xff0000";
+    this.isDegenerateColorActive = false;
+    this.degenerateColor = "0xffff00";
+    this.isMapDirectionReversed = false;
+    this.volumeMap.controller.updateMapInfo(
+      this.energy,
+      this.gradientStart,
+      this.gradientEnd,
       false,
-      1,
-      12
+      this.clampStart,
+      this.clampEnd
     );
-    this.controller.updatePickerInfo(-1, -1);
   }
 
-  togglePicker(mapper, renderers, flag) {
-    if (flag) {
-      renderers[0].renderer.domElement.addEventListener("click", (event) =>
-        mapper.pickPolygon(event, renderers[0], renderers[1])
-      );
-      renderers[1].renderer.domElement.addEventListener("click", (event) =>
-        mapper.pickPolygon(event, renderers[1], renderers[0])
-      );
-    } else {
-      renderers[0].renderer.domElement.removeEventListener("click", (event) =>
-        mapper.pickPolygon(event, renderers[0], renderers[1])
-      );
-      renderers[1].renderer.domElement.removeEventListener("click", (event) =>
-        mapper.pickPolygon(event, renderers[1], renderers[0])
-      );
-    }
-
-    /*
-    this.meshRenderers[0].distortionContainer.style.visibility = flag
-      ? "visible"
-      : "hidden";
-    this.meshRenderers[1].distortionContainer.style.visibility = flag
-      ? "visible"
-      : "hidden";
-      */
-  }
-
-  resetPicker() {
-    /*
-    this.meshRenderers[0].distortionContainer.getElementsByClassName(
-      "polygon-index"
-    )[0].innerText = `-1`;
-    this.meshRenderers[0].distortionContainer.getElementsByClassName(
-      "distortion-value"
-    )[0].innerText = `-1`;
-    this.meshRenderers[1].distortionContainer.getElementsByClassName(
-      "polygon-index"
-    )[0].innerText = `-1`;
-    this.meshRenderers[1].distortionContainer.getElementsByClassName(
-      "distortion-value"
-    )[0].innerText = `-1`;
-    */
-
-    this.controller.updatePickerInfo(-1, -1);
-
-    this.lastPickedPolygonColor = null;
-    this.lastPickedPolygonIndex = null;
-  }
-
-  pickPolygon(event, renderer, otherRenderer) {
-    if (!event.shiftKey) return;
-
-    const raycaster = new THREE.Raycaster();
-    const mouse = new THREE.Vector2();
-    const rect = renderer.renderer.domElement.getBoundingClientRect();
-    mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-    mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-    raycaster.setFromCamera(mouse, renderer.camera);
-    const intersects = raycaster.intersectObject(renderer.mesh.getMesh(), true);
-
-    const mesh = renderer.mesh.getMesh();
-    const geometry = mesh.geometry;
-    const otherMesh = otherRenderer.mesh.getMesh();
-    const otherGeometry = otherMesh.geometry;
-
-    if (intersects.length > 0) {
-      const distortion = geometry.attributes.distortion;
-      const poly = geometry.attributes.poly;
-      const faceIndex = intersects[0].face.a / 3;
-      const polyIndex = poly.array[faceIndex];
-      const d = distortion.array[faceIndex];
-
-      // 🔙 Ripristina il colore precedente (se esiste)
-      if (this.lastPickedPolygonIndex !== null && this.lastPickedPolygonColor) {
-        this._colorPolygon(
-          geometry,
-          this.lastPickedPolygonIndex,
-          this.lastPickedPolygonColor
-        );
-        this._colorPolygon(
-          otherGeometry,
-          this.lastPickedPolygonIndex,
-          this.lastPickedPolygonColor
-        );
-      }
-
-      // 💾 Salva il colore originale della prima faccia del nuovo poligono
-      let firstFaceIdx = null;
-      for (let i = 0; i < poly.array.length; i++) {
-        if (poly.array[i] === polyIndex) {
-          firstFaceIdx = i;
-          break;
-        }
-      }
-      const colorAttr = geometry.attributes.color;
-      const i = firstFaceIdx * 9;
-      this.lastPickedPolygonColor = {
-        r: colorAttr.array[i],
-        g: colorAttr.array[i + 1],
-        b: colorAttr.array[i + 2],
-      };
-      this.lastPickedPolygonIndex = polyIndex;
-
-      // Colora tutte le facce del poligono selezionato (complementare)
-      this._colorPolygon(geometry, polyIndex, null, true);
-      this._colorPolygon(otherGeometry, polyIndex, null, true);
-
-      /*
-      renderer.distortionContainer.getElementsByClassName(
-        "polygon-index"
-      )[0].innerText = `${polyIndex}`;
-      renderer.distortionContainer.getElementsByClassName(
-        "distortion-value"
-      )[0].innerText = `${d}`;
-      otherRenderer.distortionContainer.getElementsByClassName(
-        "polygon-index"
-      )[0].innerText = `${polyIndex}`;
-      otherRenderer.distortionContainer.getElementsByClassName(
-        "distortion-value"
-      )[0].innerText = `${d}`;
-      */
-      this.controller.updatePickerInfo(polyIndex, d);
-    } else {
-      // 🔙 Ripristina il colore precedente (se esiste)
-      if (this.lastPickedPolygonIndex !== null && this.lastPickedPolygonColor) {
-        this._colorPolygon(
-          geometry,
-          this.lastPickedPolygonIndex,
-          this.lastPickedPolygonColor
-        );
-        this._colorPolygon(
-          otherGeometry,
-          this.lastPickedPolygonIndex,
-          this.lastPickedPolygonColor
-        );
-      }
-      this.lastPickedPolygonIndex = null;
-      this.lastPickedPolygonColor = null;
-      /*
-      renderer.distortionContainer.getElementsByClassName(
-        "polygon-index"
-      )[0].innerText = `-1`;
-      renderer.distortionContainer.getElementsByClassName(
-        "distortion-value"
-      )[0].innerText = `-1`;
-      otherRenderer.distortionContainer.getElementsByClassName(
-        "polygon-index"
-      )[0].innerText = `-1`;
-      otherRenderer.distortionContainer.getElementsByClassName(
-        "distortion-value"
-      )[0].innerText = `-1`;
-      */
-      this.controller.updatePickerInfo(-1, -1);
-    }
-  }
-
-  // Funzione ausiliaria per colorare tutte le facce di un poligono
-  _colorPolygon(geometry, polyIndex, colorObj, complementary = false) {
-    const poly = geometry.attributes.poly;
-    const color = geometry.attributes.color;
-    const polygonsColor = geometry.userData.polygonsColor;
-    for (let i = 0; i < poly.array.length; i++) {
-      if (poly.array[i] === polyIndex) {
-        const idx = i * 9;
-        for (let j = 0; j < 9; j += 3) {
-          if (complementary) {
-            color.array[idx + j] = 1.0 - color.array[idx + j];
-            color.array[idx + j + 1] = 1.0 - color.array[idx + j + 1];
-            color.array[idx + j + 2] = 1.0 - color.array[idx + j + 2];
-          } else {
-            color.array[idx + j] = colorObj.r;
-            color.array[idx + j + 1] = colorObj.g;
-            color.array[idx + j + 2] = colorObj.b;
-          }
-        }
-        // Aggiorna il colore del poligono
-        polygonsColor[poly.array[i]] = {
-          r: color.array[idx],
-          g: color.array[idx + 1],
-          b: color.array[idx + 2],
-        };
-      }
-    }
-    color.needsUpdate = true;
-  }
-
-  changeDegenerateToggle(flag) {
-    this.degenerateToggle = flag;
-    if (this.isMap) {
-      this.calculateColor();
-      if (this.isMapActive) {
-        this.meshRenderers[0].getMesh().applyMapColor(true);
-        this.meshRenderers[1].getMesh().applyMapColor(true);
-      }
-    }
-  }
-
-  changeDegenerateColor(color) {
-    color = parseInt(color.replace("#", ""), 16);
-    this.degenerateColor = utils.hexToRGB(color);
-    if (this.isMap) {
-      this.calculateColor();
-      if (this.isMapActive) {
-        this.meshRenderers[0].getMesh().applyMapColor(true);
-        this.meshRenderers[1].getMesh().applyMapColor(true);
-      }
-    }
+  setEnergy(value) {
+    this.energy = value;
+    this.setDefaultClampRange();
+    this.volumeMap.controller.updateEnergyInfo(this.energy);
+    this.volumeMap.controller.updateClampInfo(this.clampStart, this.clampEnd);
   }
 }

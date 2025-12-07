@@ -28,6 +28,9 @@ export class MapController {
   pickerDistortion = null;
   // Distortion Slicer
   distortionSlicerContainer = null;
+  distortionSlider = null;
+  degenerateFilterToggle = null;
+  distortionReverseButton = null;
 
   constructor(volumeMap, settingsContainer, statusBarContainer) {
     this.volumeMap = volumeMap;
@@ -36,20 +39,20 @@ export class MapController {
 
     //Map Settings Elements
     this.mapViewerToggle = getElement(settingsContainer, "map-viewer-toggle");
-    this.energyInput = getElement(settingsContainer, "map-energy-input");
-    this.clampStartInput = getElement(settingsContainer, "map-clamp-start-input");
-    this.clampEndInput = getElement(settingsContainer, "map-clamp-end-input");
-    this.gradientStartInput = getElement(settingsContainer, "map-gradient-start-input");
-    this.gradientEndInput = getElement(settingsContainer, "map-gradient-end-input");
+    this.energyInput = getElement(settingsContainer, "energy-input");
+    this.clampStartInput = getElement(settingsContainer, "clamp-start-input");
+    this.clampEndInput = getElement(settingsContainer, "clamp-end-input");
+    this.gradientStartInput = getElement(settingsContainer, "gradient-start-input");
+    this.gradientEndInput = getElement(settingsContainer, "gradient-end-input");
     this.degenerateColorToggle = getElement(settingsContainer, "degenerate-color-toggle");
     this.degenerateColorInput = getElement(settingsContainer, "degenerate-color-input");
     this.reverseMapButton = getElement(settingsContainer, "reverse-map-button");
     this.resetButton = getElement(settingsContainer, "reset-button");
     this.distortionSlicerToggle = getElement(settingsContainer, "distortion-slicer-toggle");
     // Model Info
-    this.verticesCount = getElement(statusBarContainer, "vertices-info");
-    this.facesCount = getElement(statusBarContainer, "faces-info");
-    this.polyhedraCount = getElement(statusBarContainer, "polyhedra-info");
+    this.verticesCount = getElement(statusBarContainer, "vertices-count");
+    this.facesCount = getElement(statusBarContainer, "faces-count");
+    this.polyhedraCount = getElement(statusBarContainer, "polyhedra-count");
     // Map Info
     this.mapEnergy = getElement(statusBarContainer, "map-energy");
     this.mapClamp = getElement(statusBarContainer, "map-clamp");
@@ -59,6 +62,12 @@ export class MapController {
     this.pickerDistortion = getElement(statusBarContainer, "picker-distortion");
     //Distortion Slicer
     this.distortionSlicerContainer = getElement(document, "distortion-slicer-settings-container");
+    this.distortionSlider = getElement(this.distortionSlicerContainer, "distortion-slider");
+    this.degenerateFilterToggle = getElement(this.distortionSlicerContainer, "degenerate-filter");
+    this.distortionReverseButton = getElement(
+      this.distortionSlicerContainer,
+      "distortion-reverse-button"
+    );
 
     this.appendEventListeners(this.volumeMap);
   }
@@ -73,19 +82,19 @@ export class MapController {
     });
 
     this.energyInput.addEventListener("change", function () {
-      if (!this.oldValue) this.oldValue = this.value;
+      if (this.oldIndex === undefined) this.oldIndex = 0;
 
       const energy = this.value;
 
       if (!volumeMap.changeEnergy(energy)) {
-        this.value = this.oldValue;
+        this.selectedIndex = this.oldIndex;
       } else {
-        this.oldValue = this.value;
+        this.oldIndex = this.selectedIndex;
       }
     });
 
     this.clampStartInput.addEventListener("change", function () {
-      if (!this.dataset.previousValue) this.dataset.previousValue = this.value;
+      if (!this.dataset.previousValue) this.dataset.previousValue = 1;
 
       const value = Number(this.value);
 
@@ -97,7 +106,7 @@ export class MapController {
     });
 
     this.clampEndInput.addEventListener("change", function () {
-      if (!this.dataset.previousValue) this.dataset.previousValue = this.value;
+      if (!this.dataset.previousValue) this.dataset.previousValue = 12;
       const value = Number(this.value);
       if (!volumeMap.changeClampEnd(value)) {
         this.value = this.dataset.previousValue;
@@ -107,10 +116,10 @@ export class MapController {
     });
 
     this.gradientStartInput.addEventListener("change", function () {
-      if (!this.oldValue) this.oldValue = this.value;
+      if (!this.oldValue) this.oldValue = "#ffffff";
 
-      const color = this.value;
-      if (!volumeMap.changeGradientStart(color)) {
+      const colorEx = parseInt(this.value.replace("#", ""), 16);
+      if (!volumeMap.changeGradientStart(colorEx)) {
         this.value = this.oldValue;
       } else {
         this.oldValue = this.value;
@@ -118,9 +127,9 @@ export class MapController {
     });
 
     this.gradientEndInput.addEventListener("change", function () {
-      if (!this.oldValue) this.oldValue = this.value;
-      const color = this.value;
-      if (!volumeMap.changeGradientEnd(color)) {
+      if (!this.oldValue) this.oldValue = "#ff0000";
+      const colorEx = parseInt(this.value.replace("#", ""), 16);
+      if (!volumeMap.changeGradientEnd(colorEx)) {
         this.value = this.oldValue;
       } else {
         this.oldValue = this.value;
@@ -136,7 +145,7 @@ export class MapController {
     });
 
     this.degenerateColorInput.addEventListener("change", function () {
-      if (!this.oldValue) this.oldValue = this.value;
+      if (!this.oldValue) this.oldValue = "#ffff00";
 
       const color = this.value;
       if (!volumeMap.changeDegenerateColor(color)) {
@@ -160,8 +169,8 @@ export class MapController {
     });
 
     this.resetButton.addEventListener("click", function () {
-      volumeMap.resetMapSettings();
-      volumeMap.controller.resetMapSettings();
+      volumeMap.resetMapViewer();
+      volumeMap.controller.resetMapViewerSettings();
     });
 
     this.distortionSlicerToggle.addEventListener("change", function () {
@@ -173,24 +182,55 @@ export class MapController {
         volumeMap.controller.toggleDistortionSlicerContainer(flag);
       }
     });
+    this.distortionSlider.addEventListener("input", function () {
+      if (!this.oldValue) this.oldValue = this.value;
+      const value = this.value;
+      if (!volumeMap.sliceDistortion(value)) {
+        this.value = this.oldValue;
+      } else {
+        this.oldValue = this.value;
+      }
+    });
+    this.degenerateFilterToggle.addEventListener("click", function () {
+      if (!this.checked) this.checked = false;
+
+      const flag = !this.checked;
+
+      if (volumeMap.toggleDegenerateFilter(flag)) {
+        this.checked = flag;
+        this.classList.toggle("active", flag);
+      }
+    });
+    this.distortionReverseButton.addEventListener("click", function () {
+      if (!this.isReversed) this.isReversed = false;
+
+      const img = this.getElementsByTagName("img")[0];
+
+      if (volumeMap.reverseDistortionSlicingDirection()) {
+        this.isReversed = !this.isReversed;
+        img.src = this.isReversed
+          ? "./src/assets/img/left_arrow.png"
+          : "./src/assets/img/right_arrow.png";
+      }
+    });
   }
 
-  resetMapSettings() {
+  resetMapViewerSettings() {
     this.energyInput.value = "CONFORMAL";
     this.clampStartInput.value = "1";
     this.clampEndInput.value = "12";
     this.gradientStartInput.value = "#ffffff";
     this.gradientEndInput.value = "#ff0000";
     this.degenerateColorToggle.checked = false;
-    this.degenerateColorInput.value = "#ffff00ff";
+    this.degenerateColorInput.value = "#ffff00";
     this.reverseMapButton.isReversed = false;
     this.reverseMapButton.getElementsByTagName("img")[0].src = "./src/assets/img/right_arrow.png";
   }
 
   updateModelInfo(numVertices, numFaces, numPolyhedra) {
-    this.verticesInfo.textContent = numVertices;
-    this.facesInfo.textContent = numFaces;
-    this.polyhedraInfo.textContent = numPolyhedra;
+    this.verticesCount.textContent = numVertices;
+    this.facesCount.textContent = numFaces;
+    this.polyhedraCount.textContent = numPolyhedra;
   }
 
   updateMapInfo(energy, gradientStart, gradientEnd, whiteMid, clampStart, clampEnd) {
@@ -236,5 +276,13 @@ export class MapController {
     }
 
     this.distortionInfo.textContent = limitDecimals(distortion, 5);
+  }
+
+  toggleDistortionSlicerContainer(flag) {
+    this.distortionSlicerContainer.style.visibility = flag ? "visible" : "hidden";
+  }
+
+  toggleMapViewer(flag) {
+    this.mapViewerToggle.checked = flag;
   }
 }
