@@ -109,40 +109,27 @@ export class VolumeMap {
     return true;
   }
 
-  changeClampStart(start) {
+  changeClampLimits(start, end) {
     if (!this.isValid) {
       console.warn("Cannot change clamp start: the map is not valid");
       return false;
     }
-
-    //TODO this.mapViewer.setClampStart(start);
+    this.mapViewer.setClampLimits(start, end);
+    this.controller.updateClampInfo(start, end);
     return true;
   }
 
-  changeClampEnd(end) {
-    if (!this.isValid) {
-      console.warn("Cannot change clamp end: the map is not valid");
-      return false;
-    }
-    //TODO this.mapViewer.setClampEnd(end);
-    return true;
-  }
-
-  changeGradientStart(color) {
+  changeGradientLimits(start, end) {
     if (!this.isValid) {
       console.warn("Cannot change gradient start: the map is not valid");
       return false;
     }
-    //TODO this.mapViewer.setGradientStart(color);
-    return true;
-  }
-
-  changeGradientEnd(color) {
-    if (!this.isValid) {
-      console.warn("Cannot change gradient end: the map is not valid");
-      return false;
-    }
-    //TODO this.mapViewer.setGradientEnd(color);
+    this.mapViewer.setGradientLimits(start, end);
+    this.controller.updateGradientInfo(
+      start,
+      end,
+      start != utils.white && end != utils.white
+    );
     return true;
   }
 
@@ -151,7 +138,7 @@ export class VolumeMap {
       console.warn("Cannot toggle degenerate color: the map is not valid");
       return false;
     }
-    //TODO this.mapViewer.setDegenerateColor(flag);
+    this.mapViewer.setDegenerateColor(flag);
     return true;
   }
 
@@ -160,16 +147,17 @@ export class VolumeMap {
       console.warn("Cannot change degenerate color: the map is not valid");
       return false;
     }
-    //TODO this.mapViewer.setDegenerateColorValue(color);
+    this.mapViewer.setDegenerateColorValue(color);
     return true;
   }
 
-  reverseMapDirection() {
+  reverseMapDirection(flag) {
     if (!this.isValid) {
       console.warn("Cannot reverse map: the map is not valid");
       return false;
     }
-    //TODO this.mapViewer.reverseMap();
+    this.mapViewer.reverseMap(flag);
+    console.log("reversed map direction:", flag);
     return true;
   }
 

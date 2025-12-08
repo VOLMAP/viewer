@@ -32,7 +32,6 @@ export class MeshController {
 
   constructor(volumeMesh, settingsContainer, canvasContainer) {
     this.volumeMesh = volumeMesh;
-
     const getElement = (container, className) => container.getElementsByClassName(className)[0];
 
     // Mesh
@@ -65,8 +64,9 @@ export class MeshController {
     this.appendEventListeners(this.volumeMesh);
   }
 
+  // Add event listeners to the HTML elements
   appendEventListeners(volumeMesh) {
-    // Add event listeners to the HTML elements
+
     // Mesh
     this.meshInput.onchange = async function () {
       const file = this.files[0];
@@ -78,6 +78,7 @@ export class MeshController {
 
       volumeMesh.loadSampleMesh(sample);
     };
+
     // Rendering
     this.shellToggle.onchange = function () {
       const flag = this.checked;
@@ -145,6 +146,7 @@ export class MeshController {
       volumeMesh.resetRendering();
       volumeMesh.controller.resetRendering();
     };
+
     // Slicing
     this.xSlider.oninput = function () {
       if (!this.oldValue) {
@@ -239,6 +241,7 @@ export class MeshController {
           : "./src/assets/img/right_arrow.png";
       }
     };
+
     // Control
     this.axisToggle.onchange = function () {
       const flag = this.checked;
@@ -253,8 +256,8 @@ export class MeshController {
       volumeMesh.controller.resetControl();
     };
 
+    //Update renderer size on window resize
     window.addEventListener("resize", () => {
-      //Update renderer size on window resize
       volumeMesh.meshRenderer.resize();
     });
   }
@@ -263,8 +266,8 @@ export class MeshController {
     this.slicerSettingsContainer.style.visibility = flag ? "visible" : "hidden";
   }
 
+  //Reset of all UI elements to default values
   resetRendering() {
-    //Reset of all UI elements to default values
     this.shellToggle.checked = true;
     this.meshColorInput.value = "#ffffff";
     this.wireframeToggle.checked = true;
@@ -272,8 +275,8 @@ export class MeshController {
     this.boundingBoxToggle.checked = false;
   }
 
+  //Reset of all slicer UI elements to default values
   resetSlicer() {
-    //Reset of all UI elements to default values
     this.xSlider.value = maxSliderValue;
     this.xPlaneToggle.checked = true;
     this.xReverseButton.isReversed = false;
@@ -294,8 +297,8 @@ export class MeshController {
   }
   */
 
+  //Reset of all control UI elements to default values
   resetControl() {
-    //Reset of all UI elements to default values
     this.axisToggle.checked = false;
     this.orbitalToggle.checked = false;
   }

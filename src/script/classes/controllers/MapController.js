@@ -95,10 +95,9 @@ export class MapController {
 
     this.clampStartInput.addEventListener("change", function () {
       if (!this.dataset.previousValue) this.dataset.previousValue = 1;
-
       const value = Number(this.value);
 
-      if (!volumeMap.changeClampStart(value)) {
+      if (!volumeMap.changeClampLimits(value, volumeMap.mapViewer.clampEnd)) {
         this.value = this.dataset.previousValue;
       } else {
         this.dataset.previousValue = this.value;
@@ -108,7 +107,8 @@ export class MapController {
     this.clampEndInput.addEventListener("change", function () {
       if (!this.dataset.previousValue) this.dataset.previousValue = 12;
       const value = Number(this.value);
-      if (!volumeMap.changeClampEnd(value)) {
+      
+      if (!volumeMap.changeClampLimits(volumeMap.mapViewer.clampStart, value)) {
         this.value = this.dataset.previousValue;
       } else {
         this.dataset.previousValue = this.value;
@@ -117,9 +117,9 @@ export class MapController {
 
     this.gradientStartInput.addEventListener("change", function () {
       if (!this.oldValue) this.oldValue = "#ffffff";
-
       const colorEx = parseInt(this.value.replace("#", ""), 16);
-      if (!volumeMap.changeGradientStart(colorEx)) {
+      
+      if (!volumeMap.changeGradientLimits(colorEx, volumeMap.mapViewer.gradientEnd)) {
         this.value = this.oldValue;
       } else {
         this.oldValue = this.value;
@@ -129,7 +129,8 @@ export class MapController {
     this.gradientEndInput.addEventListener("change", function () {
       if (!this.oldValue) this.oldValue = "#ff0000";
       const colorEx = parseInt(this.value.replace("#", ""), 16);
-      if (!volumeMap.changeGradientEnd(colorEx)) {
+      
+      if (!volumeMap.changeGradientLimits(volumeMap.mapViewer.gradientStart, colorEx)) {
         this.value = this.oldValue;
       } else {
         this.oldValue = this.value;
@@ -146,9 +147,9 @@ export class MapController {
 
     this.degenerateColorInput.addEventListener("change", function () {
       if (!this.oldValue) this.oldValue = "#ffff00";
-
-      const color = this.value;
-      if (!volumeMap.changeDegenerateColor(color)) {
+      const colorEx = parseInt(this.value.replace("#", ""), 16);
+      
+      if (!volumeMap.changeDegenerateColor(colorEx)) {
         this.value = this.oldValue;
       } else {
         this.oldValue = this.value;
@@ -156,11 +157,12 @@ export class MapController {
     });
 
     this.reverseMapButton.addEventListener("click", function () {
+      //Initialize isReversed if undefined
       if (!this.isReversed) this.isReversed = false;
 
       const img = this.getElementsByTagName("img")[0];
 
-      if (volumeMap.reverseMapDirection()) {
+      if (volumeMap.reverseMapDirection(this.isReversed)) {
         this.isReversed = !this.isReversed;
         img.src = this.isReversed
           ? "./src/assets/img/left_arrow.png"

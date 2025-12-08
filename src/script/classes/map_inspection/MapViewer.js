@@ -136,6 +136,7 @@ export class MapViewer {
     }
   }
 
+  //Clamping operations
   clampDistortion() {
     const tmpClampedPolyDistortion = this.polyDistortion.slice();
 
@@ -185,6 +186,25 @@ export class MapViewer {
     }
   }
 
+  setClampLimits(start, end) {
+    if (start < this.clampEnd && end > this.clampStart) {
+      this.clampStart = start;
+      this.clampEnd = end;
+
+      if (this.isActive) {
+        this.clampDistortion()
+        this.computeColor();
+        this.volumeMap.volumeMesh1.updateVisibleFacesColor();
+        this.volumeMap.volumeMesh2.updateVisibleFacesColor();
+      }
+      return true;
+    } else {
+      alert("Invalid clamp limits.");
+      return false;
+    }
+  }
+
+  //Color operations
   computeColor() {
     const tmpPolyColor = new Array();
 
@@ -198,7 +218,7 @@ export class MapViewer {
 
       if (this.clampedPolyDistortion[i] == Infinity) {
         if (this.isDegenerateColorActive) {
-          color = this.degenerateColor;
+          color = utils.hexToRGB(this.degenerateColor);
         } else {
           color = utils.hexToRGB(this.gradientEnd);
         }
@@ -218,7 +238,6 @@ export class MapViewer {
     mesh2.geometry.userData.polyColor = tmpPolyColor;
   }
 
-  //Custom interpolation between two colors with t as interpolation factor (0-1)
   interpolateColor(start, end, t) {
     const whiteRGB = { r: 1, g: 1, b: 1 };
     const isWhite = (c) => c.r === 1 && c.g === 1 && c.b === 1;
@@ -233,6 +252,52 @@ export class MapViewer {
       } else {
         return utils.lerpColor(whiteRGB, end, (t - 0.5) * 2);
       }
+    }
+  }
+
+  setGradientLimits(colorStart, colorEnd) {
+    if (colorStart != this.gradientEnd && colorEnd != this.gradientStart) {
+      this.gradientStart = colorStart;
+      this.gradientEnd = colorEnd;
+
+      if (this.isActive) {
+        this.computeColor();
+        this.volumeMap.volumeMesh1.updateVisibleFacesColor();
+        this.volumeMap.volumeMesh2.updateVisibleFacesColor();
+      }
+    } else {
+      alert("Invalid color value.");
+      return false;
+    }
+    return true;
+  }
+
+  setDegenerateColor(flag) {
+    this.isDegenerateColorActive = flag;
+    if (this.isActive) {
+      this.computeColor();
+      this.volumeMap.volumeMesh1.updateVisibleFacesColor();
+      this.volumeMap.volumeMesh2.updateVisibleFacesColor();
+    }
+  }
+
+  setDegenerateColorValue(color) {
+    this.degenerateColor = color;
+    if (this.isActive) {
+      this.computeColor();
+      this.volumeMap.volumeMesh1.updateVisibleFacesColor();
+      this.volumeMap.volumeMesh2.updateVisibleFacesColor();
+    }
+  }
+
+  //miscellanious operations
+  reverseMap(flag) {
+    this.isMapDirectionReversed = flag;
+    if (this.isActive) {
+      this.computeDistortion();
+      this.computeColor();
+      this.volumeMap.volumeMesh1.updateVisibleFacesColor();
+      this.volumeMap.volumeMesh2.updateVisibleFacesColor();
     }
   }
 
