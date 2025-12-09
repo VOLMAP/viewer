@@ -154,10 +154,10 @@ export class VolumeMesh {
         //Check the visibility of the two adjacent tetrahedra
         const isVisible1 =
           (!isSlicerActive || this.meshSlicer.isPolyVisible(value[0].polyIndex)) &&
-          (!isMapActive || this.meshSlicer.isPolyVisibleByDistortion(value[0].polyIndex));
+          (!isMapActive || this.volumeMap.distortionSlicer.isPolyVisibleByDistortion(value[0].polyIndex));
         const isVisible2 =
           (!isSlicerActive || this.meshSlicer.isPolyVisible(value[1].polyIndex)) &&
-          (!isMapActive || this.meshSlicer.isPolyVisibleByDistortion(value[1].polyIndex));
+          (!isMapActive || this.volumeMap.distortionSlicer.isPolyVisibleByDistortion(value[1].polyIndex));
         //If only one of the two is visible, add the face to the triangle soup
         if (isVisible1 !== isVisible2) {
           sortedFace = isVisible1 ? value[0].sortedFace : value[1].sortedFace;
@@ -167,7 +167,7 @@ export class VolumeMesh {
         //Check the visibility of the adjacent tetrahedra
         const isVisible =
           (!isSlicerActive || this.meshSlicer.isPolyVisible(value[0].polyIndex)) &&
-          (!isMapActive || this.meshSlicer.isPolyVisibleByDistortion(value[0].polyIndex));
+          (!isMapActive || this.volumeMap.distortionSlicer.isPolyVisibleByDistortion(value[0].polyIndex));
         //If it's visible, add the face to the triangle soup
         if (isVisible) {
           sortedFace = value[0].sortedFace;

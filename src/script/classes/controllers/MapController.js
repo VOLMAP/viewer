@@ -107,7 +107,7 @@ export class MapController {
     this.clampEndInput.addEventListener("change", function () {
       if (!this.dataset.previousValue) this.dataset.previousValue = 12;
       const value = Number(this.value);
-      
+
       if (!volumeMap.changeClampLimits(volumeMap.mapViewer.clampStart, value)) {
         this.value = this.dataset.previousValue;
       } else {
@@ -282,6 +282,10 @@ export class MapController {
 
   toggleDistortionSlicerContainer(flag) {
     this.distortionSlicerContainer.style.visibility = flag ? "visible" : "hidden";
+  }
+
+  resetSlicer() {
+    this.distortionSlider.value = minDistSliderValue;
   }
 
   toggleMapViewer(flag) {

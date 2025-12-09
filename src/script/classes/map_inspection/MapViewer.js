@@ -32,6 +32,7 @@ export class MapViewer {
     this.computeColor();
     this.volumeMap.volumeMesh1.updateVisibleFacesColor();
     this.volumeMap.volumeMesh2.updateVisibleFacesColor();
+    this.volumeMap.distortionSlicer.setPolyByDistortionAndVisibility();
   }
 
   setActive(flag) {

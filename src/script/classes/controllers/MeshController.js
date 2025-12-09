@@ -56,6 +56,7 @@ export class MeshController {
     this.zSlider = getElement(this.slicerSettingsContainer, "Z-slider");
     this.zPlaneToggle = getElement(this.slicerSettingsContainer, "Z-plane-toggle");
     this.zReverseButton = getElement(this.slicerSettingsContainer, "Z-reverse-button");
+  
     // Control
     this.axisToggle = getElement(settingsContainer, "axis-toggle");
     this.orbitalToggle = getElement(settingsContainer, "orbital-toggle");

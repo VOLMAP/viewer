@@ -1,6 +1,7 @@
 import * as THREE from "../../../libs/three/three.module.js";
 import * as utils from "../../main/utils.js";
 import { MapController } from "../controllers/MapController.js";
+import { DistortionSlicer } from "../map_inspection/DistortionSlicer.js";
 //import { TetrahedronPicker } from "../map_inspection/TetrahedronPicker.js";
 import { MapViewer } from "../map_inspection/MapViewer.js";
 //import { DistortionSlicer } from "../map_inspection/DistortionSlicer.js";
@@ -24,7 +25,7 @@ export class VolumeMap {
 
     this.controller = new MapController(this, settingsContainer, statusBarContainer);
     this.mapViewer = new MapViewer(this);
-    //this.distortionSlicer = new DistortionSlicer(this);
+    this.distortionSlicer = new DistortionSlicer(this);
     //this.tetrahedronPicker = new TetrahedronPicker(this);
   }
 
@@ -177,12 +178,12 @@ export class VolumeMap {
       return false;
     }
 
-    //TODO this.distortionSlicer.setActive(flag);
+    this.distortionSlicer.setActive(flag);
 
     if (!flag) {
-      //this.distortionSlicer.resetSlicer();
-      //this.controller.resetSlicer();
-      //this.updateVisibleFaces(this.meshSlicer.isActive, false);
+      this.distortionSlicer.reset();
+      this.volumeMesh1.updateVisibleFaces(this.distortionSlicer.isActive, this.mapViewer.isActive);
+      this.volumeMesh2.updateVisibleFaces(this.distortionSlicer.isActive, this.mapViewer.isActive);
     }
 
     return true;
@@ -194,7 +195,9 @@ export class VolumeMap {
       return false;
     }
 
-    //TODO this.distortionSlicer.slice(value);
+    this.distortionSlicer.slice(value);
+    this.volumeMesh1.updateVisibleFaces(this.distortionSlicer.isActive, this.mapViewer.isActive);
+    this.volumeMesh2.updateVisibleFaces(this.distortionSlicer.isActive, this.mapViewer.isActive);
     return true;
   }
 
