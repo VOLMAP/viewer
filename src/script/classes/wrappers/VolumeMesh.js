@@ -321,6 +321,7 @@ export class VolumeMesh {
 
     this.wireframe.material.color.set(color_ex);
     this.wireframe.material.needsUpdate = true;
+    return true;
   }
 
   toggleBoundingBox(flag) {

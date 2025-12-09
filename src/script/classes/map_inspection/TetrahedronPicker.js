@@ -11,6 +11,9 @@ export class TetrahedronPicker {
 
   raycaster = null;
   mouse = null;
+  // stored event callbacks so they can be removed later
+  _onClickMesh1 = null;
+  _onClickMesh2 = null;
 
   constructor(volumeMap) {
     this.volumeMap = volumeMap;
@@ -26,19 +29,22 @@ export class TetrahedronPicker {
     const meshRenderer2 = this.volumeMap.volumeMesh2.meshRenderer;
 
     if (flag) {
-      meshRenderer1.renderer.domElement.addEventListener("click", (event) =>
-        picker.pickPolygon(event, 1)
-      );
-      meshRenderer2.renderer.domElement.addEventListener("click", (event) =>
-        picker.pickPolygon(event, 2)
-      );
+      // store callbacks so removeEventListener can use the same references
+      this._onClickMesh1 = (event) => picker.pickPolygon(event, 1);
+      this._onClickMesh2 = (event) => picker.pickPolygon(event, 2);
+
+      meshRenderer1.renderer.domElement.addEventListener("click", this._onClickMesh1);
+      meshRenderer2.renderer.domElement.addEventListener("click", this._onClickMesh2);
     } else {
-      meshRenderer1.renderer.domElement.removeEventListener("click", (event) =>
-        picker.pickPolygon(event, 1)
-      );
-      meshRenderer2.renderer.domElement.removeEventListener("click", (event) =>
-        picker.pickPolygon(event, 2)
-      );
+      if (this._onClickMesh1) {
+        meshRenderer1.renderer.domElement.removeEventListener("click", this._onClickMesh1);
+        this._onClickMesh1 = null;
+      }
+      if (this._onClickMesh2) {
+        meshRenderer2.renderer.domElement.removeEventListener("click", this._onClickMesh2);
+        this._onClickMesh2 = null;
+      }
+
       this.resetPicker();
     }
   }
@@ -111,7 +117,6 @@ export class TetrahedronPicker {
       }
 
       otherVolumeMesh.pickerSlice(pickedPolyhedron);
-      console.log("Picked polyhedron index:", pickedPolyhedron);
 
       // Store the color of the picked polygon
       this.lastPickedPolyhedronIndex = pickedPolyhedron;
@@ -152,6 +157,8 @@ export class TetrahedronPicker {
       }
     }
 
+    console.log("Picked polyhedron index:", polyhedron, "Color:", colorRGB);
+
     color.needsUpdate = true;
   }
 
@@ -170,7 +177,7 @@ export class TetrahedronPicker {
     }
     this.volumeMap.controller.updatePickerInfo(-1, -1);
 
-    this.lastPickedPolygonColor = null;
-    this.lastPickedPolygonIndex = null;
+    this.lastPickedPolyhedronColor = null;
+    this.lastPickedPolyhedronIndex = null;
   }
 }
