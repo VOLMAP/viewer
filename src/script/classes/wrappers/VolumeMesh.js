@@ -14,6 +14,7 @@ const standardWireframeMaterial = new THREE.LineBasicMaterial({
 const standardMaterial = new THREE.MeshPhysicalMaterial({
   color: utils.whiteHex,
   side: THREE.DoubleSide,
+  flatShading: true,
   polygonOffset: true,
   polygonOffsetFactor: 1,
   polygonOffsetUnits: 1,
@@ -49,6 +50,7 @@ export class VolumeMesh {
 
   setMesh(mesh) {
     this.mesh = mesh;
+    this.mesh.material = standardMaterial.clone();
     // Translate mesh to origin and compute bounding box
     this.translateToOrigin();
     this.setBoundingBox();
@@ -64,7 +66,7 @@ export class VolumeMesh {
     //Update the slicer with the new mesh and reset it
     this.meshSlicer.updateMesh();
     this.controller.resetSlicer();
-    this.volumeMap.updateMesh();
+    this.volumeMap.updateMesh(this);
     //Update the renderer with the new mesh and reset it
     this.meshRenderer.updateMesh();
     this.controller.resetRendering();
@@ -134,12 +136,11 @@ export class VolumeMesh {
     this.mesh.geometry.setAttribute("position", positionAttribute);
   }
 
-  updateVisibleFaces(isSlicerActive, isMapActive) {
+  updateVisibleFaces(isSlicerActive, isDistortionSlicerActive) {
     const adjacencyMap = this.mesh.geometry.userData.adjacencyMap;
     const vertices = this.mesh.geometry.userData.vertices;
     //Mesh attributes
     var tmpTriangleSoup = new Array();
-    var tmpColor = new Array();
     var tmpPoly = new Array();
     //Wireframe attributes
     var tmpSegments = new Array();
@@ -154,10 +155,12 @@ export class VolumeMesh {
         //Check the visibility of the two adjacent tetrahedra
         const isVisible1 =
           (!isSlicerActive || this.meshSlicer.isPolyVisible(value[0].polyIndex)) &&
-          (!isMapActive || this.volumeMap.distortionSlicer.isPolyVisibleByDistortion(value[0].polyIndex));
+          (!isDistortionSlicerActive ||
+            this.volumeMap.distortionSlicer.isPolyVisibleByDistortion(value[0].polyIndex));
         const isVisible2 =
           (!isSlicerActive || this.meshSlicer.isPolyVisible(value[1].polyIndex)) &&
-          (!isMapActive || this.volumeMap.distortionSlicer.isPolyVisibleByDistortion(value[1].polyIndex));
+          (!isDistortionSlicerActive ||
+            this.volumeMap.distortionSlicer.isPolyVisibleByDistortion(value[1].polyIndex));
         //If only one of the two is visible, add the face to the triangle soup
         if (isVisible1 !== isVisible2) {
           sortedFace = isVisible1 ? value[0].sortedFace : value[1].sortedFace;
@@ -167,7 +170,8 @@ export class VolumeMesh {
         //Check the visibility of the adjacent tetrahedra
         const isVisible =
           (!isSlicerActive || this.meshSlicer.isPolyVisible(value[0].polyIndex)) &&
-          (!isMapActive || this.volumeMap.distortionSlicer.isPolyVisibleByDistortion(value[0].polyIndex));
+          (!isDistortionSlicerActive ||
+            this.volumeMap.distortionSlicer.isPolyVisibleByDistortion(value[0].polyIndex));
         //If it's visible, add the face to the triangle soup
         if (isVisible) {
           sortedFace = value[0].sortedFace;
@@ -190,14 +194,6 @@ export class VolumeMesh {
         }
         // Push polyhedron index
         tmpPoly.push(polyIndex);
-        // If present, push color information
-        const polyColor = this.mesh.geometry.userData.polyColor;
-        if (polyColor) {
-          const color = polyColor[polyIndex];
-          for (let i = 0; i < sortedFace.length; i++) {
-            tmpColor.push(color.r, color.g, color.b);
-          }
-        }
         // Push wireframe segments (for each face, create its 3 edges)
         tmpSegments.push(sortedFace[0], sortedFace[1]);
         tmpSegments.push(sortedFace[1], sortedFace[2]);
@@ -209,8 +205,6 @@ export class VolumeMesh {
     this.mesh.geometry.setAttribute("position", positionsAttribute);
     const polyAttribute = new THREE.BufferAttribute(new Uint32Array(tmpPoly), 1);
     this.mesh.geometry.setAttribute("polyIndex", polyAttribute);
-    const colorAttribute = new THREE.BufferAttribute(new Float32Array(tmpColor), 3);
-    this.mesh.geometry.setAttribute("color", colorAttribute);
     //Compute normals for proper lighting
     this.mesh.geometry.computeVertexNormals();
     this.mesh.geometry.needsUpdate = true;
@@ -218,16 +212,19 @@ export class VolumeMesh {
     const segmentsAttribute = new THREE.BufferAttribute(new Uint32Array(tmpSegments), 1);
     this.wireframe.geometry.setIndex(segmentsAttribute);
     this.wireframe.geometry.needsUpdate = true;
+
+    if (this.volumeMap && this.volumeMap.isValid) {
+      this.updateVisibleFacesColor();
+    }
   }
 
   updateVisibleFacesColor() {
     const polyIndex = this.mesh.geometry.getAttribute("polyIndex");
-
+    const polyColor = this.mesh.geometry.userData.polyColor;
     var tmpColor = new Array();
 
     for (let i = 0; i < polyIndex.count; i++) {
       const pIndex = polyIndex.array[i];
-      const polyColor = this.mesh.geometry.userData.polyColor;
       if (polyColor) {
         const color = polyColor[pIndex];
         //One color per vertex
@@ -350,6 +347,7 @@ export class VolumeMesh {
     }
 
     this.meshSlicer.setActive(flag);
+    this.controller.toggleSlicerContainer(flag);
     this.toggleSlicingPlane(flag, 0);
     this.toggleSlicingPlane(flag, 1);
     this.toggleSlicingPlane(flag, 2);
@@ -357,7 +355,7 @@ export class VolumeMesh {
     if (!flag) {
       this.meshSlicer.resetSlicer();
       this.controller.resetSlicer();
-      this.updateVisibleFaces(this.meshSlicer.isActive, false);
+      this.updateVisibleFaces(this.meshSlicer.isActive, this.volumeMap.distortionSlicer.isActive);
     }
 
     return true;
@@ -369,11 +367,15 @@ export class VolumeMesh {
       return false;
     }
 
+    if (!this.meshSlicer.isActive) {
+      console.warn("Mesh Slicer is not active");
+      return false;
+    }
+
     const result = this.meshSlicer.slice(sliderValue, axisIndex);
 
     if (result) {
-      //TODO use this.volumeMap.isMapActive
-      this.updateVisibleFaces(this.meshSlicer.isActive, false);
+      this.updateVisibleFaces(this.meshSlicer.isActive, this.volumeMap.distortionSlicer.isActive);
     }
 
     return result;
@@ -385,71 +387,34 @@ export class VolumeMesh {
       return false;
     }
 
+    if (flag && !this.meshSlicer.isActive) {
+      console.warn("Mesh Slicer is not active");
+      return false;
+    }
+
     const plane = this.meshSlicer.getSlicingPlane(axisIndex);
 
     this.meshRenderer.toggleObject(flag, plane);
     return true;
   }
 
-  reverseSlicingDirection(axisIndex) {
+  reverseSlicingDirection(flag, axisIndex) {
     if (!this.mesh) {
       console.warn("Mesh not loaded yet");
       return false;
     }
 
-    const result = this.meshSlicer.reverseSlicingDirection(axisIndex);
-
-    if (result) {
-      //TODO use this.volumeMap.isMapActive
-      this.updateVisibleFaces(this.meshSlicer.isActive, false);
-    }
-
-    return result;
-  }
-
-  distortionSlice(sliderValue) {
-    if (!this.mesh) {
-      console.warn("Mesh not loaded yet");
+    if (!this.meshSlicer.isActive) {
+      console.warn("Mesh Slicer is not active");
       return false;
     }
 
-    const result = this.meshSlicer.distortionSlice(sliderValue);
+    const result = this.meshSlicer.reverseSlicingDirection(flag, axisIndex);
 
     if (result) {
-      //TODO use this.volumeMap.isMapActive
-      this.updateVisibleFaces(this.meshSlicer.isActive, false);
-    }
-    return result;
-  }
-
-  toggleDegenerateFilter(flag) {
-    if (!this.mesh) {
-      console.warn("Mesh not loaded yet");
-      return false;
+      this.updateVisibleFaces(this.meshSlicer.isActive, this.volumeMap.distortionSlicer.isActive);
     }
 
-    const result = this.meshSlicer.toggleDegenerateFilter(flag);
-
-    if (result) {
-      //TODO use this.volumeMap.isMapActive
-      this.updateVisibleFaces(this.meshSlicer.isActive, false);
-    }
-
-    return result;
-  }
-
-  reverseDistortionSlicingDirection() {
-    if (!this.mesh) {
-      console.warn("Mesh not loaded yet");
-      return false;
-    }
-
-    const result = this.meshSlicer.reverseDistortionSlicingDirection();
-
-    if (result) {
-      //TODO use this.volumeMap.isMapActive
-      this.updateVisibleFaces(this.meshSlicer.isActive, false);
-    }
     return result;
   }
 

@@ -217,7 +217,7 @@ export class MeshSlicer {
     return true;
   }
 
-  reverseSlicingDirection(axisIndex) {
+  reverseSlicingDirection(flag, axisIndex) {
     if (!this.volumeMesh.mesh) {
       console.warn("Mesh not loaded yet");
       return false;
@@ -225,7 +225,7 @@ export class MeshSlicer {
 
     const axisData = axisIndex === 0 ? this.x : axisIndex === 1 ? this.y : this.z;
 
-    axisData.isReversed = !axisData.isReversed;
+    axisData.isReversed = flag;
     for (let i = 0; i < axisData.polyByCentroid.length; i++) {
       axisData.polyVisibility[axisData.polyByCentroid[i]] =
         !axisData.polyVisibility[axisData.polyByCentroid[i]];

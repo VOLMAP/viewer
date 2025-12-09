@@ -1,4 +1,4 @@
-const minDistSliderValue = -100;
+const minDistSliderValue = 0;
 const maxDistSliderValue = 100;
 
 export class MapController {
@@ -158,11 +158,11 @@ export class MapController {
 
     this.reverseMapButton.addEventListener("click", function () {
       //Initialize isReversed if undefined
-      if (!this.isReversed) this.isReversed = false;
+      if (this.isReversed == null) this.isReversed = false;
 
       const img = this.getElementsByTagName("img")[0];
 
-      if (volumeMap.reverseMapDirection(this.isReversed)) {
+      if (volumeMap.reverseMapDirection(!this.isReversed)) {
         this.isReversed = !this.isReversed;
         img.src = this.isReversed
           ? "./src/assets/img/left_arrow.png"
@@ -180,14 +180,12 @@ export class MapController {
 
       if (!volumeMap.toggleDistortionSlicer(flag)) {
         this.checked = !flag;
-      } else {
-        volumeMap.controller.toggleDistortionSlicerContainer(flag);
       }
     });
     this.distortionSlider.addEventListener("input", function () {
-      if (!this.oldValue) this.oldValue = this.value;
+      if (!this.oldValue) this.oldValue = minDistSliderValue;
       const value = this.value;
-      if (!volumeMap.sliceDistortion(value)) {
+      if (!volumeMap.distortionSlice(value)) {
         this.value = this.oldValue;
       } else {
         this.oldValue = this.value;
@@ -204,11 +202,11 @@ export class MapController {
       }
     });
     this.distortionReverseButton.addEventListener("click", function () {
-      if (!this.isReversed) this.isReversed = false;
+      if (this.isReversed == null) this.isReversed = false;
 
       const img = this.getElementsByTagName("img")[0];
 
-      if (volumeMap.reverseDistortionSlicingDirection()) {
+      if (volumeMap.reverseDistortionSlicingDirection(!this.isReversed)) {
         this.isReversed = !this.isReversed;
         img.src = this.isReversed
           ? "./src/assets/img/left_arrow.png"
@@ -281,8 +279,8 @@ export class MapController {
     }
   }
 
-  updatePickerInfo(polyhedronIndex, distortion) {
-    this.polyhedronInfo.textContent = polyhedronIndex;
+  updatePickerInfo(polyhedronIndex, polyhedronDistortion) {
+    this.pickerPolyhedron.textContent = polyhedronIndex;
 
     function limitDecimals(num, max = 5) {
       if (isNaN(num)) return "Degenerate";
@@ -291,7 +289,7 @@ export class MapController {
       return Math.trunc(num * factor) / factor;
     }
 
-    this.distortionInfo.textContent = limitDecimals(distortion, 5);
+    this.pickerDistortion.textContent = limitDecimals(polyhedronDistortion, 5);
   }
 
   toggleDistortionSlicerContainer(flag) {
@@ -300,9 +298,18 @@ export class MapController {
 
   resetSlicer() {
     this.distortionSlider.value = minDistSliderValue;
+    this.distortionReverseButton.isReversed = false;
+    this.distortionReverseButton.getElementsByTagName("img")[0].src =
+      "./src/assets/img/right_arrow.png";
+    this.degenerateFilterToggle.checked = false;
+    this.degenerateFilterToggle.classList.remove("active");
   }
 
   toggleMapViewer(flag) {
     this.mapViewerToggle.checked = flag;
+  }
+
+  toggleDistortionSlicer(flag) {
+    this.distortionSlicerToggle.checked = flag;
   }
 }

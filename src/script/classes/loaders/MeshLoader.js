@@ -1,14 +1,6 @@
 import * as THREE from "../../../libs/three/three.module.js";
 import * as utils from "../../main/utils.js";
 
-const standardMaterial = new THREE.MeshPhysicalMaterial({
-  color: utils.whiteHex,
-  side: THREE.DoubleSide,
-  polygonOffset: true,
-  polygonOffsetFactor: 1,
-  polygonOffsetUnits: 1,
-});
-
 export class MeshLoader {
   constructor() {}
 
@@ -175,10 +167,10 @@ export class MeshLoader {
       clampedPolyDistortion: null,
     };
 
-    return new THREE.Mesh(geometry, standardMaterial.clone());
+    return new THREE.Mesh(geometry);
   }
 
-  generateTrianglesAndAdjacencyMap(tetrahedra) {
+  generateTrianglesAndAdjacencyMap(tetrahedra, vertices) {
     function sortedFaces(v0, v1, v2, v3) {
       return [
         [v0, v2, v1],

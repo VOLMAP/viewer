@@ -1,7 +1,7 @@
 import * as THREE from "../../../libs/three/three.module.js";
 import * as utils from "../../main/utils.js";
 import { MapController } from "../controllers/MapController.js";
-//import { TetrahedronPicker } from "../map_inspection/TetrahedronPicker.js";
+import { TetrahedronPicker } from "../map_inspection/TetrahedronPicker.js";
 import { MapViewer } from "../map_inspection/MapViewer.js";
 import { DistortionSlicer } from "../map_inspection/DistortionSlicer.js";
 
@@ -23,12 +23,12 @@ export class VolumeMap {
     this.volumeMesh2.volumeMap = this;
 
     this.controller = new MapController(this, settingsContainer, statusBarContainer);
+    this.tetrahedronPicker = new TetrahedronPicker(this);
     this.mapViewer = new MapViewer(this);
     this.distortionSlicer = new DistortionSlicer(this);
-    //this.tetrahedronPicker = new TetrahedronPicker(this);
   }
 
-  updateMesh() {
+  updateMesh(volumeMesh) {
     const oldValidity = this.isValid;
     this.isValid = this.checkMapValidity();
 
@@ -43,6 +43,22 @@ export class VolumeMap {
           data.tetrahedra.length / 4
         );
       } else {
+        this.distortionSlicer.setActive(false);
+        this.distortionSlicer.resetSlicer();
+        if (volumeMesh === this.volumeMesh1) {
+          this.volumeMesh2.updateVisibleFaces(
+            this.volumeMesh1.meshSlicer.isActive,
+            this.distortionSlicer.isActive
+          );
+        } else {
+          this.volumeMesh1.updateVisibleFaces(
+            this.volumeMesh2.meshSlicer.isActive,
+            this.distortionSlicer.isActive
+          );
+        }
+        this.controller.resetSlicer();
+        this.controller.toggleDistortionSlicerContainer(false);
+        this.controller.toggleDistortionSlicer(false);
         this.mapViewer.resetSettings();
         this.controller.resetMapViewerSettings();
         this.controller.updateModelInfo(-1, -1, -1);
@@ -96,6 +112,10 @@ export class VolumeMap {
     }
 
     this.mapViewer.setActive(flag);
+    if (!flag) {
+      this.toggleDistortionSlicer(false);
+      this.controller.toggleDistortionSlicer(false);
+    }
     return true;
   }
 
@@ -218,46 +238,95 @@ export class VolumeMap {
     }
 
     this.mapViewer.resetSettings();
-    this.mapViewer.updateMap();
+    this.mapViewer.updateDistortion();
     return true;
   }
 
   toggleDistortionSlicer(flag) {
-    if (!this.isValid) {
+    if (flag && !this.isValid) {
       console.warn("Cannot toggle Distortion Slicer: the map is not valid");
       return false;
     }
 
+    if (flag && !this.mapViewer.isActive) {
+      console.warn("Map Viewer is not active");
+      return false;
+    }
+
     this.distortionSlicer.setActive(flag);
+    this.controller.toggleDistortionSlicerContainer(flag);
 
     if (!flag) {
-      this.distortionSlicer.reset();
+      this.distortionSlicer.resetSlicer();
       this.controller.resetSlicer();
-      this.volumeMesh1.updateVisibleFaces(this.distortionSlicer.isActive, this.mapViewer.isActive);
-      this.volumeMesh2.updateVisibleFaces(this.distortionSlicer.isActive, this.mapViewer.isActive);
+      this.volumeMesh1.updateVisibleFaces(
+        this.volumeMesh1.meshSlicer.isActive,
+        this.distortionSlicer.isActive
+      );
+      this.volumeMesh2.updateVisibleFaces(
+        this.volumeMesh2.meshSlicer.isActive,
+        this.distortionSlicer.isActive
+      );
     }
 
     return true;
   }
 
-  sliceDistortion(value) {
+  distortionSlice(value) {
     if (!this.isValid) {
       console.warn("Cannot slice by distortion: the map is not valid");
       return false;
     }
 
-    this.distortionSlicer.slice(value);
-    this.volumeMesh1.updateVisibleFaces(this.distortionSlicer.isActive, this.mapViewer.isActive);
-    this.volumeMesh2.updateVisibleFaces(this.distortionSlicer.isActive, this.mapViewer.isActive);
-    return true;
+    if (!this.distortionSlicer.isActive) {
+      console.warn("Distortion Slicer is not active");
+      return false;
+    }
+
+    if (this.distortionSlicer.isDegenerateFilterActive) {
+      console.warn("Degenerate filter is active");
+      return false;
+    }
+
+    const result = this.distortionSlicer.slice(value);
+    if (result) {
+      this.volumeMesh1.updateVisibleFaces(
+        this.volumeMesh1.meshSlicer.isActive,
+        this.distortionSlicer.isActive
+      );
+      this.volumeMesh2.updateVisibleFaces(
+        this.volumeMesh2.meshSlicer.isActive,
+        this.distortionSlicer.isActive
+      );
+    }
+    return result;
   }
 
-  reverseDistortionSlicingDirection() {
+  reverseDistortionSlicingDirection(flag) {
     if (!this.isValid) {
       console.warn("Cannot reverse distortion slicing direction: the map is not valid");
       return false;
     }
-    //TODO this.distortionSlicer.reverseSlicingDirection();
+
+    if (!this.distortionSlicer.isActive) {
+      console.warn("Distortion Slicer is not active");
+      return false;
+    }
+
+    if (this.distortionSlicer.isDegenerateFilterActive) {
+      console.warn("Degenerate filter is active");
+      return false;
+    }
+
+    this.distortionSlicer.reverseSlicingDirection(flag);
+    this.volumeMesh1.updateVisibleFaces(
+      this.volumeMesh1.meshSlicer.isActive,
+      this.distortionSlicer.isActive
+    );
+    this.volumeMesh2.updateVisibleFaces(
+      this.volumeMesh2.meshSlicer.isActive,
+      this.distortionSlicer.isActive
+    );
     return true;
   }
 
@@ -266,7 +335,21 @@ export class VolumeMap {
       console.warn("Cannot toggle degenerate filter: the map is not valid");
       return false;
     }
-    //TODO this.distortionSlicer.toggleDegenerateFilter(flag);
+
+    if (!this.distortionSlicer.isActive) {
+      console.warn("Distortion Slicer is not active");
+      return false;
+    }
+
+    this.distortionSlicer.toggleDegenerateFilter(flag);
+    this.volumeMesh1.updateVisibleFaces(
+      this.volumeMesh1.meshSlicer.isActive,
+      this.distortionSlicer.isActive
+    );
+    this.volumeMesh2.updateVisibleFaces(
+      this.volumeMesh2.meshSlicer.isActive,
+      this.distortionSlicer.isActive
+    );
     return true;
   }
 }

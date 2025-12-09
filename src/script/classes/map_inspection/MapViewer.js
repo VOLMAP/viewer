@@ -29,16 +29,49 @@ export class MapViewer {
 
   updateMap() {
     this.computeDistortion();
+    this.clampDistortion();
     this.computeColor();
     this.volumeMap.volumeMesh1.updateVisibleFacesColor();
     this.volumeMap.volumeMesh2.updateVisibleFacesColor();
   }
 
+  updateDistortion() {
+    this.computeDistortion();
+    this.clampDistortion();
+    this.computeColor();
+    this.volumeMap.distortionSlicer.updateDistortion();
+    if (this.volumeMap.distortionSlicer.isActive) {
+      this.volumeMap.volumeMesh1.updateVisibleFaces(
+        this.volumeMap.volumeMesh1.meshSlicer.isActive,
+        this.volumeMap.distortionSlicer.isActive
+      );
+      this.volumeMap.volumeMesh2.updateVisibleFaces(
+        this.volumeMap.volumeMesh2.meshSlicer.isActive,
+        this.volumeMap.distortionSlicer.isActive
+      );
+    } else {
+      this.volumeMap.volumeMesh1.updateVisibleFacesColor();
+      this.volumeMap.volumeMesh2.updateVisibleFacesColor();
+    }
+  }
+
   updateClamp() {
     this.clampDistortion();
     this.computeColor();
-    this.volumeMap.volumeMesh1.updateVisibleFacesColor();
-    this.volumeMap.volumeMesh2.updateVisibleFacesColor();
+    this.volumeMap.distortionSlicer.updateDistortion();
+    if (this.volumeMap.distortionSlicer.isActive) {
+      this.volumeMap.volumeMesh1.updateVisibleFaces(
+        this.volumeMap.volumeMesh1.meshSlicer.isActive,
+        this.volumeMap.distortionSlicer.isActive
+      );
+      this.volumeMap.volumeMesh2.updateVisibleFaces(
+        this.volumeMap.volumeMesh2.meshSlicer.isActive,
+        this.volumeMap.distortionSlicer.isActive
+      );
+    } else {
+      this.volumeMap.volumeMesh1.updateVisibleFacesColor();
+      this.volumeMap.volumeMesh2.updateVisibleFacesColor();
+    }
   }
 
   updateGradient() {
@@ -51,6 +84,7 @@ export class MapViewer {
     this.isActive = flag;
     this.volumeMap.volumeMesh1.toggleMapColor(flag);
     this.volumeMap.volumeMesh2.toggleMapColor(flag);
+    this.volumeMap.tetrahedronPicker.setActive(flag);
   }
 
   computeDistortion() {
@@ -110,8 +144,6 @@ export class MapViewer {
     this.polyDistortion = tmpPolyDistortion;
     mesh1.geometry.userData.polyDistortion = tmpPolyDistortion;
     mesh2.geometry.userData.polyDistortion = tmpPolyDistortion;
-
-    this.clampDistortion();
   }
 
   computeTetDistortion(s_max, s_mid, s_min, energy) {
@@ -162,6 +194,7 @@ export class MapViewer {
       tmpClampedPolyDistortion;
   }
 
+  //Clamp and normalize a value between min and max to [0,1]
   clamp(val, min, max) {
     //We use infinity as a distortion value to identify degenerate tetrahedra
     if (isNaN(val)) return Infinity;
@@ -254,7 +287,7 @@ export class MapViewer {
     this.energy = value;
     this.setDefaultClampRange();
 
-    this.updateMap();
+    this.updateDistortion();
     return true;
   }
 
@@ -328,7 +361,7 @@ export class MapViewer {
 
   reverseMapDirection(flag) {
     this.isMapDirectionReversed = flag;
-    this.updateMap();
+    this.updateDistortion();
   }
 
   resetSettings() {

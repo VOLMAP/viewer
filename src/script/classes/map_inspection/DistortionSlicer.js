@@ -9,12 +9,12 @@ const maxDistSliderValue = 100;
 
 export class DistortionSlicer {
   isActive = false;
+  isDegenerateFilterActive = false;
+  sliderValue = 0;
 
-  distData = {
-    polyByDistortion: null,
-    polyVisibility: null,
-    isReversed: false,
-  };
+  polyByDistortion = null;
+  polyVisibility = null;
+  isReversed = false;
 
   volumeMap = null;
 
@@ -23,25 +23,20 @@ export class DistortionSlicer {
   }
 
   updateMap() {
+    this.isDegenerateFilterActive = false;
     this.setPolyByDistortionAndVisibility();
+    this.isReversed = false;
   }
 
-  isPolyVisibleByDistortion(polyIndex) {
-    if (this.isDegenerateFilterActive) {
-      const distortion = this.volumeMap.mapViewer.clampedPolyDistortion[polyIndex];
-      return distortion == Infinity;
-    } else {
-      return this.distData.polyVisibility[polyIndex];
+  updateDistortion() {
+    this.setPolyByDistortionAndVisibility();
+    if (this.isActive) {
+      this.slice(this.sliderValue);
     }
   }
 
-  setActive(flag, setMesh = false) {
-    if (flag) {
-      this.isActive = true;
-    } else {
-      this.isActive = false;
-      this.reset(setMesh);
-    }
+  setActive(flag) {
+    this.isActive = flag;
   }
 
   setPolyByDistortionAndVisibility() {
@@ -60,58 +55,62 @@ export class DistortionSlicer {
     }
 
     //Sorted polyhedra array
-    this.distData.polyByDistortion = Array.from(tmpPoly.sort(sortByDistortion));
+    this.polyByDistortion = Array.from(tmpPoly.sort(sortByDistortion));
 
-    this.distData.polyVisibility = new Array(tmpPoly.length).fill(true);
+    this.polyVisibility = new Array(tmpPoly.length).fill(true);
+  }
+
+  isPolyVisibleByDistortion(polyIndex) {
+    if (!this.volumeMap.volumeMesh1.mesh || !this.volumeMap.volumeMesh2.mesh) {
+      console.warn("Map not loaded yet");
+      return false;
+    }
+
+    if (this.isDegenerateFilterActive) {
+      const distortion = this.volumeMap.mapViewer.clampedPolyDistortion[polyIndex];
+      return distortion == Infinity;
+    } else {
+      return this.polyVisibility[polyIndex];
+    }
   }
 
   //Slice by distortion value
   slice(sliderValue) {
-    if (!this.volumeMap) {
-      console.warn("Map not updated yet");
+    if (!this.volumeMap.volumeMesh1.mesh || !this.volumeMap.volumeMesh2.mesh) {
+      console.warn("Map not loaded yet");
       return false;
     }
+
+    this.sliderValue = sliderValue;
+
     const clampedPolyDistortion = this.volumeMap.mapViewer.clampedPolyDistortion;
     //Calculate distortion value based on slider and clamp range (0-1)
-    const distortion = sliderValue * (1 / maxDistSliderValue);
+    const threshold = sliderValue * (1 / maxDistSliderValue);
 
-    var firstVisiblePoly = utils.binarySearchClosest(
-      this.distData.polyByDistortion,
+    let thresholdPoly = utils.binarySearchClosest(
+      this.polyByDistortion,
       (i) => clampedPolyDistortion[i],
-      distortion
+      threshold
     );
 
-    //Include all polyhedra with the same distortion value as the first visible one
-    if (!this.distData.isReversed) {
-      for (let i = firstVisiblePoly - 1; i >= 0; i--) {
-        if (
-          clampedPolyDistortion[this.distData.polyByDistortion[i]] ===
-          clampedPolyDistortion[this.distData.polyByDistortion[firstVisiblePoly]]
-        ) {
-          firstVisiblePoly = i;
-        } else {
-          break;
-        }
-      }
-    } else {
-      for (let i = firstVisiblePoly + 1; i < this.distData.polyByDistortion.length; i++) {
-        if (
-          clampedPolyDistortion[this.distData.polyByDistortion[i]] ===
-          clampedPolyDistortion[this.distData.polyByDistortion[firstVisiblePoly]]
-        ) {
-          firstVisiblePoly = i;
-        } else {
-          break;
-        }
+    //Include all polyhedra with the same distortion value as the first or lastvisible one
+    for (let i = thresholdPoly - 1; i >= 0; i--) {
+      if (
+        clampedPolyDistortion[this.polyByDistortion[i]] ===
+        clampedPolyDistortion[this.polyByDistortion[thresholdPoly]]
+      ) {
+        thresholdPoly = i;
+      } else {
+        break;
       }
     }
 
-    for (let i = 0; i < this.distData.polyByDistortion.length; i++) {
+    for (let i = 0; i < this.polyByDistortion.length; i++) {
       // PolysToKeep and PolysToRemove are reversed when isReversed is true
-      if (i >= firstVisiblePoly) {
-        this.distData.polyVisibility[this.distData.polyByDistortion[i]] = !this.distData.isReversed;
+      if (!this.isReversed) {
+        this.polyVisibility[this.polyByDistortion[i]] = i >= thresholdPoly;
       } else {
-        this.distData.polyVisibility[this.distData.polyByDistortion[i]] = this.distData.isReversed;
+        this.polyVisibility[this.polyByDistortion[i]] = i < thresholdPoly;
       }
     }
 
@@ -119,8 +118,8 @@ export class DistortionSlicer {
   }
 
   toggleDegenerateFilter(flag) {
-    if (!this.volumeMap) {
-      console.warn("Map not updated yet");
+    if (!this.volumeMap.volumeMesh1.mesh || !this.volumeMap.volumeMesh2.mesh) {
+      console.warn("Map not loaded yet");
       return false;
     }
 
@@ -129,17 +128,14 @@ export class DistortionSlicer {
     return true;
   }
 
-  reverseDistortionSlicingDirection() {
-    if (!this.volumeMap) {
-      console.warn("Map not updated yet");
+  reverseSlicingDirection(flag) {
+    if (!this.volumeMap.volumeMesh1.mesh || !this.volumeMap.volumeMesh2.mesh) {
+      console.warn("Map not loaded yet");
       return false;
     }
 
-    this.distData.isReversed = !this.distData.isReversed;
-    for (let i = 0; i < this.distData.polyByDistortion.length; i++) {
-      this.distData.polyVisibility[this.distData.polyByDistortion[i]] =
-        !this.distData.polyVisibility[this.distData.polyByDistortion[i]];
-    }
+    this.isReversed = flag;
+    this.slice(this.sliderValue);
 
     return true;
   }
@@ -163,11 +159,10 @@ export class DistortionSlicer {
   }
   */
 
-  reset() {
-    if (this.volumeMap.mapViewer.isActive) {
-      this.isDegenerateFilterActive = false;
-      this.distData.polyVisibility.fill(true);
-      this.distData.isReversed = false;
-    }
+  resetSlicer() {
+    this.isDegenerateFilterActive = false;
+
+    this.isReversed = false;
+    this.polyVisibility.fill(true);
   }
 }

@@ -56,7 +56,7 @@ export class MeshController {
     this.zSlider = getElement(this.slicerSettingsContainer, "Z-slider");
     this.zPlaneToggle = getElement(this.slicerSettingsContainer, "Z-plane-toggle");
     this.zReverseButton = getElement(this.slicerSettingsContainer, "Z-reverse-button");
-  
+
     // Control
     this.axisToggle = getElement(settingsContainer, "axis-toggle");
     this.orbitalToggle = getElement(settingsContainer, "orbital-toggle");
@@ -67,7 +67,6 @@ export class MeshController {
 
   // Add event listeners to the HTML elements
   appendEventListeners(volumeMesh) {
-
     // Mesh
     this.meshInput.onchange = async function () {
       const file = this.files[0];
@@ -139,8 +138,6 @@ export class MeshController {
 
       if (!volumeMesh.toggleSlicer(flag)) {
         this.checked = !flag;
-      } else {
-        volumeMesh.controller.toggleSlicerContainer(flag);
       }
     };
     this.resetRenderingButton.onclick = function () {
@@ -152,7 +149,7 @@ export class MeshController {
     this.xSlider.oninput = function () {
       if (!this.oldValue) {
         // Save the first valid value
-        this.oldValue = this.value;
+        this.oldValue = maxSliderValue;
       }
       const value = this.value;
 
@@ -171,11 +168,11 @@ export class MeshController {
       }
     };
     this.xReverseButton.onclick = function () {
-      if (!this.isReversed) this.isReversed = false;
+      if (this.isReversed == null) this.isReversed = false;
 
       const img = this.getElementsByTagName("img")[0];
 
-      if (volumeMesh.reverseSlicingDirection(0)) {
+      if (volumeMesh.reverseSlicingDirection(!this.isReversed, 0)) {
         this.isReversed = !this.isReversed;
         img.src = this.isReversed
           ? "./src/assets/img/left_arrow.png"
@@ -185,7 +182,7 @@ export class MeshController {
     this.ySlider.oninput = function () {
       if (!this.oldValue) {
         // Save the first valid value
-        this.oldValue = this.value;
+        this.oldValue = maxSliderValue;
       }
       const value = this.value;
       if (!volumeMesh.slice(value, 1)) {
@@ -203,9 +200,9 @@ export class MeshController {
       }
     };
     this.yReverseButton.onclick = function () {
-      if (!this.isReversed) this.isReversed = false;
+      if (this.isReversed == null) this.isReversed = false;
       const img = this.getElementsByTagName("img")[0];
-      if (volumeMesh.reverseSlicingDirection(1)) {
+      if (volumeMesh.reverseSlicingDirection(!this.isReversed, 1)) {
         this.isReversed = !this.isReversed;
         img.src = this.isReversed
           ? "./src/assets/img/left_arrow.png"
@@ -215,7 +212,7 @@ export class MeshController {
     this.zSlider.oninput = function () {
       if (!this.oldValue) {
         // Save the first valid value
-        this.oldValue = this.value;
+        this.oldValue = maxSliderValue;
       }
       const value = this.value;
       if (!volumeMesh.slice(value, 2)) {
@@ -233,9 +230,9 @@ export class MeshController {
       }
     };
     this.zReverseButton.onclick = function () {
-      if (!this.isReversed) this.isReversed = false;
+      if (this.isReversed == null) this.isReversed = false;
       const img = this.getElementsByTagName("img")[0];
-      if (volumeMesh.reverseSlicingDirection(2)) {
+      if (volumeMesh.reverseSlicingDirection(!this.isReversed, 2)) {
         this.isReversed = !this.isReversed;
         img.src = this.isReversed
           ? "./src/assets/img/left_arrow.png"
