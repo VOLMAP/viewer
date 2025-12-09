@@ -168,7 +168,7 @@ export class MeshSlicer {
   }
 
   //Slice along a given axis (0=x, 1=y, 2=z)
-  slice(sliderValue, axisIndex) {
+  slice(sliderValue, axisIndex, pickedPolyhedron = null) {
     if (!this.volumeMesh.mesh) {
       console.warn("Mesh not loaded yet");
       return false;
@@ -189,25 +189,36 @@ export class MeshSlicer {
       axisData.plane.position.z = planePosition;
     }
 
+    var lastVisiblePolyhedron;
     //Find last visible face index using binary search
-    var lastVisiblePolyhedra = utils.binarySearchClosest(
-      axisData.polyByCentroid,
-      //Function to find the right coordinate of the centroid to evaluate
-      (i) => centroids[i * 3 + axisIndex],
-      planePosition
-    );
-
-    //Adjust lastVisiblePolyhedra to exclude/include last polyhedra when at boundary
-    if (lastVisiblePolyhedra == 0) {
-      lastVisiblePolyhedra = -1;
+    if (pickedPolyhedron !== null) {
+      //If a polyhedron has been picked, use it as last visible polyhedron
+      for (let i = 0; i < axisData.polyByCentroid.length; i++) {
+        if (axisData.polyByCentroid[i] === pickedPolyhedron) {
+          lastVisiblePolyhedron = i;
+          break;
+        }
+      }
+    } else {
+      lastVisiblePolyhedron = utils.binarySearchClosest(
+        axisData.polyByCentroid,
+        //Function to find the right coordinate of the centroid to evaluate
+        (i) => centroids[i * 3 + axisIndex],
+        planePosition
+      );
     }
-    if (lastVisiblePolyhedra == axisData.polyByCentroid.length - 1) {
-      lastVisiblePolyhedra = axisData.polyByCentroid.length;
+
+    //Adjust lastVisiblePolyhedron to exclude/include last polyhedra when at boundary
+    if (lastVisiblePolyhedron == 0) {
+      lastVisiblePolyhedron = -1;
+    }
+    if (lastVisiblePolyhedron == axisData.polyByCentroid.length - 1) {
+      lastVisiblePolyhedron = axisData.polyByCentroid.length;
     }
 
     for (let i = 0; i < axisData.polyByCentroid.length; i++) {
       // PolysToKeep and PolysToRemove are reversed when isReversed is true
-      if (i <= lastVisiblePolyhedra) {
+      if (i <= lastVisiblePolyhedron) {
         axisData.polyVisibility[axisData.polyByCentroid[i]] = !axisData.isReversed;
       } else {
         axisData.polyVisibility[axisData.polyByCentroid[i]] = axisData.isReversed;
@@ -234,24 +245,22 @@ export class MeshSlicer {
     return true;
   }
 
-  /*
-  pickerSlice(pickedPolyhedra) {
-    if (!this.volumeMesh.mesh) {
-      console.warn("Mesh not loaded yet");
+  pickerSlice(pickedPolyhedron) {
+    if (!this.volumeMesh) {
+      console.warn("Mesh not updated yet");
       return false;
     }
 
     //Update sliderValue based on the picked polyhedra
-    const polyhedraCentroid =
-      this.volumeMesh.mesh.geometry.userData.polyCentroids[pickedPolyhedra * 3];
-
+    const polyhedronCentroid =
+      this.volumeMesh.mesh.geometry.userData.polyCentroids[pickedPolyhedron * 3];
     const maxPlanePosition = this.x.plane.geometry.userData.resetPosition;
-    const sliderValue = polyhedraCentroid * (maxSliderValue / maxPlanePosition);
+
+    const sliderValue = polyhedronCentroid * (maxSliderValue / maxPlanePosition);
     this.volumeMesh.controller.updatePickerSliceSlider(sliderValue);
 
-    return this.slice(sliderValue, 0);
+    return this.slice(sliderValue, 0, pickedPolyhedron);
   }
-  */
 
   resetSlicer() {
     this.x.plane.position.x = this.x.plane.geometry.userData.resetPosition;

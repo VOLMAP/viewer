@@ -264,6 +264,8 @@ export class MapViewer {
     this.polyColor = tmpPolyColor;
     mesh1.geometry.userData.polyColor = tmpPolyColor;
     mesh2.geometry.userData.polyColor = tmpPolyColor;
+
+    this.volumeMap.tetrahedronPicker.updateColor();
   }
 
   interpolateColor(start, end, t) {

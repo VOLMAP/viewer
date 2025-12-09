@@ -418,17 +418,21 @@ export class VolumeMesh {
     return result;
   }
 
-  pickerSlice(lastVisiblePolyhedra) {
+  pickerSlice(pickedPolyhedron) {
     if (!this.mesh) {
       console.warn("Mesh not loaded yet");
       return false;
     }
 
-    const result = this.meshSlicer.pickerSlice(lastVisiblePolyhedra);
+    if (!this.volumeMap.mapViewer.isActive) {
+      console.warn("Map Viewer is not active");
+      return false;
+    }
+
+    const result = this.meshSlicer.pickerSlice(pickedPolyhedron);
 
     if (result) {
-      //TODO use this.volumeMap.isMapActive
-      this.updateVisibleFaces(true, false);
+      this.updateVisibleFaces(true, this.volumeMap.distortionSlicer.isActive);
     }
 
     return result;

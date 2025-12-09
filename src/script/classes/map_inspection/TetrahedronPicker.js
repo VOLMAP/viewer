@@ -43,13 +43,36 @@ export class TetrahedronPicker {
     }
   }
 
+  updateColor() {
+    const polyColor = this.volumeMap.volumeMesh1.mesh.geometry.userData.polyColor;
+
+    if (this.lastPickedPolyhedronIndex !== null && this.lastPickedPolyhedronColor !== null) {
+      this.lastPickedPolyhedronColor = polyColor[this.lastPickedPolyhedronIndex];
+      const colorRGB = {
+        r: 1.0 - this.lastPickedPolyhedronColor.r,
+        g: 1.0 - this.lastPickedPolyhedronColor.g,
+        b: 1.0 - this.lastPickedPolyhedronColor.b,
+      };
+      this._colorPolyhedron(
+        this.volumeMap.volumeMesh1.mesh,
+        this.lastPickedPolyhedronIndex,
+        colorRGB
+      );
+      this._colorPolyhedron(
+        this.volumeMap.volumeMesh2.mesh,
+        this.lastPickedPolyhedronIndex,
+        colorRGB
+      );
+    }
+  }
+
   pickPolygon(event, meshRendererId) {
     if (!event.shiftKey) return;
 
     const pickedMesh =
       meshRendererId === 1 ? this.volumeMap.volumeMesh1.mesh : this.volumeMap.volumeMesh2.mesh;
-    const otherMesh =
-      meshRendererId === 1 ? this.volumeMap.volumeMesh2.mesh : this.volumeMap.volumeMesh1.mesh;
+    const otherVolumeMesh =
+      meshRendererId === 1 ? this.volumeMap.volumeMesh2 : this.volumeMap.volumeMesh1;
 
     const meshRenderer =
       meshRendererId === 1
@@ -62,19 +85,6 @@ export class TetrahedronPicker {
     this.raycaster.setFromCamera(this.mouse, meshRenderer.camera);
     const intersects = this.raycaster.intersectObject(pickedMesh, true);
 
-    // If exists, retrieve the last picked polyhedron and restore its color
-    if (this.lastPickedPolyhedronIndex !== null && this.lastPickedPolyhedronColor) {
-      this._colorPolyhedron(
-        pickedMesh,
-        this.lastPickedPolyhedronIndex,
-        this.lastPickedPolyhedronColor
-      );
-      this._colorPolyhedron(
-        otherMesh,
-        this.lastPickedPolyhedronIndex,
-        this.lastPickedPolyhedronColor
-      );
-    }
     // If a polyhedron is picked, color it and store its color
     if (intersects.length > 0) {
       const polyIndex = pickedMesh.geometry.getAttribute("polyIndex");
@@ -85,6 +95,23 @@ export class TetrahedronPicker {
       const pickedPolyhedron = polyIndex.array[faceIndex];
       const pickedPolyhedronColor = polyColor[pickedPolyhedron];
       const pickedPolyhedronDistortion = polyDistortion[pickedPolyhedron];
+
+      // If exists, retrieve the last picked polyhedron and restore its color
+      if (this.lastPickedPolyhedronIndex !== null && this.lastPickedPolyhedronColor !== null) {
+        this._colorPolyhedron(
+          pickedMesh,
+          this.lastPickedPolyhedronIndex,
+          this.lastPickedPolyhedronColor
+        );
+        this._colorPolyhedron(
+          otherVolumeMesh.mesh,
+          this.lastPickedPolyhedronIndex,
+          this.lastPickedPolyhedronColor
+        );
+      }
+
+      otherVolumeMesh.pickerSlice(pickedPolyhedron);
+      console.log("Picked polyhedron index:", pickedPolyhedron);
 
       // Store the color of the picked polygon
       this.lastPickedPolyhedronIndex = pickedPolyhedron;
@@ -97,11 +124,11 @@ export class TetrahedronPicker {
       };
       // Color the picked polygon with the complementary color
       this._colorPolyhedron(pickedMesh, pickedPolyhedron, colorRGB);
-      this._colorPolyhedron(otherMesh, pickedPolyhedron, colorRGB);
+      this._colorPolyhedron(otherVolumeMesh.mesh, pickedPolyhedron, colorRGB);
 
       this.volumeMap.controller.updatePickerInfo(pickedPolyhedron, pickedPolyhedronDistortion);
     } else {
-      this.volumeMap.controller.updatePickerInfo(-1, -1);
+      this.resetPicker();
     }
   }
 
@@ -129,7 +156,7 @@ export class TetrahedronPicker {
   }
 
   resetPicker() {
-    if (this.lastPickedPolyhedronIndex !== null && this.lastPickedPolyhedronColor) {
+    if (this.lastPickedPolyhedronIndex !== null && this.lastPickedPolyhedronColor !== null) {
       this._colorPolyhedron(
         this.volumeMap.volumeMesh1.mesh,
         this.lastPickedPolyhedronIndex,

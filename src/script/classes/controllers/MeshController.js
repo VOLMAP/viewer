@@ -289,11 +289,9 @@ export class MeshController {
     this.zReverseButton.getElementsByTagName("img")[0].src = "./src/assets/img/right_arrow.png";
   }
 
-  /*
   updatePickerSliceSlider(sliderValue) {
     this.xSlider.value = sliderValue;
   }
-  */
 
   //Reset of all control UI elements to default values
   resetControl() {

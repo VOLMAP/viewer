@@ -140,25 +140,6 @@ export class DistortionSlicer {
     return true;
   }
 
-  /*
-  pickerSlice(pickedPolyhedra) {
-    if (!this.volumeMesh) {
-      console.warn("Mesh not updated yet");
-      return false;
-    }
-
-    //Update sliderValue based on the picked polyhedra
-    const polyhedraCentroid =
-      this.volumeMesh.mesh.geometry.userData.polyCentroids[pickedPolyhedra * 3];
-
-    const maxPlanePosition = this.x.plane.geometry.userData.resetPosition;
-    const sliderValue = polyhedraCentroid * (maxSliderValue / maxPlanePosition);
-    this.volumeMesh.controller.updatePickerSliceSlider(sliderValue);
-
-    return this.slice(sliderValue, 0);
-  }
-  */
-
   resetSlicer() {
     this.isDegenerateFilterActive = false;
 
