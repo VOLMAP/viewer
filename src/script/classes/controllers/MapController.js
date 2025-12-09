@@ -97,7 +97,7 @@ export class MapController {
       if (!this.dataset.previousValue) this.dataset.previousValue = 1;
       const value = Number(this.value);
 
-      if (!volumeMap.changeClampLimits(value, volumeMap.mapViewer.clampEnd)) {
+      if (!volumeMap.changeClampRange(value, null)) {
         this.value = this.dataset.previousValue;
       } else {
         this.dataset.previousValue = this.value;
@@ -108,7 +108,7 @@ export class MapController {
       if (!this.dataset.previousValue) this.dataset.previousValue = 12;
       const value = Number(this.value);
 
-      if (!volumeMap.changeClampLimits(volumeMap.mapViewer.clampStart, value)) {
+      if (!volumeMap.changeClampRange(null, value)) {
         this.value = this.dataset.previousValue;
       } else {
         this.dataset.previousValue = this.value;
@@ -118,8 +118,8 @@ export class MapController {
     this.gradientStartInput.addEventListener("change", function () {
       if (!this.oldValue) this.oldValue = "#ffffff";
       const colorEx = parseInt(this.value.replace("#", ""), 16);
-      
-      if (!volumeMap.changeGradientLimits(colorEx, volumeMap.mapViewer.gradientEnd)) {
+
+      if (!volumeMap.changeGradientEdges(colorEx, null)) {
         this.value = this.oldValue;
       } else {
         this.oldValue = this.value;
@@ -129,8 +129,8 @@ export class MapController {
     this.gradientEndInput.addEventListener("change", function () {
       if (!this.oldValue) this.oldValue = "#ff0000";
       const colorEx = parseInt(this.value.replace("#", ""), 16);
-      
-      if (!volumeMap.changeGradientLimits(volumeMap.mapViewer.gradientStart, colorEx)) {
+
+      if (!volumeMap.changeGradientEdges(null, colorEx)) {
         this.value = this.oldValue;
       } else {
         this.oldValue = this.value;
@@ -148,7 +148,7 @@ export class MapController {
     this.degenerateColorInput.addEventListener("change", function () {
       if (!this.oldValue) this.oldValue = "#ffff00";
       const colorEx = parseInt(this.value.replace("#", ""), 16);
-      
+
       if (!volumeMap.changeDegenerateColor(colorEx)) {
         this.value = this.oldValue;
       } else {
@@ -249,11 +249,18 @@ export class MapController {
     this.mapClamp.textContent = `[${start}, ${end}]`;
   }
 
-  updateGradientInfo(start, end, whiteMid) {
+  updateClampInputInfo(start, end) {
+    this.clampStartInput.value = start;
+    this.clampEndInput.value = end;
+    this.clampStartInput.dataset.previousValue = start;
+    this.clampEndInput.dataset.previousValue = end;
+  }
+
+  updateGradientInfo(start, end, isWhiteMid) {
     start = "#" + start.toString(16).padStart(6, "0");
     end = "#" + end.toString(16).padStart(6, "0");
 
-    if (whiteMid) {
+    if (isWhiteMid) {
       const gradientMid = "#ffffff";
       this.mapGradient.style.setProperty(
         "background",

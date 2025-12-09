@@ -14,10 +14,10 @@ export class MapViewer {
   clampStart = 1;
   clampEnd = 12;
   gradientStart = utils.whiteHex;
-  gradientEnd = "0xff0000";
+  gradientEnd = utils.mapRedHex;
 
   isDegenerateColorActive = false;
-  degenerateColor = "0xffff00";
+  degenerateColor = utils.mapYellowHex;
 
   isMapDirectionReversed = false;
 
@@ -32,7 +32,19 @@ export class MapViewer {
     this.computeColor();
     this.volumeMap.volumeMesh1.updateVisibleFacesColor();
     this.volumeMap.volumeMesh2.updateVisibleFacesColor();
-    this.volumeMap.distortionSlicer.setPolyByDistortionAndVisibility();
+  }
+
+  updateClamp() {
+    this.clampDistortion();
+    this.computeColor();
+    this.volumeMap.volumeMesh1.updateVisibleFacesColor();
+    this.volumeMap.volumeMesh2.updateVisibleFacesColor();
+  }
+
+  updateGradient() {
+    this.computeColor();
+    this.volumeMap.volumeMesh1.updateVisibleFacesColor();
+    this.volumeMap.volumeMesh2.updateVisibleFacesColor();
   }
 
   setActive(flag) {
@@ -187,24 +199,6 @@ export class MapViewer {
     }
   }
 
-  setClampLimits(start, end) {
-    if (start < this.clampEnd && end > this.clampStart) {
-      this.clampStart = start;
-      this.clampEnd = end;
-
-      if (this.isActive) {
-        this.clampDistortion()
-        this.computeColor();
-        this.volumeMap.volumeMesh1.updateVisibleFacesColor();
-        this.volumeMap.volumeMesh2.updateVisibleFacesColor();
-      }
-      return true;
-    } else {
-      alert("Invalid clamp limits.");
-      return false;
-    }
-  }
-
   //Color operations
   computeColor() {
     const tmpPolyColor = new Array();
@@ -215,23 +209,23 @@ export class MapViewer {
     const tetrahedra = mesh1.geometry.userData.tetrahedra;
 
     for (var i = 0; i < tetrahedra.length / 4; i++) {
-      let color = null;
+      let colorRGB = null;
 
       if (this.clampedPolyDistortion[i] == Infinity) {
         if (this.isDegenerateColorActive) {
-          color = utils.hexToRGB(this.degenerateColor);
+          colorRGB = utils.hexToRGB(this.degenerateColor);
         } else {
-          color = utils.hexToRGB(this.gradientEnd);
+          colorRGB = utils.hexToRGB(this.gradientEnd);
         }
       } else {
-        color = this.interpolateColor(
+        colorRGB = this.interpolateColor(
           utils.hexToRGB(this.gradientStart),
           utils.hexToRGB(this.gradientEnd),
           this.clampedPolyDistortion[i]
         );
       }
 
-      tmpPolyColor.push(color);
+      tmpPolyColor.push(colorRGB);
     }
 
     this.polyColor = tmpPolyColor;
@@ -256,59 +250,94 @@ export class MapViewer {
     }
   }
 
-  setGradientLimits(colorStart, colorEnd) {
-    if (colorStart != this.gradientEnd && colorEnd != this.gradientStart) {
-      this.gradientStart = colorStart;
-      this.gradientEnd = colorEnd;
+  setEnergy(value) {
+    this.energy = value;
+    this.setDefaultClampRange();
 
-      if (this.isActive) {
-        this.computeColor();
-        this.volumeMap.volumeMesh1.updateVisibleFacesColor();
-        this.volumeMap.volumeMesh2.updateVisibleFacesColor();
-      }
-    } else {
-      alert("Invalid color value.");
-      return false;
-    }
+    this.updateMap();
     return true;
   }
 
-  setDegenerateColor(flag) {
+  setClampRange(start, end) {
+    if (start == null) {
+      start = this.clampStart;
+    }
+    if (end == null) {
+      end = this.clampEnd;
+    }
+
+    if (start >= end) {
+      console.warn("Invalid clamp range: start must be less than end");
+      return false;
+    }
+
+    this.clampStart = start;
+    this.clampEnd = end;
+
+    this.updateClamp();
+    return true;
+  }
+
+  setGradientEdges(colorStart, colorEnd) {
+    if (colorStart == null) {
+      colorStart = this.gradientStart;
+    }
+    if (colorEnd == null) {
+      colorEnd = this.gradientEnd;
+    }
+
+    if (colorStart === colorEnd) {
+      console.warn("Invalid gradient colors: start and end colors must be different");
+      return false;
+    }
+
+    this.gradientStart = colorStart;
+    this.gradientEnd = colorEnd;
+
+    this.updateGradient();
+    return true;
+  }
+
+  setDegenerateColorActive(flag) {
     this.isDegenerateColorActive = flag;
-    if (this.isActive) {
-      this.computeColor();
-      this.volumeMap.volumeMesh1.updateVisibleFacesColor();
-      this.volumeMap.volumeMesh2.updateVisibleFacesColor();
+    if (this.isDegenerateColorActive) {
+      this.updateGradient();
     }
   }
 
-  setDegenerateColorValue(color) {
+  setDegenerateColor(color) {
+    if (!this.isDegenerateColorActive) {
+      console.warn("Degenerate color is not active");
+      return false;
+    }
+
+    const isWhiteMid = this.gradientStart != utils.whiteHex && this.gradientEnd != utils.whiteHex;
+    if (
+      color == this.gradientStart ||
+      color == this.gradientEnd ||
+      (isWhiteMid && color == utils.whiteHex)
+    ) {
+      console.warn("Degenerate color must be different from gradient colors");
+      return false;
+    }
+
     this.degenerateColor = color;
-    if (this.isActive) {
-      this.computeColor();
-      this.volumeMap.volumeMesh1.updateVisibleFacesColor();
-      this.volumeMap.volumeMesh2.updateVisibleFacesColor();
-    }
+    this.updateGradient();
+    return true;
   }
 
-  //miscellanious operations
-  reverseMap(flag) {
+  reverseMapDirection(flag) {
     this.isMapDirectionReversed = flag;
-    if (this.isActive) {
-      this.computeDistortion();
-      this.computeColor();
-      this.volumeMap.volumeMesh1.updateVisibleFacesColor();
-      this.volumeMap.volumeMesh2.updateVisibleFacesColor();
-    }
+    this.updateMap();
   }
 
   resetSettings() {
     this.energy = "Conformal";
     this.setDefaultClampRange();
     this.gradientStart = utils.whiteHex;
-    this.gradientEnd = "0xff0000";
+    this.gradientEnd = utils.mapRedHex;
     this.isDegenerateColorActive = false;
-    this.degenerateColor = "0xffff00";
+    this.degenerateColor = utils.mapYellowHex;
     this.isMapDirectionReversed = false;
     this.volumeMap.controller.updateMapInfo(
       this.energy,
@@ -318,12 +347,5 @@ export class MapViewer {
       this.clampStart,
       this.clampEnd
     );
-  }
-
-  setEnergy(value) {
-    this.energy = value;
-    this.setDefaultClampRange();
-    this.volumeMap.controller.updateEnergyInfo(this.energy);
-    this.volumeMap.controller.updateClampInfo(this.clampStart, this.clampEnd);
   }
 }

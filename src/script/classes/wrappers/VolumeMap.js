@@ -1,10 +1,9 @@
 import * as THREE from "../../../libs/three/three.module.js";
 import * as utils from "../../main/utils.js";
 import { MapController } from "../controllers/MapController.js";
-import { DistortionSlicer } from "../map_inspection/DistortionSlicer.js";
 //import { TetrahedronPicker } from "../map_inspection/TetrahedronPicker.js";
 import { MapViewer } from "../map_inspection/MapViewer.js";
-//import { DistortionSlicer } from "../map_inspection/DistortionSlicer.js";
+import { DistortionSlicer } from "../map_inspection/DistortionSlicer.js";
 
 export class VolumeMap {
   isValid = false;
@@ -36,6 +35,7 @@ export class VolumeMap {
     if (oldValidity !== this.isValid) {
       if (this.isValid) {
         this.mapViewer.updateMap();
+        this.distortionSlicer.updateMap();
         const data = this.volumeMesh1.mesh.geometry.userData;
         this.controller.updateModelInfo(
           data.vertices.length / 3,
@@ -105,33 +105,61 @@ export class VolumeMap {
       return false;
     }
 
-    this.mapViewer.setEnergy(value);
-    this.mapViewer.updateMap();
-    return true;
+    if (!this.mapViewer.isActive) {
+      console.warn("Map Viewer is not active");
+      return false;
+    }
+
+    const result = this.mapViewer.setEnergy(value);
+    if (result) {
+      this.controller.updateEnergyInfo(this.mapViewer.energy);
+      this.controller.updateClampInfo(this.mapViewer.clampStart, this.mapViewer.clampEnd);
+      this.controller.updateClampInputInfo(this.mapViewer.clampStart, this.mapViewer.clampEnd);
+    }
+    return result;
   }
 
-  changeClampLimits(start, end) {
+  changeClampRange(start, end) {
     if (!this.isValid) {
       console.warn("Cannot change clamp start: the map is not valid");
       return false;
     }
-    this.mapViewer.setClampLimits(start, end);
-    this.controller.updateClampInfo(start, end);
-    return true;
+
+    if (!this.mapViewer.isActive) {
+      console.warn("Map Viewer is not active");
+      return false;
+    }
+
+    const result = this.mapViewer.setClampRange(start, end);
+    if (result) {
+      this.controller.updateClampInfo(this.mapViewer.clampStart, this.mapViewer.clampEnd);
+    }
+    return result;
   }
 
-  changeGradientLimits(start, end) {
+  changeGradientEdges(start, end) {
     if (!this.isValid) {
       console.warn("Cannot change gradient start: the map is not valid");
       return false;
     }
-    this.mapViewer.setGradientLimits(start, end);
-    this.controller.updateGradientInfo(
-      start,
-      end,
-      start != utils.white && end != utils.white
-    );
-    return true;
+
+    if (!this.mapViewer.isActive) {
+      console.warn("Map Viewer is not active");
+      return false;
+    }
+
+    const result = this.mapViewer.setGradientEdges(start, end);
+    if (result) {
+      const isWhiteMid =
+        this.mapViewer.gradientStart != utils.white && this.mapViewer.gradientEnd != utils.white;
+
+      this.controller.updateGradientInfo(
+        this.mapViewer.gradientStart,
+        this.mapViewer.gradientEnd,
+        isWhiteMid
+      );
+    }
+    return result;
   }
 
   toggleDegenerateColor(flag) {
@@ -139,7 +167,13 @@ export class VolumeMap {
       console.warn("Cannot toggle degenerate color: the map is not valid");
       return false;
     }
-    this.mapViewer.setDegenerateColor(flag);
+
+    if (!this.mapViewer.isActive) {
+      console.warn("Map Viewer is not active");
+      return false;
+    }
+
+    this.mapViewer.setDegenerateColorActive(flag);
     return true;
   }
 
@@ -148,8 +182,13 @@ export class VolumeMap {
       console.warn("Cannot change degenerate color: the map is not valid");
       return false;
     }
-    this.mapViewer.setDegenerateColorValue(color);
-    return true;
+
+    if (!this.mapViewer.isActive) {
+      console.warn("Map Viewer is not active");
+      return false;
+    }
+
+    return this.mapViewer.setDegenerateColor(color);
   }
 
   reverseMapDirection(flag) {
@@ -157,8 +196,13 @@ export class VolumeMap {
       console.warn("Cannot reverse map: the map is not valid");
       return false;
     }
-    this.mapViewer.reverseMap(flag);
-    console.log("reversed map direction:", flag);
+
+    if (!this.mapViewer.isActive) {
+      console.warn("Map Viewer is not active");
+      return false;
+    }
+
+    this.mapViewer.reverseMapDirection(flag);
     return true;
   }
 
@@ -167,6 +211,12 @@ export class VolumeMap {
       console.warn("Cannot reset Map Viewer: the map is not valid");
       return false;
     }
+
+    if (!this.mapViewer.isActive) {
+      console.warn("Map Viewer is not active");
+      return false;
+    }
+
     this.mapViewer.resetSettings();
     this.mapViewer.updateMap();
     return true;

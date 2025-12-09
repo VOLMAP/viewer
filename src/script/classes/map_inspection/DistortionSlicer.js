@@ -22,6 +22,10 @@ export class DistortionSlicer {
     this.volumeMap = volumeMap;
   }
 
+  updateMap() {
+    this.setPolyByDistortionAndVisibility();
+  }
+
   isPolyVisibleByDistortion(polyIndex) {
     if (this.isDegenerateFilterActive) {
       const distortion = this.volumeMap.mapViewer.clampedPolyDistortion[polyIndex];

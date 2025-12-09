@@ -43,6 +43,8 @@ const redHex = 0xff8080;
 const greenHex = 0x80ff80;
 const blueHex = 0x8080ff;
 const yellowHex = 0xffff80;
+const mapRedHex = 0xff0000;
+const mapYellowHex = 0xffff00;
 
 function hexToRGB(colorHex) {
   const r = ((colorHex >> 16) & 0xff) / 255;
@@ -78,6 +80,8 @@ export {
   blueHex,
   greenHex,
   yellowHex,
+  mapRedHex,
+  mapYellowHex,
   hexToRGB,
   RGBToHex,
   lerpColor,
