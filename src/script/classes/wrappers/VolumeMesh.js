@@ -288,6 +288,11 @@ export class VolumeMesh {
       return false;
     }
 
+    if (this.volumeMap.mapViewer.isActive) {
+      console.warn("Cannot change plain color while map is active");
+      return false;
+    }
+
     this.plainColor = color_ex;
     // TODO Change color only if map is not active !this.volumeMap.isMapActive
     if (true) {
@@ -330,6 +335,7 @@ export class VolumeMesh {
 
   toggleMapColor(flag) {
     if (flag) {
+      this.mesh.material.color.set(utils.whiteHex);
       this.mesh.material.color.set(null);
       this.mesh.material.vertexColors = true;
     } else {
