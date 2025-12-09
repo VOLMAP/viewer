@@ -227,6 +227,13 @@ export class MapController {
     this.degenerateColorInput.value = "#ffff00";
     this.reverseMapButton.isReversed = false;
     this.reverseMapButton.getElementsByTagName("img")[0].src = "./src/assets/img/right_arrow.png";
+    //Reset previous values/dataset
+    this.energyInput.oldIndex = 0;
+    this.clampStartInput.dataset.previousValue = "1";
+    this.clampEndInput.dataset.previousValue = "12";
+    this.gradientStartInput.oldValue = "#ffffff";
+    this.gradientEndInput.oldValue = "#ff0000";
+    this.degenerateColorInput.oldValue = "#ffff00";
   }
 
   updateModelInfo(numVertices, numFaces, numPolyhedra) {
