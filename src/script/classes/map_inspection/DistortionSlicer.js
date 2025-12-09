@@ -162,7 +162,6 @@ export class DistortionSlicer {
   reset() {
     if (this.volumeMap.mapViewer.isActive) {
       this.isDegenerateFilterActive = false;
-      this.volumeMap.controller.resetSlicer();
       this.distData.polyVisibility.fill(true);
       this.distData.isReversed = false;
     }

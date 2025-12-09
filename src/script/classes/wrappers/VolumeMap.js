@@ -182,6 +182,7 @@ export class VolumeMap {
 
     if (!flag) {
       this.distortionSlicer.reset();
+      this.controller.resetSlicer();
       this.volumeMesh1.updateVisibleFaces(this.distortionSlicer.isActive, this.mapViewer.isActive);
       this.volumeMesh2.updateVisibleFaces(this.distortionSlicer.isActive, this.mapViewer.isActive);
     }
