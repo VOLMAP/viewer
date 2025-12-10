@@ -156,7 +156,6 @@ export class TetrahedronPicker {
         polyColor[polyhedron] = colorRGB;
       }
     }
-    console.log("Picked polyhedron index:", polyhedron, "Color:", colorRGB);
 
     color.needsUpdate = true;
   }
