@@ -1,71 +1,102 @@
-# How to use VOLMAP Viewer
+# How to Use VOLMAP Viewer
 
 ---
 
 > ### **Table of Contents**
 >
-> 1. [Uploading models and maps](#uploading-models-and-maps)
-> 1. [Inspect models](#setup-and-launch)
-> 1. [Inspect map](#usage)
+> 1. [Uploading Models and Maps](#uploading-models-and-maps)
+> 2. [Inspecting Models](#inspect-models)
+> 3. [Inspecting Maps](#inspect-maps)
+> 4. [Status Bar](#status-bar)
 
 ---
 
-## Uploading models and maps
+## Uploading Models and Maps
 
 ### Upload a Model
 
-Click on either the **Mesh 1** or **Mesh 2** panel in the top menu, then click on the file input button to select a **_.mesh_** file from your file manager. The model will be rendered in the corresponding canvas.
+Click on either the **Mesh 1** or **Mesh 2** panel in the top menu, then use the file input button to select a **_.mesh_** file from your file manager.  
+Alternatively, click the dropdown menu to select one of the available **sample meshes**.  
+The selected model will be rendered in the chosen canvas.
 
 ### Upload a Map
 
-After uploading the first model, repeat the process in the other canvas to upload the corresponding map.
+After uploading the first model (domain), repeat the process in the other canvas to upload its corresponding map (codomain).
 
 ### Notes on Map Distortion Calculation
 
-The calculation of map distortion can be performed in either direction (domain → codomain or codomain → domain). Therefore, the order in which you upload the models does not affect the result.
+Map distortion can be calculated in either direction (domain → codomain or codomain → domain). Therefore, the upload order does not affect the results.  
 
-By default, the model in the first canvas is treated as the domain, and the model in the second canvas as the codomain.
+By default, the model in the first canvas is treated as the **domain**, and the model in the second canvas as the **codomain**.
 
-## Inspect Models
+---
 
-Once a model is loaded into the canvas, various inspection and rendering options are provided trough two dropdown menus avaiable under the following buttons: **Rendering** and **Control**.
+## Inspecting Models
 
-### Rendering
+Once a model is loaded into a canvas, various rendering and inspection options are available through two dropdown menus: **Rendering** and **Control**.
 
-The user has the following rendering options:
+### Rendering Options
 
-- **Texture Color** – Change the mesh texture color using a color picker.
+- **Shell** – Toggle the visibility of the mesh shell. The shell is a semi-transparent boundary of the mesh surface that provides a clear visual reference of the model’s outer shape, remaining visible during slicing operations.  
 
-- **Wireframe** – View and customize the color of the mesh wireframe.
+- **Texture** – Customize the model's texture color using a color picker.  
 
-- **Shell** – Toggle the visibility of the mesh shell. The shell is a semi-transparent outline of the mesh surface, it provides a clear visual reference of the model’s outer shape as it remains visible during slicing operations.
+- **Wireframe** – Toggle the visibility of the mesh wireframe and customize its color using a color picker.  
 
-- **Bounding Box** – Toggle the model’s bounding box, the smallest rectangular frame that completely encloses the entire mesh.
+- **Bounding Box** – Toggle the visibility of the model’s bounding box, the smallest rectangular prism enclosing the entire mesh.  
 
-- **Slicer** – Toggle the display of three slicing planes, each perpendicular to one of the main axes, which can be moved by the user through dedicated sliders. Each plane can also be hidden or have its slicing direction inverted. An additional **orange slider** allows you to slice the mesh based on the distortion value (this feature works only if the corresponding map is loaded). The button labelled **Deg.** enables the visualization of degenerate elements only.
+- **Reset** – Restore the original rendering settings.  
 
-### Control
+- **Slicer** – Toggle the display of three slicing planes, each perpendicular to one of the main axes (x, y, z). These planes can be moved using dedicated sliders to slice the mesh and inspect its volume. Each plane can also be hidden or have its slicing direction inverted via two dedicated buttons.  
 
-Inside the control panel, the user can:
+### Control Options
 
-- toggle the visibility of the mesh's axes and orbitals trough dedicated checkboxes.
+- **Axis** and **Orbital** – Toggle the visibility of the scene axes and the camera's orbital controls via dedicated toggles.  
 
-- reset the rendering and control options restoring the original state of the mesh after the upload.
+- **Reset** – Restore the original control settings.  
 
-## Inspect Map
+---
 
-The **Map** panel allows you to control both the calculation and visualization of the distortion between two loaded meshes. Any changes made to the options will automatically update the distortion calculation and its visualization. The available options are:
+## Inspecting Maps
 
-- **View Map** – Toggle the distortion visualization on or off. If the two models are not loaded or are incompatible for mapping, an error message will appear.
+Once a map is loaded, the **Map** dropdown menu allows you to control both the computation and visualization of the distortion between domain and codomain tetrahedra. Any changes are applied automatically. Available options include:  
 
-- **Energy** – Select the type of energy used for distortion calculation. Available options include _Conformal_, _Dirichlet_, _Symmetric-Dirichlet_, _ARAP_, and _MIPS-3D_.
+- **Map Viewer** – Toggle the visualization of computed distortion on or off.  
 
-- **Gradient** – Select the colors for the distortion visualization. The left color represents low-distortion tetrahedra, and the right color represents high-distortion tetrahedra. If neither color is white, it will also serve as an intermediate color in the gradient.
+- **Energy** – Select the distortion metric used for computation. Options include _Conformal_, _Dirichlet_, _Sym-Dirichlet_ (Symmetric Dirichlet), _ARAP_ (As-Rigid-As-Possible), and _MIPS-3D_ (Most Isometric Parameterizations in 3D).  
 
-- **Degenerate** – Toggle the highlighting of degenerate tetrahedra. You can also select the color used for highlighting.
+- **Clamp** – Set minimum and maximum values for clamping the computed distortion. This enables a more focused visualization that highlights relevant distortion ranges.  
 
-- **Clamping** – Set minimum and maximum values for clamping the calculated distortions. This allows for a more focused visualization that better highlights the distortions of interest.
+- **Gradient** – Choose the gradient colors for distortion visualization. The left color represents low-distortion tetrahedra, and the right color represents high-distortion tetrahedra. If neither color is white, it will also serve as an intermediate gradient color.  
 
-- **Reverse** – Toggle to reverse the calculation direction between the domain and the codomain (from domain → codomain to codomain → domain).
+- **Degenerate** – Toggle highlighting of degenerate tetrahedra, and select the color used for highlighting.  
+- **Map Direction** – Reverse the computation direction between domain and codomain (domain → codomain or codomain → domain).  
 
-- **Reset** – Restore all map settings to their default values.
+- **Reset** – Restore all map settings to their default values.  
+
+- **Distortion Slicer** – Slice the mesh based on its tetrahedral distortion values using a dedicated slider. You can also choose to visualize only degenerate elements and reverse the slicing direction using two dedicated buttons.
+
+Users can also use the **tetrahedron picker** to highlight tetrahedra in both meshes:
+
+1. **Shift+Click** on a tetrahedron in either mesh to select it.  
+2. The selected tetrahedron will be highlighted in **both meshes** using its **complementary color**.  
+3. Simultaneously, the corresponding slicing plane on the **other mesh** will automatically adjust along the **x-axis** to ensure the selected tetrahedron is visible.  
+
+This feature allows easy comparison of corresponding tetrahedra between domain and codomain and facilitates detailed inspection of distortion and spatial relationships.
+
+---
+
+## Status Bar
+
+At the bottom of the viewer, the **status bar** displays key information about the currently loaded model and map:
+
+- **Vertices** – Number of vertices in the mesh.  
+- **Faces** – Number of triangles in the mesh.  
+- **Polyhedra** – Number of tetrahedra in the mesh.  
+- **Energy** – Distortion metric currently selected (e.g., Conformal, Dirichlet, etc.).  
+- **Clamp** – Minimum and maximum values used for clamping the distortion.  
+- **Gradient** – Gradient visualization of tetrahedral distortion, showing low to high distortion colors.  
+- **Picker** – Status of the tetrahedron picker.  
+- **Polyhedron** – Index of the currently selected tetrahedron (if any).  
+- **Distortion** – Distortion value of the selected tetrahedron (if any).  
+- **Code & Tutorial** – Quick access buttons to the GitHub repository and online documentation.
