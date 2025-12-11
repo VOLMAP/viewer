@@ -3,14 +3,6 @@
   justify-content: center;
 }
 
-/*Smartphone and Tablet*/
-@media (max-aspect-ratio: 1/1) or (max-width: 768px) {
-  .info-section {
-    padding: 3px;
-    justify-content: center;
-  }
-}
-
 .info-details {
   display: flex;
   flex-direction: column;
@@ -44,6 +36,7 @@
 /*Smartphone and Tablet*/
 @media (max-aspect-ratio: 1/1) or (max-width: 768px) {
   .info-section {
+    padding: 3px;
     justify-content: flex-start;
   }
 
