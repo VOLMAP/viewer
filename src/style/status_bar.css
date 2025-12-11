@@ -79,4 +79,9 @@
   .info-links > a:not(:last-child) {
     margin-right: 15px;
   }
+
+  .info-links img {
+    width: 20px;
+    height: 20px;
+  }
 }
