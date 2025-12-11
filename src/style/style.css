@@ -33,3 +33,14 @@ p {
   color: black;
   font-size: 16px;
 }
+
+/*Smartphone and Tablet*/
+@media (max-aspect-ratio: 1/1) or (max-width: 768px) {
+  p {
+    margin: 0;
+    padding: 0;
+    font-family: "Times New Roman", Times, serif;
+    color: black;
+    font-size: 14px;
+  }
+}

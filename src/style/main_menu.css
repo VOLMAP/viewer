@@ -12,19 +12,18 @@
   border-right: solid 2px #010b13;
 }
 
-/* Smartphone and Tablet */
-@media (max-width: 767px) {
-  #map_settings {
-    border-top: solid 2px #010b13;
-    border-bottom: solid 2px #010b13;
-  }
+#map_settings {
+  border-left: solid 2px #010b13;
+  border-right: solid 2px #010b13;
 }
 
-/* Desktop and Laptop */
-@media (min-width: 768px) {
+/* Smartphone and Tablet */
+@media (max-aspect-ratio: 1/1) or (max-width: 768px) {
   #map_settings {
-    border-left: solid 2px #010b13;
-    border-right: solid 2px #010b13;
+    border-left: 0px;
+    border-right: 0px;
+    border-top: solid 2px #010b13;
+    border-bottom: solid 2px #010b13;
   }
 }
 
@@ -53,6 +52,15 @@
 .setting > img {
   width: 20px;
   height: 20px;
+}
+
+/*Smartphone and Tablet*/
+@media (max-aspect-ratio: 1/1) or (max-width: 768px) {
+  .dropbtn > img,
+  .setting > img {
+    width: 16px;
+    height: 16px;
+  }
 }
 
 .dropcontent {

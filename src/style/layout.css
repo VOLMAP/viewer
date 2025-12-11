@@ -94,7 +94,7 @@
 } /* 12/12 */
 
 /*Smartphone and Tablet*/
-@media (max-width: 767px) {
+@media (max-aspect-ratio: 1/1) or (max-width: 768px) {
   .row {
     flex-direction: column;
   }
