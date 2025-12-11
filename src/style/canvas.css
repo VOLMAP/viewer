@@ -17,7 +17,7 @@
 }
 
 /*Smartphone and Tablet*/
-@media (max-aspect-ratio: 1/1) or (max-width: 768px) {
+@media (max-aspect-ratio: 1/1) {
   .canvas-container {
     height: 50%;
     width: 100%;
@@ -51,7 +51,7 @@
 }
 
 /*Smartphone and Tablet*/
-@media (max-aspect-ratio: 1/1) or (max-width: 768px) {
+@media (max-aspect-ratio: 1/1) {
   .axis-container {
     left: auto;
     bottom: auto;
@@ -79,7 +79,7 @@
 }
 
 /*Smartphone and Tablet*/
-@media (max-aspect-ratio: 1/1) or (max-width: 768px) {
+@media (max-aspect-ratio: 1/1) {
   .canvas-container:last-child .slicer-settings-container {
     top: auto;
     right: auto;
@@ -93,9 +93,15 @@ input[type="range"] {
 }
 
 /*Smartphone and Tablet*/
-@media (max-aspect-ratio: 1/1) or (max-width: 768px) {
+@media (max-aspect-ratio: 1/1) {
   input[type="range"] {
     width: 100px;
+  }
+}
+
+@media (min-aspect-ratio: 1/1) and (max-width: 768px) {
+  input[type="range"] {
+    width: 75px;
   }
 }
 
@@ -130,7 +136,7 @@ input[type="range"] {
 }
 
 /*Smartphone and Tablet*/
-@media (max-aspect-ratio: 1/1) or (max-width: 768px) {
+@media (max-aspect-ratio: 1/1) {
   .distortion-slicer-settings-container {
     left: 2px;
     transform: translateY(-50%);

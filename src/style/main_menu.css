@@ -18,7 +18,7 @@
 }
 
 /* Smartphone and Tablet */
-@media (max-aspect-ratio: 1/1) or (max-width: 768px) {
+@media (max-aspect-ratio: 1/1) {
   #map_settings {
     border-left: 0px;
     border-right: 0px;
@@ -37,6 +37,15 @@
   align-items: center;
   padding: 5px;
   cursor: pointer;
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
+
+.dropbtn > p {
+  flex-shrink: 0;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
 .dropbtn > p {
@@ -55,7 +64,15 @@
 }
 
 /*Smartphone and Tablet*/
-@media (max-aspect-ratio: 1/1) or (max-width: 768px) {
+@media (max-aspect-ratio: 1/1) {
+  .dropbtn > img,
+  .setting > img {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+@media (min-aspect-ratio: 1/1) and (max-width: 768px) {
   .dropbtn > img,
   .setting > img {
     width: 16px;

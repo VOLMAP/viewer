@@ -7,6 +7,15 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
+
+.info-details > p {
+  flex-shrink: 0;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
 .map-gradient {
@@ -16,6 +25,19 @@
   background: linear-gradient(to right, white, red);
   border-radius: 5px;
   border: solid 1px black;
+}
+
+/*Smartphone and Tablet*/
+@media (max-aspect-ratio: 1/1) {
+  .map-gradient {
+    width: 75px;
+  }
+}
+
+@media (min-aspect-ratio: 1/1) and (max-width: 768px) {
+  .map-gradient {
+    width: 50px;
+  }
 }
 
 .info-links {
@@ -34,7 +56,7 @@
 }
 
 /*Smartphone and Tablet*/
-@media (max-aspect-ratio: 1/1) or (max-width: 768px) {
+@media (max-aspect-ratio: 1/1) {
   .info-section {
     padding: 3px;
     justify-content: flex-start;

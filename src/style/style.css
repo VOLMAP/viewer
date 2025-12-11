@@ -35,7 +35,13 @@ p {
 }
 
 /*Smartphone and Tablet*/
-@media (max-aspect-ratio: 1/1) or (max-width: 768px) {
+@media (max-aspect-ratio: 1/1) {
+  p {
+    font-size: 14px;
+  }
+}
+
+@media (min-aspect-ratio: 1/1) and (max-width: 768px) {
   p {
     font-size: 14px;
   }
