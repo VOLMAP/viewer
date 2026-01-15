@@ -26,14 +26,13 @@ You can display and interact in real-time with both source and target domains, c
 
 ### 🌐 Online Access
 
-This project can be used **directly online** at the following link (no setup required):
+This tool can be used **directly online** at the following link (no setup required):
 
-```text
-https://volmap.github.io/viewer/
-```
+**https://volmap.github.io/viewer/**
+
 ### 💻 Local Access
 
-This project can be used **locally without any build tool or external dependency**, but due to browser's CORS (Cross-Origin Resource Sharing) and file access restrictions, it must be launched through a **local server**.
+This tool can be used **locally without any build tool or external dependency**, but due to browser's CORS (Cross-Origin Resource Sharing) and file access restrictions, it must be launched through a **local server**.
 
 Below are three easy ways to start a local server: **Node.js**, **Python**, or **VS Code Live Server**.
 
