@@ -24,11 +24,20 @@ You can display and interact in real-time with both source and target domains, c
 
 ## Setup and Launch
 
-This project can be used **without build tools or external dependencies**, but due to browser's CORS (Cross-Origin Resource Sharing) and file access restrictions, it must be launched through a **local server**.
+### 🌐 Online Access
+
+This project can be used **directly online** at the following link (no setup required):
+
+```text
+https://volmap.github.io/viewer/
+```
+### 💻 Local Access
+
+This project can be used **locally without any build tool or external dependency**, but due to browser's CORS (Cross-Origin Resource Sharing) and file access restrictions, it must be launched through a **local server**.
 
 Below are three easy ways to start a local server: **Node.js**, **Python**, or **VS Code Live Server**.
 
-### 🟢 Using Node.js
+#### 🟢 Using Node.js
 
 If you have Node.js installed, run:
 
@@ -38,7 +47,7 @@ npx serve
 
 Then open the URL shown in the terminal (usually `http://localhost:3000` or `http://127.0.0.1:8080`).
 
-### 🐍 Using Python
+#### 🐍 Using Python
 
 If you have Python installed, you can run:
 
@@ -52,7 +61,7 @@ Then visit:
 http://localhost:8000
 ```
 
-### 💡 Using VS Code Live Server Extension
+#### 💡 Using VS Code Live Server Extension
 
 1. Install the **Live Server** extension in VS Code (by Ritwick Dey).
 2. Open your project folder in VS Code.
