@@ -1,14 +1,14 @@
 # VOLMAP Viewer
 
-> [!IMPORTANT]
-> **VOLMAP Viewer** is now available **ONLINE**!  
-> You can try it at [volmap.github.io/viewer](https://volmap.github.io/viewer)
-
 ![VOLMAP Viewer Teaser](teaser.png)
 
 **VOLMAP Viewer** is a **web-based** tool for the visual assessment and analysis of **maps** between **tetrahedral meshes**.  
 Users can load models directly in the browser and manage them with data structures optimized for interactive visualization.
 You can display and interact in real-time with both source and target domains, check map validity, and compute map quality according to a variety of popular distortion metrics.
+
+> [!IMPORTANT]
+> **VOLMAP Viewer** is now available **ONLINE**!  
+> You can try it at [volmap.github.io/viewer](https://volmap.github.io/viewer)
 
 ---
 
