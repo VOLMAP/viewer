@@ -1,7 +1,7 @@
 # VOLMAP Viewer
 
 > [!IMPORTANT]
-> VOLMAP Viewer is now available ONLINE!  
+> **VOLMAP Viewer** is now available **ONLINE**!  
 > You can try it at [volmap.github.io/viewer](https://volmap.github.io/viewer)
 
 ![VOLMAP Viewer Teaser](teaser.png)
