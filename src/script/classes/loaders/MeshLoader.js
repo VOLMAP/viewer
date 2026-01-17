@@ -110,7 +110,7 @@ export class MeshLoader {
           tetrahedraLabels.push(tokens[4]);
         } else if (mode === "triangles" && tokens.length === 4) {
           for (let i = 0; i < 3; i++) {
-            triangles.push(parseInt(tokens[i]));
+            triangles.push(parseInt(tokens[i]) - 1);
           }
           trianglesLabels.push(tokens[3]);
         } else if (tokens[0] === "End") {

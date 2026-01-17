@@ -40,7 +40,7 @@ export class VolumeMap {
         this.controller.updateModelInfo(
           data.vertices.length / 3,
           data.triangles.length / 3,
-          data.tetrahedra.length / 4
+          data.tetrahedra.length / 4,
         );
       } else {
         this.distortionSlicer.setActive(false);
@@ -48,12 +48,12 @@ export class VolumeMap {
         if (volumeMesh === this.volumeMesh1) {
           this.volumeMesh2.updateVisibleFaces(
             this.volumeMesh1.meshSlicer.isActive,
-            this.distortionSlicer.isActive
+            this.distortionSlicer.isActive,
           );
         } else {
           this.volumeMesh1.updateVisibleFaces(
             this.volumeMesh2.meshSlicer.isActive,
-            this.distortionSlicer.isActive
+            this.distortionSlicer.isActive,
           );
         }
         this.controller.resetSlicer();
@@ -90,12 +90,20 @@ export class VolumeMap {
         return false;
       } else {
         for (let i = 0; i < tetrahedra1.length; i += 4) {
-          if (
-            tetrahedra1[i] != tetrahedra2[i] ||
-            tetrahedra1[i + 1] != tetrahedra2[i + 1] ||
-            tetrahedra1[i + 2] != tetrahedra2[i + 2] ||
-            tetrahedra1[i + 3] != tetrahedra2[i + 3]
-          ) {
+          const t1 = [
+            tetrahedra1[i],
+            tetrahedra1[i + 1],
+            tetrahedra1[i + 2],
+            tetrahedra1[i + 3],
+          ].sort((a, b) => a - b);
+          const t2 = [
+            tetrahedra2[i],
+            tetrahedra2[i + 1],
+            tetrahedra2[i + 2],
+            tetrahedra2[i + 3],
+          ].sort((a, b) => a - b);
+
+          if (t1[0] != t2[0] || t1[1] != t2[1] || t1[2] != t2[2] || t1[3] != t2[3]) {
             console.warn("mesh1 and mesh2 have different tetrahedra connectivity");
             return false;
           }
@@ -176,7 +184,7 @@ export class VolumeMap {
       this.controller.updateGradientInfo(
         this.mapViewer.gradientStart,
         this.mapViewer.gradientEnd,
-        isWhiteMid
+        isWhiteMid,
       );
     }
     return result;
@@ -261,11 +269,11 @@ export class VolumeMap {
       this.controller.resetSlicer();
       this.volumeMesh1.updateVisibleFaces(
         this.volumeMesh1.meshSlicer.isActive,
-        this.distortionSlicer.isActive
+        this.distortionSlicer.isActive,
       );
       this.volumeMesh2.updateVisibleFaces(
         this.volumeMesh2.meshSlicer.isActive,
-        this.distortionSlicer.isActive
+        this.distortionSlicer.isActive,
       );
     }
 
@@ -292,11 +300,11 @@ export class VolumeMap {
     if (result) {
       this.volumeMesh1.updateVisibleFaces(
         this.volumeMesh1.meshSlicer.isActive,
-        this.distortionSlicer.isActive
+        this.distortionSlicer.isActive,
       );
       this.volumeMesh2.updateVisibleFaces(
         this.volumeMesh2.meshSlicer.isActive,
-        this.distortionSlicer.isActive
+        this.distortionSlicer.isActive,
       );
     }
     return result;
@@ -321,11 +329,11 @@ export class VolumeMap {
     this.distortionSlicer.reverseSlicingDirection(flag);
     this.volumeMesh1.updateVisibleFaces(
       this.volumeMesh1.meshSlicer.isActive,
-      this.distortionSlicer.isActive
+      this.distortionSlicer.isActive,
     );
     this.volumeMesh2.updateVisibleFaces(
       this.volumeMesh2.meshSlicer.isActive,
-      this.distortionSlicer.isActive
+      this.distortionSlicer.isActive,
     );
     return true;
   }
@@ -344,11 +352,11 @@ export class VolumeMap {
     this.distortionSlicer.toggleDegenerateFilter(flag);
     this.volumeMesh1.updateVisibleFaces(
       this.volumeMesh1.meshSlicer.isActive,
-      this.distortionSlicer.isActive
+      this.distortionSlicer.isActive,
     );
     this.volumeMesh2.updateVisibleFaces(
       this.volumeMesh2.meshSlicer.isActive,
-      this.distortionSlicer.isActive
+      this.distortionSlicer.isActive,
     );
     return true;
   }

@@ -188,7 +188,6 @@ input:checked + .slider:before {
 
 input[type="color"],
 input[type="number"],
-.reset-button,
 .img-button {
   width: 38px;
   height: 17px;
