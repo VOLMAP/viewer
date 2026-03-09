@@ -62,12 +62,12 @@ export class TetrahedronPicker {
       this._colorPolyhedron(
         this.volumeMap.volumeMesh1.mesh,
         this.lastPickedPolyhedronIndex,
-        colorRGB
+        colorRGB,
       );
       this._colorPolyhedron(
         this.volumeMap.volumeMesh2.mesh,
         this.lastPickedPolyhedronIndex,
-        colorRGB
+        colorRGB,
       );
     }
   }
@@ -107,12 +107,12 @@ export class TetrahedronPicker {
         this._colorPolyhedron(
           pickedMesh,
           this.lastPickedPolyhedronIndex,
-          this.lastPickedPolyhedronColor
+          this.lastPickedPolyhedronColor,
         );
         this._colorPolyhedron(
           otherVolumeMesh.mesh,
           this.lastPickedPolyhedronIndex,
-          this.lastPickedPolyhedronColor
+          this.lastPickedPolyhedronColor,
         );
       }
 
@@ -165,17 +165,74 @@ export class TetrahedronPicker {
       this._colorPolyhedron(
         this.volumeMap.volumeMesh1.mesh,
         this.lastPickedPolyhedronIndex,
-        this.lastPickedPolyhedronColor
+        this.lastPickedPolyhedronColor,
       );
       this._colorPolyhedron(
         this.volumeMap.volumeMesh2.mesh,
         this.lastPickedPolyhedronIndex,
-        this.lastPickedPolyhedronColor
+        this.lastPickedPolyhedronColor,
       );
     }
     this.volumeMap.controller.updatePickerInfo(-1, -1);
 
     this.lastPickedPolyhedronColor = null;
     this.lastPickedPolyhedronIndex = null;
+  }
+
+  ////DEBUG
+  pickPolygonX(X, meshRendererId) {
+    const pickedMesh =
+      meshRendererId === 1 ? this.volumeMap.volumeMesh1.mesh : this.volumeMap.volumeMesh2.mesh;
+    const otherVolumeMesh =
+      meshRendererId === 1 ? this.volumeMap.volumeMesh2 : this.volumeMap.volumeMesh1;
+
+    const meshRenderer =
+      meshRendererId === 1
+        ? this.volumeMap.volumeMesh1.meshRenderer
+        : this.volumeMap.volumeMesh2.meshRenderer;
+
+    // If a polyhedron is picked, color it and store its color
+    if (true) {
+      const polyIndex = pickedMesh.geometry.getAttribute("polyIndex");
+      const polyColor = pickedMesh.geometry.userData.polyColor;
+      const polyDistortion = pickedMesh.geometry.userData.polyDistortion;
+
+      const pickedPolyhedron = X;
+      const pickedPolyhedronColor = polyColor[pickedPolyhedron];
+      const pickedPolyhedronDistortion = polyDistortion[pickedPolyhedron];
+
+      // If exists, retrieve the last picked polyhedron and restore its color
+      if (this.lastPickedPolyhedronIndex !== null && this.lastPickedPolyhedronColor !== null) {
+        this._colorPolyhedron(
+          pickedMesh,
+          this.lastPickedPolyhedronIndex,
+          this.lastPickedPolyhedronColor,
+        );
+        this._colorPolyhedron(
+          otherVolumeMesh.mesh,
+          this.lastPickedPolyhedronIndex,
+          this.lastPickedPolyhedronColor,
+        );
+      }
+
+      otherVolumeMesh.pickerSlice(pickedPolyhedron);
+
+      // Store the color of the picked polygon
+      this.lastPickedPolyhedronIndex = pickedPolyhedron;
+      this.lastPickedPolyhedronColor = pickedPolyhedronColor;
+      // Compute the complementary color
+      const colorRGB = {
+        r: 1.0 - pickedPolyhedronColor.r,
+        g: 1.0 - pickedPolyhedronColor.g,
+        b: 1.0 - pickedPolyhedronColor.b,
+      };
+      // Color the picked polygon with the complementary color
+      this._colorPolyhedron(pickedMesh, pickedPolyhedron, colorRGB);
+      this._colorPolyhedron(otherVolumeMesh.mesh, pickedPolyhedron, colorRGB);
+
+      this.volumeMap.controller.updatePickerInfo(pickedPolyhedron, pickedPolyhedronDistortion);
+    } else {
+      this.resetPicker();
+    }
   }
 }

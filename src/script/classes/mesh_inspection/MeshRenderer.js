@@ -108,7 +108,7 @@ export class MeshRenderer {
     });
     this.orbitalRenderer.setSize(
       this.orbitalContainer.clientWidth,
-      this.orbitalContainer.clientHeight
+      this.orbitalContainer.clientHeight,
     );
     // Make the background transparent using alpha
     this.orbitalRenderer.setClearColor(utils.whiteHex, 0);
@@ -132,7 +132,7 @@ export class MeshRenderer {
       defaultFOV,
       this.canvasContainer.clientWidth / this.canvasContainer.clientHeight,
       defaultNear,
-      defaultFar
+      defaultFar,
     );
     this.camera.position.set(0, 0, 5);
     this.camera.lookAt(0, 0, 0);
@@ -260,7 +260,7 @@ export class MeshRenderer {
     this.axisRenderer.setSize(this.axisContainer.clientWidth, this.axisContainer.clientHeight);
     this.orbitalRenderer.setSize(
       this.orbitalContainer.clientWidth,
-      this.orbitalContainer.clientHeight
+      this.orbitalContainer.clientHeight,
     );
 
     this.camera.aspect = aspect();
