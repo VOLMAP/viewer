@@ -105,8 +105,7 @@ export class TetrahedronPicker {
       // If exists, retrieve the last picked polyhedron and restore its color
       if (this.lastPickedPolyhedronIndex !== null && this.lastPickedPolyhedronColor !== null) {
         if (this.lastPickedPolyhedronIndex === pickedPolyhedron) {
-          // If the same polyhedron is picked again, just reset the picker
-          this.resetPicker();
+          // If the same polyhedron is picked again, just do nothing (keep it highlighted)
           return;
         }
 
