@@ -214,13 +214,6 @@ export class VolumeMesh {
     this.wireframe.geometry.setIndex(segmentsAttribute);
     this.wireframe.geometry.needsUpdate = true;
 
-    ////DEBUG
-    const g = this.mesh.geometry;
-    console.log("position:", g.attributes.position.count / 3);
-    console.log("polyIndex:", g.attributes.polyIndex.count);
-    console.log("drawRange:", g.drawRange);
-    console.log("normals:", g.attributes.normal.count / 3);
-
     if (this.volumeMap && this.volumeMap.isValid) {
       this.updateVisibleFacesColor();
     }
@@ -245,10 +238,6 @@ export class VolumeMesh {
     const colorAttribute = new THREE.BufferAttribute(new Float32Array(tmpColor), 3);
     this.mesh.geometry.setAttribute("color", colorAttribute);
     this.mesh.geometry.needsUpdate = true;
-
-    ////DEBUG
-    const g = this.mesh.geometry;
-    console.log("color:", g.attributes.color.count / 3);
   }
 
   async loadMesh(file) {

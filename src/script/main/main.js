@@ -27,8 +27,3 @@ const volumeMap = new VolumeMap(
 
 volumeMeshes[0].loadSampleMesh("hand_aigerman.mesh");
 volumeMeshes[1].loadSampleMesh("hand_pc_aigerman.mesh");
-
-///DEBUG
-setTimeout(() => {
-  volumeMap.tetrahedronPicker.pickPolygonX(41938, 1);
-}, 3000);
