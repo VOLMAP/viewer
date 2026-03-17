@@ -206,6 +206,7 @@ export class VolumeMesh {
     const polyAttribute = new THREE.BufferAttribute(new Uint32Array(tmpPoly), 1);
     this.mesh.geometry.setAttribute("polyIndex", polyAttribute);
     //Compute normals for proper lighting
+    this.mesh.geometry.deleteAttribute("normal");
     this.mesh.geometry.computeVertexNormals();
     this.mesh.geometry.needsUpdate = true;
     //Update wireframe geometry

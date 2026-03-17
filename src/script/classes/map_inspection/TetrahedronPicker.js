@@ -62,12 +62,12 @@ export class TetrahedronPicker {
       this._colorPolyhedron(
         this.volumeMap.volumeMesh1.mesh,
         this.lastPickedPolyhedronIndex,
-        colorRGB
+        colorRGB,
       );
       this._colorPolyhedron(
         this.volumeMap.volumeMesh2.mesh,
         this.lastPickedPolyhedronIndex,
-        colorRGB
+        colorRGB,
       );
     }
   }
@@ -104,15 +104,20 @@ export class TetrahedronPicker {
 
       // If exists, retrieve the last picked polyhedron and restore its color
       if (this.lastPickedPolyhedronIndex !== null && this.lastPickedPolyhedronColor !== null) {
+        if (this.lastPickedPolyhedronIndex === pickedPolyhedron) {
+          // If the same polyhedron is picked again, just do nothing (keep it highlighted)
+          return;
+        }
+
         this._colorPolyhedron(
           pickedMesh,
           this.lastPickedPolyhedronIndex,
-          this.lastPickedPolyhedronColor
+          this.lastPickedPolyhedronColor,
         );
         this._colorPolyhedron(
           otherVolumeMesh.mesh,
           this.lastPickedPolyhedronIndex,
-          this.lastPickedPolyhedronColor
+          this.lastPickedPolyhedronColor,
         );
       }
 
@@ -165,12 +170,12 @@ export class TetrahedronPicker {
       this._colorPolyhedron(
         this.volumeMap.volumeMesh1.mesh,
         this.lastPickedPolyhedronIndex,
-        this.lastPickedPolyhedronColor
+        this.lastPickedPolyhedronColor,
       );
       this._colorPolyhedron(
         this.volumeMap.volumeMesh2.mesh,
         this.lastPickedPolyhedronIndex,
-        this.lastPickedPolyhedronColor
+        this.lastPickedPolyhedronColor,
       );
     }
     this.volumeMap.controller.updatePickerInfo(-1, -1);

@@ -22,7 +22,7 @@ const volumeMap = new VolumeMap(
   volumeMeshes[0],
   volumeMeshes[1],
   mapSettingsContainer,
-  statusBarContainer
+  statusBarContainer,
 );
 
 volumeMeshes[0].loadSampleMesh("hand_aigerman.mesh");
