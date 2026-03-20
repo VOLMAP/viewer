@@ -108,12 +108,45 @@
           <span class="slider round"></span>
         </label>
       </div>
-      <!-- Reset -->
+      <!-- Reset Control-->
       <div class="setting">
-        <p>Reset:</p>
+        <p>Reset Control:</p>
         <div class="img-button reset-control">
           <img src="./src/assets/img/reset_arrow.png" />
         </div>
+      </div>
+      <!-- Digger -->
+      <div class="setting">
+        <p>Digger:</p>
+        <div class="digger-radio-group">
+          <label><input type="radio" name="digger-mode-{{i}}" class="digger-mode" value="inactive" checked />
+            Inactive</label>
+          <label><input type="radio" name="digger-mode-{{i}}" class="digger-mode" value="digger" /> Digger</label>
+          <label><input type="radio" name="digger-mode-{{i}}" class="digger-mode" value="undigger" /> Undigger</label>
+          <label><input type="radio" name="digger-mode-{{i}}" class="digger-mode" value="isolate" /> Isolate</label>
+        </div>
+      </div>
+      <!-- Reset Digger -->
+      <div class="setting">
+        <p>Reset Digger:</p>
+        <div class="img-button reset-digger margin-left">
+          <img src="./src/assets/img/reset_arrow.png" />
+        </div>
+      </div>
+      <!-- Link Digger -->
+      <div class="setting">
+        <p>Link digging:</p>
+        <label class="switch">
+          <input type="checkbox" class="digger-link-toggle" />
+          <span class="slider round"></span>
+        </label>
+      </div>
+      <div class="setting">
+        <p>Picker Debug Normals:</p>
+        <label class="switch">
+          <input type="checkbox" class="picker-debug-normal-toggle" />
+          <span class="slider round"></span>
+        </label>
       </div>
     </div>
   </div>

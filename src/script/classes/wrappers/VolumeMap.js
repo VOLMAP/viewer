@@ -4,6 +4,7 @@ import { MapController } from "../controllers/MapController.js";
 import { TetrahedronPicker } from "../map_inspection/TetrahedronPicker.js";
 import { MapViewer } from "../map_inspection/MapViewer.js";
 import { DistortionSlicer } from "../map_inspection/DistortionSlicer.js";
+import { TetrahedronDigger } from "../map_inspection/TetrahedronDigger.js";
 
 export class VolumeMap {
   isValid = false;
@@ -15,6 +16,7 @@ export class VolumeMap {
   mapViewer = null;
   distortionSlicer = null;
   tetrahedronPicker = null;
+  digger = null;
 
   constructor(volumeMesh1, volumeMesh2, settingsContainer, statusBarContainer) {
     this.volumeMesh1 = volumeMesh1;
@@ -26,6 +28,7 @@ export class VolumeMap {
     this.tetrahedronPicker = new TetrahedronPicker(this);
     this.mapViewer = new MapViewer(this);
     this.distortionSlicer = new DistortionSlicer(this);
+    this.digger = new TetrahedronDigger(this);
   }
 
   updateMesh(volumeMesh) {

@@ -64,10 +64,8 @@ export class MapController {
     this.distortionSlicerContainer = getElement(document, "distortion-slicer-settings-container");
     this.distortionSlider = getElement(this.distortionSlicerContainer, "distortion-slider");
     this.degenerateFilterToggle = getElement(this.distortionSlicerContainer, "degenerate-filter");
-    this.distortionReverseButton = getElement(
-      this.distortionSlicerContainer,
-      "distortion-reverse-button"
-    );
+    this.distortionReverseButton = getElement(this.distortionSlicerContainer,"distortion-reverse-button");
+  
 
     this.appendEventListeners(this.volumeMap);
   }

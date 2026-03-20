@@ -4,6 +4,7 @@ import * as utils from "../../main/utils.js";
 const minSliderValue = -100;
 const maxSliderValue = 100;
 
+
 function AxisData() {
   return {
     plane: null,
@@ -50,6 +51,7 @@ export class MeshSlicer {
   computeCentroids() {
     const tetrahedra = this.volumeMesh.mesh.geometry.userData.tetrahedra;
     const vertices = this.volumeMesh.mesh.geometry.userData.vertices;
+    const translation = this.volumeMesh.mesh.position;
 
     const numTetrahedra = tetrahedra.length / 4;
     let centroids = new Array(numTetrahedra * 3);
@@ -70,6 +72,10 @@ export class MeshSlicer {
         centroid[k] /= 4;
         centroids[i * 3 + k] = centroid[k];
       }
+
+      centroids[i * 3] += translation.x;
+      centroids[i * 3 + 1] += translation.y;
+      centroids[i * 3 + 2] += translation.z;
     }
 
     this.volumeMesh.mesh.geometry.userData.polyCentroids = centroids;
@@ -148,6 +154,14 @@ export class MeshSlicer {
     this.x.plane = createPlaneHelper(size.z, size.y, distance.x, utils.redHex, 0);
     this.y.plane = createPlaneHelper(size.x, size.z, distance.y, utils.blueHex, 1);
     this.z.plane = createPlaneHelper(size.x, size.y, distance.z, utils.greenHex, 2);
+
+    /*this.x.plane.position.x += translation.x;
+    this.y.plane.position.y += translation.y;
+    this.z.plane.position.z += translation.z;
+
+    this.x.plane.geometry.userData.resetPosition = this.x.plane.position.x;
+    this.y.plane.geometry.userData.resetPosition = this.y.plane.position.y;
+    this.z.plane.geometry.userData.resetPosition = this.z.plane.position.z;*/
     //Initial reversed flags
     this.x.isReversed = false;
     this.y.isReversed = false;
@@ -252,8 +266,17 @@ export class MeshSlicer {
     }
 
     //Update sliderValue based on the picked polyhedra
-    const polyhedronCentroid =
-      this.volumeMesh.mesh.geometry.userData.polyCentroids[pickedPolyhedron * 3];
+    const polyhedronCentroid = this.volumeMesh.mesh.geometry.userData.polyCentroids[pickedPolyhedron * 3];
+    const box = this.volumeMesh.mesh.geometry.boundingBox;
+    const translation = this.volumeMesh.mesh.position;
+    const meshCenter = box.getCenter(new THREE.Vector3()).add(translation);
+    const shouldReverse = polyhedronCentroid < meshCenter.x;
+
+
+    if (this.x.isReversed !== shouldReverse) {
+      this.reverseSlicingDirection(shouldReverse, 0);
+    }
+
     const maxPlanePosition = this.x.plane.geometry.userData.resetPosition;
 
     const sliderValue = polyhedronCentroid * (maxSliderValue / maxPlanePosition);
