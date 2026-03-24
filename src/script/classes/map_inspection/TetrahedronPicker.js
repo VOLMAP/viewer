@@ -162,7 +162,10 @@ export class TetrahedronPicker {
         }
       }
 
-      otherVolumeMesh.meshRenderer.focusCameraOnPolyhedron(otherFaceIndex, otherVolumeMesh.mesh.geometry);
+      if (meshRenderer.autoCameraEnabled) {
+        otherVolumeMesh.meshRenderer.focusCameraOnPolyhedron(otherFaceIndex, otherVolumeMesh.mesh.geometry);
+      }
+      
 
       this.volumeMap.controller.updatePickerInfo(pickedPolyhedron, pickedPolyhedronDistortion);
     } else {

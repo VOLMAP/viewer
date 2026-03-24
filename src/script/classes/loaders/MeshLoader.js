@@ -184,7 +184,6 @@ export class MeshLoader {
     var vertices = new Array();
     var numVertices = 0;
     var triangles = new Array();
-    var numTriangles = 0;
     var tetrahedra = new Array();
     var numTetrahedra = 0;
 
@@ -229,6 +228,9 @@ export class MeshLoader {
         numVertices = parseInt(tokens[1]);
         for (let i = 0; i < numVertices; i++) {
           line = nextLine();
+          if (line === null) {
+            throw new Error("Not enough vertices in this file");
+          }
           const vertex = line.split(/\s+/);
           for (let k = 0; k < 3; k++) {
             vertices.push(parseFloat(vertex[k]));
@@ -238,6 +240,9 @@ export class MeshLoader {
         numCells = parseInt(tokens[1]);
         for (let i = 0; i < numCells; i++) {
           line = nextLine();
+          if (line === null) {
+            throw new Error("Not enough cells in this file");
+          }
           const cell = line.split(/\s+/);
           const count = parseInt(cell[0]);
           var ids = new Array();
@@ -250,6 +255,9 @@ export class MeshLoader {
         numCellTypes = parseInt(tokens[1]);
         for (let i = 0; i < numCellTypes; i++) {
           line = nextLine();
+          if (line === null) {
+            throw new Error("Not enough cell types in this file");
+          }
           const cellType = line.split(/\s+/);
           cellTypes.push(parseInt(cellType[0]));
         }

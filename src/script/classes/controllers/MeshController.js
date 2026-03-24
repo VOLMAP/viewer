@@ -11,6 +11,7 @@ export class MeshController {
   meshColorInput = null;
   wireframeToggle = null;
   wireframeColorInput = null;
+  separationSlider = null;
   boundingBoxToggle = null;
   slicerToggle = null;
   resetRenderingButton = null;
@@ -32,6 +33,7 @@ export class MeshController {
   diggerModeInputs = null;
   resetDiggerButton = null;
   diggerLinkToggle = null;
+  pickerAutoCameraToggle = null;
   pickerDebugNormalToggle = null;
 
   constructor(volumeMesh, settingsContainer, canvasContainer) {
@@ -46,6 +48,7 @@ export class MeshController {
     this.meshColorInput = getElement(settingsContainer, "mesh-color-input");
     this.wireframeToggle = getElement(settingsContainer, "wireframe-toggle");
     this.wireframeColorInput = getElement(settingsContainer, "wireframe-color-input");
+    this.separationSlider = getElement(settingsContainer, "separation-slider");
     this.boundingBoxToggle = getElement(settingsContainer, "bounding-box-toggle");
     this.slicerToggle = getElement(settingsContainer, "slicer-toggle");
     this.resetRenderingButton = getElement(settingsContainer, "reset-rendering");
@@ -68,6 +71,7 @@ export class MeshController {
     this.diggerModeInputs = settingsContainer.getElementsByClassName("digger-mode");
     this.resetDiggerButton = getElement(settingsContainer, "reset-digger");
     this.diggerLinkToggle = getElement(settingsContainer, "digger-link-toggle");
+    this.pickerAutoCameraToggle = getElement(settingsContainer, "picker-auto-camera-toggle");
     this.pickerDebugNormalToggle = getElement(settingsContainer, "picker-debug-normal-toggle");
 
     this.appendEventListeners(this.volumeMesh);
@@ -134,6 +138,10 @@ export class MeshController {
         this.oldValue = this.value;
       }
     };
+    this.separationSlider.onchange = function () {
+      volumeMesh.separate(this.value);
+    };
+
     this.boundingBoxToggle.onchange = function () {
       const flag = this.checked;
 
@@ -273,6 +281,10 @@ export class MeshController {
       const flag = this.checked;
       volumeMesh.digger.setLinkActive(flag);
     };
+    this.pickerAutoCameraToggle.onchange = function () {
+      const flag = this.checked;
+      volumeMesh.meshRenderer.toggleAutoCamera(flag);
+    };
     this.pickerDebugNormalToggle.onchange = function () {
       const flag = this.checked;
       volumeMesh.volumeMap.volumeMesh1.meshRenderer.toggleDebug(flag);
@@ -295,6 +307,7 @@ export class MeshController {
     this.meshColorInput.value = "#ffffff";
     this.wireframeToggle.checked = true;
     this.wireframeColorInput.value = "#000000";
+    this.separationSlider.value = 0;
     this.boundingBoxToggle.checked = false;
   }
 
@@ -323,6 +336,7 @@ export class MeshController {
     this.axisToggle.checked = false;
     this.orbitalToggle.checked = false;
     this.diggerModeInputs[0].checked = true;
+    this.pickerAutoCameraToggle.checked = true;
     this.pickerDebugNormalToggle.checked = false;
   }
 }
