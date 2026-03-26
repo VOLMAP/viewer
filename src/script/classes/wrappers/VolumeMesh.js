@@ -141,13 +141,21 @@ export class VolumeMesh {
   updateVisibleFaces(isSlicerActive, isDistortionSlicerActive, isDiggerActive) {
     const adjacencyMap = this.mesh.geometry.userData.adjacencyMap;
     const vertices = this.mesh.geometry.userData.vertices;
-    const polyCentroids = this.mesh.geometry.userData.polyCentroids;
     const tetrahedra = this.mesh.geometry.userData.tetrahedra;
     //Mesh attributes
     var tmpTriangleSoup = new Array();
     var tmpFaces = new Array();
     //Wireframe attributes
     var tmpSegments = new Array();
+    var tmpWireframePositions = new Array();
+
+    const isPolyVisible = (polyIndex) => {
+      return (
+        (!isSlicerActive || this.meshSlicer.isPolyVisible(polyIndex)) &&
+        (!isDistortionSlicerActive || this.volumeMap.distortionSlicer.isPolyVisibleByDistortion(polyIndex)) &&
+        (!isDiggerActive || this.digger.isPolyVisible(polyIndex))
+      );
+    };
 
     if (this.separation > 0) {
       const surfacePolyIndex = new Array();
@@ -156,14 +164,8 @@ export class VolumeMesh {
         const value = adjacencyMap.get(key);
 
         if (value.length == 2) {
-          const isVisible1 =
-            (!isSlicerActive || this.meshSlicer.isPolyVisible(value[0].polyIndex)) &&
-            (!isDistortionSlicerActive || this.volumeMap.distortionSlicer.isPolyVisibleByDistortion(value[0].polyIndex)) &&
-            (!isDiggerActive || this.digger.isPolyVisible(value[0].polyIndex));
-          const isVisible2 =
-            (!isSlicerActive || this.meshSlicer.isPolyVisible(value[1].polyIndex)) &&
-            (!isDistortionSlicerActive || this.volumeMap.distortionSlicer.isPolyVisibleByDistortion(value[1].polyIndex)) &&
-            (!isDiggerActive || this.digger.isPolyVisible(value[1].polyIndex));
+          const isVisible1 = isPolyVisible(value[0].polyIndex);
+          const isVisible2 = isPolyVisible(value[1].polyIndex);
 
           if (isVisible1 !== isVisible2) {
             if (isVisible1) {
@@ -174,10 +176,7 @@ export class VolumeMesh {
 
           }
         } else if (value.length == 1) {
-          const isVisible =
-            (!isSlicerActive || this.meshSlicer.isPolyVisible(value[0].polyIndex)) &&
-            (!isDistortionSlicerActive || this.volumeMap.distortionSlicer.isPolyVisibleByDistortion(value[0].polyIndex)) &&
-            (!isDiggerActive || this.digger.isPolyVisible(value[0].polyIndex));
+          const isVisible = isPolyVisible(value[0].polyIndex);
 
           if (isVisible) {
             surfacePolyIndex.push(value[0].polyIndex);
@@ -185,15 +184,17 @@ export class VolumeMesh {
         }
       }
 
+      var wireframeVertexCounter = 0;
+
       surfacePolyIndex.forEach(polyIndex => {
         const v0 = tetrahedra[polyIndex * 4];
         const v1 = tetrahedra[polyIndex * 4 + 1];
         const v2 = tetrahedra[polyIndex * 4 + 2];
         const v3 = tetrahedra[polyIndex * 4 + 3];
 
-        const centroidX = polyCentroids[polyIndex * 3];
-        const centroidY = polyCentroids[polyIndex * 3 + 1];
-        const centroidZ = polyCentroids[polyIndex * 3 + 2];
+        const centroidX = (vertices[v0 * 3] + vertices[v1 * 3] + vertices[v2 * 3] + vertices[v3 * 3]) / 4;
+        const centroidY = (vertices[v0 * 3 + 1] + vertices[v1 * 3 + 1] + vertices[v2 * 3 + 1] + vertices[v3 * 3 + 1]) / 4;
+        const centroidZ = (vertices[v0 * 3 + 2] + vertices[v1 * 3 + 2] + vertices[v2 * 3 + 2] + vertices[v3 * 3 + 2]) / 4;
 
         const faces = [
           [v0, v2, v1],
@@ -208,20 +209,24 @@ export class VolumeMesh {
 
           for (let i = 0; i < 3; i++) {
             const v = face[i];
-            tmpTriangleSoup.push(
-              vertices[v * 3] - (vertices[v * 3] - centroidX) * this.separation,
-              vertices[v * 3 + 1] - (vertices[v * 3 + 1] - centroidY) * this.separation,
-              vertices[v * 3 + 2] - (vertices[v * 3 + 2] - centroidZ) * this.separation,
-            );
+            tmpTriangleSoup.push(vertices[v * 3] - (vertices[v * 3] - centroidX) * this.separation);
+            tmpTriangleSoup.push(vertices[v * 3 + 1] - (vertices[v * 3 + 1] - centroidY) * this.separation);
+            tmpTriangleSoup.push(vertices[v * 3 + 2] - (vertices[v * 3 + 2] - centroidZ) * this.separation);
+
+            tmpWireframePositions.push(vertices[v * 3] - (vertices[v * 3] - centroidX) * this.separation);
+            tmpWireframePositions.push(vertices[v * 3 + 1] - (vertices[v * 3 + 1] - centroidY) * this.separation);
+            tmpWireframePositions.push(vertices[v * 3 + 2] - (vertices[v * 3 + 2] - centroidZ) * this.separation);
+
           }
 
-          tmpSegments.push(face[0], face[1]);
-          tmpSegments.push(face[1], face[2]);
-          tmpSegments.push(face[2], face[0]);
+          tmpSegments.push(wireframeVertexCounter, wireframeVertexCounter + 1);
+          tmpSegments.push(wireframeVertexCounter + 1, wireframeVertexCounter + 2);
+          tmpSegments.push(wireframeVertexCounter + 2, wireframeVertexCounter);
+          wireframeVertexCounter += 3;
         });
-      }); 
-        
-      
+      });
+
+
     } else {
       for (const key of adjacencyMap.keys()) {
         const value = adjacencyMap.get(key);
@@ -231,16 +236,8 @@ export class VolumeMesh {
 
         if (value.length == 2) {
           //Check the visibility of the two adjacent tetrahedra
-          const isVisible1 =
-            (!isSlicerActive || this.meshSlicer.isPolyVisible(value[0].polyIndex)) &&
-            (!isDistortionSlicerActive ||
-              this.volumeMap.distortionSlicer.isPolyVisibleByDistortion(value[0].polyIndex)) &&
-            (!isDiggerActive || this.digger.isPolyVisible(value[0].polyIndex));
-          const isVisible2 =
-            (!isSlicerActive || this.meshSlicer.isPolyVisible(value[1].polyIndex)) &&
-            (!isDistortionSlicerActive ||
-              this.volumeMap.distortionSlicer.isPolyVisibleByDistortion(value[1].polyIndex)) &&
-            (!isDiggerActive || this.digger.isPolyVisible(value[1].polyIndex));
+          const isVisible1 = isPolyVisible(value[0].polyIndex);
+          const isVisible2 = isPolyVisible(value[1].polyIndex);
           //If only one of the two is visible, add the face to the triangle soup
           if (isVisible1 !== isVisible2) {
             sortedFace = isVisible1 ? value[0].sortedFace : value[1].sortedFace;
@@ -248,11 +245,7 @@ export class VolumeMesh {
           }
         } else if (value.length == 1) {
           //Check the visibility of the adjacent tetrahedra
-          const isVisible =
-            (!isSlicerActive || this.meshSlicer.isPolyVisible(value[0].polyIndex)) &&
-            (!isDistortionSlicerActive ||
-              this.volumeMap.distortionSlicer.isPolyVisibleByDistortion(value[0].polyIndex)) &&
-            (!isDiggerActive || this.digger.isPolyVisible(value[0].polyIndex))
+          const isVisible = isPolyVisible(value[0].polyIndex);
           //If it's visible, add the face to the triangle soup
           if (isVisible) {
             sortedFace = value[0].sortedFace;
@@ -286,15 +279,6 @@ export class VolumeMesh {
       }
     }
 
-    /*const centroidX = polyCentroids[polyIndex * 3];
-            const centroidY = polyCentroids[polyIndex * 3 + 1];
-            const centroidZ = polyCentroids[polyIndex * 3 + 2];
-
-            tmpTriangleSoup.push(vertices[v * 3] - (vertices[v * 3] - centroidX) * this.separation);
-            tmpTriangleSoup.push(vertices[v * 3 + 1] - (vertices[v * 3 + 1] - centroidY) * this.separation);
-            tmpTriangleSoup.push(vertices[v * 3 + 2] - (vertices[v * 3 + 2] - centroidZ) * this.separation);*/
-
-
     //Update mesh geometry
     const positionsAttribute = new THREE.BufferAttribute(new Float32Array(tmpTriangleSoup), 3);
     this.mesh.geometry.setAttribute("position", positionsAttribute);
@@ -306,7 +290,15 @@ export class VolumeMesh {
     //Update wireframe geometry
     const segmentsAttribute = new THREE.BufferAttribute(new Uint32Array(tmpSegments), 1);
     this.wireframe.geometry.setIndex(segmentsAttribute);
+    let wireframePositionAttribute = null;
+    if (this.separation > 0) {
+      wireframePositionAttribute = new THREE.BufferAttribute(new Float32Array(tmpWireframePositions), 3);
+    } else {
+      wireframePositionAttribute = new THREE.BufferAttribute(new Float32Array(vertices), 3);
+    }
+    this.wireframe.geometry.setAttribute("position", wireframePositionAttribute);
     this.wireframe.geometry.needsUpdate = true;
+
 
     if (this.volumeMap && this.volumeMap.isValid) {
       this.updateVisibleFacesColor();
