@@ -147,7 +147,6 @@ export class VolumeMesh {
     var tmpFaces = new Array();
     //Wireframe attributes
     var tmpSegments = new Array();
-    var tmpWireframePositions = new Array();
 
     const isPolyVisible = (polyIndex) => {
       return (
@@ -156,6 +155,28 @@ export class VolumeMesh {
         (!isDiggerActive || this.digger.isPolyVisible(polyIndex))
       );
     };
+
+    const computeCentroid = (vertexIndices) => {
+      let centroidX = 0, centroidY = 0, centroidZ = 0;
+      vertexIndices.forEach(vertex => {
+        centroidX += vertices[vertex * 3];
+        centroidY += vertices[vertex * 3 + 1];
+        centroidZ += vertices[vertex * 3 + 2];
+      });
+      return {
+        x: (centroidX / vertexIndices.length),
+        y: (centroidY / vertexIndices.length),
+        z: (centroidZ / vertexIndices.length)
+      }
+    }
+
+    const computeSeparation = (vertex, centroid) => {
+      return {
+        x: vertices[vertex * 3] - (vertices[vertex * 3] - centroid.x) * this.separation,
+        y: vertices[vertex * 3 + 1] - (vertices[vertex * 3 + 1] - centroid.y) * this.separation,
+        z: vertices[vertex * 3 + 2] - (vertices[vertex * 3 + 2] - centroid.z) * this.separation
+      }
+    }
 
     if (this.separation > 0) {
       const surfacePolyIndex = new Array();
@@ -173,7 +194,6 @@ export class VolumeMesh {
             } else {
               surfacePolyIndex.push(value[1].polyIndex);
             }
-
           }
         } else if (value.length == 1) {
           const isVisible = isPolyVisible(value[0].polyIndex);
@@ -184,6 +204,7 @@ export class VolumeMesh {
         }
       }
 
+
       var wireframeVertexCounter = 0;
 
       surfacePolyIndex.forEach(polyIndex => {
@@ -192,10 +213,6 @@ export class VolumeMesh {
         const v2 = tetrahedra[polyIndex * 4 + 2];
         const v3 = tetrahedra[polyIndex * 4 + 3];
 
-        const centroidX = (vertices[v0 * 3] + vertices[v1 * 3] + vertices[v2 * 3] + vertices[v3 * 3]) / 4;
-        const centroidY = (vertices[v0 * 3 + 1] + vertices[v1 * 3 + 1] + vertices[v2 * 3 + 1] + vertices[v3 * 3 + 1]) / 4;
-        const centroidZ = (vertices[v0 * 3 + 2] + vertices[v1 * 3 + 2] + vertices[v2 * 3 + 2] + vertices[v3 * 3 + 2]) / 4;
-
         const faces = [
           [v0, v2, v1],
           [v0, v1, v3],
@@ -203,20 +220,18 @@ export class VolumeMesh {
           [v1, v2, v3],
         ];
 
+        const centroid = computeCentroid([v0, v1, v2, v3]);
+
         faces.forEach((face) => {
           const key = [...face].sort((a, b) => a - b).join(",");
           tmpFaces.push(key);
 
           for (let i = 0; i < 3; i++) {
             const v = face[i];
-            tmpTriangleSoup.push(vertices[v * 3] - (vertices[v * 3] - centroidX) * this.separation);
-            tmpTriangleSoup.push(vertices[v * 3 + 1] - (vertices[v * 3 + 1] - centroidY) * this.separation);
-            tmpTriangleSoup.push(vertices[v * 3 + 2] - (vertices[v * 3 + 2] - centroidZ) * this.separation);
-
-            tmpWireframePositions.push(vertices[v * 3] - (vertices[v * 3] - centroidX) * this.separation);
-            tmpWireframePositions.push(vertices[v * 3 + 1] - (vertices[v * 3 + 1] - centroidY) * this.separation);
-            tmpWireframePositions.push(vertices[v * 3 + 2] - (vertices[v * 3 + 2] - centroidZ) * this.separation);
-
+            const vertexSeparate = computeSeparation(v, centroid);
+            tmpTriangleSoup.push(vertexSeparate.x);
+            tmpTriangleSoup.push(vertexSeparate.y);
+            tmpTriangleSoup.push(vertexSeparate.z);
           }
 
           tmpSegments.push(wireframeVertexCounter, wireframeVertexCounter + 1);
@@ -258,9 +273,6 @@ export class VolumeMesh {
         }
         //If the face has to be added
         if (sortedFace) {
-
-
-
           for (let i = 0; i < sortedFace.length; i++) {
             // Get vertex index
             const v = sortedFace[i];
@@ -292,7 +304,7 @@ export class VolumeMesh {
     this.wireframe.geometry.setIndex(segmentsAttribute);
     let wireframePositionAttribute = null;
     if (this.separation > 0) {
-      wireframePositionAttribute = new THREE.BufferAttribute(new Float32Array(tmpWireframePositions), 3);
+      wireframePositionAttribute = new THREE.BufferAttribute(new Float32Array(tmpTriangleSoup), 3);
     } else {
       wireframePositionAttribute = new THREE.BufferAttribute(new Float32Array(vertices), 3);
     }
@@ -551,7 +563,7 @@ export class VolumeMesh {
       console.warn("Mesh not loaded yet");
       return false;
     }
-    this.separation = separation / 100 * 0.2;
+    this.separation = separation / 100 * 0.1;
     this.updateVisibleFaces(this.meshSlicer.isActive, this.volumeMap.distortionSlicer.isActive, this.digger.isActive);
     return true;
   }
