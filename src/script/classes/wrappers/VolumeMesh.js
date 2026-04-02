@@ -32,6 +32,7 @@ const standardShellMaterial = new THREE.MeshPhysicalMaterial({
 
 export class VolumeMesh {
   mesh = null;
+  surfaceMesh = null;
   plainColor = utils.whiteHex;
 
   shell = null;
@@ -95,6 +96,7 @@ export class VolumeMesh {
 
   }
 
+
   setShell() {
     this.shell = new THREE.Mesh(this.mesh.geometry.clone(), standardShellMaterial.clone());
     this.shell.position.copy(this.mesh.position);
@@ -142,6 +144,7 @@ export class VolumeMesh {
     const adjacencyMap = this.mesh.geometry.userData.adjacencyMap;
     const vertices = this.mesh.geometry.userData.vertices;
     const tetrahedra = this.mesh.geometry.userData.tetrahedra;
+
     //Mesh attributes
     var tmpTriangleSoup = new Array();
     var tmpFaces = new Array();
@@ -291,6 +294,8 @@ export class VolumeMesh {
       }
     }
 
+    console.log("numero:", tmpTriangleSoup.length)
+
     //Update mesh geometry
     const positionsAttribute = new THREE.BufferAttribute(new Float32Array(tmpTriangleSoup), 3);
     this.mesh.geometry.setAttribute("position", positionsAttribute);
@@ -363,6 +368,19 @@ export class VolumeMesh {
       } catch (error) {
         console.error("Error loading .vtk file:", error);
       }
+    } else if (fileFormat === "txt") {
+      const loader = new MeshLoader();
+      try {
+        mesh = await loader.loadTxt(file);
+      } catch (error) {
+        console.error("Error loading .txt file:", error);
+      }
+
+      if (mesh) {
+        this.loadSurfaceMeshFromTxt(mesh);
+      }
+
+      return;
     } else {
       console.error("Invalid file format selected");
     }
@@ -379,6 +397,88 @@ export class VolumeMesh {
     const file = new File([blob], fileName);
 
     await this.loadMesh(file);
+  }
+
+  loadSurfaceMeshFromTxt(txtMesh) {
+    const volMesh = this.volumeMap.volumeMesh1.mesh;
+    if (!volMesh) {
+      console.warn("Volumetric mesh not loaded yet.");
+      return;
+    }
+
+    const adjacencyMap = volMesh.geometry.userData.adjacencyMap;
+    const txtVertices = txtMesh.geometry.userData.vertices;
+    const txtVerticesIds = txtMesh.geometry.userData.verticesIds;
+
+    const volMeshNumVertices = volMesh.geometry.userData.vertices.length / 3;
+
+    const txtVertexMap = new Map();
+    for (let i = 0; i < txtVerticesIds.length; i++) {
+      const id = txtVerticesIds[i];
+
+      txtVertexMap.set(id, {
+        x: txtVertices[i * 3],
+        y: txtVertices[i * 3 + 1],
+        z: txtVertices[i * 3 + 2],
+      });
+    }
+
+    const surfaceVertexIds = new Set();
+    for (const [key, value] of adjacencyMap.entries()) {
+      if (value.length !== 1) {
+        continue;
+      }
+
+      const faceIds = key.split(",").map(Number);
+      faceIds.forEach(id => surfaceVertexIds.add(id));
+    }
+
+    for (const id of txtVerticesIds) {
+      if (id >= volMeshNumVertices) {
+        console.error(`id=${id} is out of range`);
+        return;
+      }
+      if (!surfaceVertexIds.has(id)) {
+        console.error(`${id} is not a surface vertex`);
+        return;
+      }
+    }
+
+    const triangleSoup = new Array();
+
+    for (const [key, value] of adjacencyMap.entries()) {
+      if (value.length !== 1) {
+        continue;
+      }
+
+      const face = value[0].sortedFace;
+      for (const id of face) {
+        const position = txtVertexMap.get(id);
+        triangleSoup.push(position.x, position.y, position.z);
+      }
+    }
+
+    if (triangleSoup.length === 0) {
+      console.error("No surface faces found matching the txt vertex IDs");
+      return;
+    }
+
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute("position", new THREE.BufferAttribute(new Float32Array(triangleSoup), 3));
+    geometry.computeVertexNormals();
+
+    this.mesh = new THREE.Mesh(geometry, standardMaterial.clone());
+    this.mesh.position.set(0, 0, 0);
+
+    this.translateToOrigin();
+
+    this.meshRenderer.updateMesh();
+
+    const wireframeGeometry = new THREE.BufferGeometry();
+    wireframeGeometry.setAttribute("position",new THREE.BufferAttribute(new Float32Array(triangleSoup), 3));
+    this.wireframe = new THREE.LineSegments(new THREE.WireframeGeometry(wireframeGeometry), standardWireframeMaterial.clone());
+    this.wireframe.position.copy(this.mesh.position);
+    this.meshRenderer.toggleObject(true, this.wireframe);
   }
 
   toggleShell(flag) {
@@ -572,7 +672,7 @@ export class VolumeMesh {
     this.toggleShell(true);
     this.changePlainColor(utils.whiteHex);
     this.toggleWireframe(true);
-    this.separate(0);
+    this.separation = 0;
     this.changeWireframeColor(utils.blackHex);
     this.toggleBoundingBox(false);
   }

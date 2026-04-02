@@ -5,6 +5,7 @@ export class MeshController {
   volumeMesh = null;
   //Mesh
   meshInput = null;
+  surfaceMeshWarning = null;
   sampleMeshInput = null;
   //Rendering
   shellToggle = null;
@@ -42,6 +43,7 @@ export class MeshController {
 
     // Mesh
     this.meshInput = getElement(settingsContainer, "mesh-input");
+    this.surfaceMeshWarning = getElement(settingsContainer, "surface-mesh-warning");
     this.sampleMeshInput = getElement(settingsContainer, "sample-mesh-input");
     // Rendering
     this.shellToggle = getElement(settingsContainer, "shell-toggle");
@@ -80,8 +82,13 @@ export class MeshController {
   // Add event listeners to the HTML elements
   appendEventListeners(volumeMesh) {
     // Mesh
+    const surfaceMeshWarning = this.surfaceMeshWarning;
     this.meshInput.onchange = async function () {
       const file = this.files[0];
+      if (!file) return;
+
+      const isSurfaceMesh = file.name.endsWith(".txt");
+      surfaceMeshWarning.style.display = isSurfaceMesh ? "flex" : "none";
 
       volumeMesh.loadMesh(file);
     };

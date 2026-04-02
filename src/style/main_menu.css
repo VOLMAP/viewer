@@ -244,8 +244,14 @@ input[type="color"]::-moz-color-swatch {
   height: 100%;
 }
 
+.surface-mesh-warning {
+  display: none;
+  margin-top: 6px;
+  padding: 8px 10px;
+  border-top: solid 2px #010b13;
+  background-color: #f1cd04;
+}
 
-/* Radio button digger */
 .digger-radio-group {
   display: flex;
   flex-direction: column;
