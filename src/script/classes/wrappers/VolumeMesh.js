@@ -32,7 +32,8 @@ const standardShellMaterial = new THREE.MeshPhysicalMaterial({
 
 export class VolumeMesh {
   mesh = null;
-  surfaceMesh = null;
+  tmpSurfaceMesh = null;
+  loadedFileType = null;
   plainColor = utils.whiteHex;
 
   shell = null;
@@ -54,6 +55,8 @@ export class VolumeMesh {
   }
 
   setMesh(mesh) {
+    const otherMesh = this.volumeMap.volumeMesh1 === this ? this.volumeMap.volumeMesh2 : this.volumeMap.volumeMesh1;
+
     this.mesh = mesh;
     this.mesh.material = standardMaterial.clone();
     // Translate mesh to origin and compute bounding box
@@ -92,6 +95,10 @@ export class VolumeMesh {
 
     if (!this.digger.isActive) {
       this.digger.setActive(true);
+    }
+
+    if (otherMesh.tmpSurfaceMesh) {
+      otherMesh.loadSurfaceMeshFromTxt(otherMesh.tmpSurfaceMesh);
     }
 
   }
@@ -182,35 +189,31 @@ export class VolumeMesh {
     }
 
     if (this.separation > 0) {
-      const surfacePolyIndex = new Array();
 
-      for (const key of adjacencyMap.keys()) {
-        const value = adjacencyMap.get(key);
-
-        if (value.length == 2) {
-          const isVisible1 = isPolyVisible(value[0].polyIndex);
-          const isVisible2 = isPolyVisible(value[1].polyIndex);
-
-          if (isVisible1 !== isVisible2) {
-            if (isVisible1) {
-              surfacePolyIndex.push(value[0].polyIndex);
-            } else {
-              surfacePolyIndex.push(value[1].polyIndex);
-            }
-          }
-        } else if (value.length == 1) {
-          const isVisible = isPolyVisible(value[0].polyIndex);
-
-          if (isVisible) {
-            surfacePolyIndex.push(value[0].polyIndex);
-          }
+      const surfaceVertices = new Set();
+      for (const [key, value] of adjacencyMap.entries()) {
+        if (value.length === 1) {
+          key.split(",").map(Number).forEach(id => surfaceVertices.add(id));
         }
       }
 
+      const surfacePolyIndices = new Set();
+      for (let i = 0; i < tetrahedra.length; i += 4) {
+        const v0 = tetrahedra[i];
+        const v1 = tetrahedra[i + 1];
+        const v2 = tetrahedra[i + 2];
+        const v3 = tetrahedra[i + 3];
+
+        if (surfaceVertices.has(v0) || surfaceVertices.has(v1) || surfaceVertices.has(v2) || surfaceVertices.has(v3)) {
+          surfacePolyIndices.add(i / 4);
+        }
+      }
 
       var wireframeVertexCounter = 0;
 
-      surfacePolyIndex.forEach(polyIndex => {
+      for (const polyIndex of surfacePolyIndices) {
+        if (!isPolyVisible(polyIndex)) continue;
+
         const v0 = tetrahedra[polyIndex * 4];
         const v1 = tetrahedra[polyIndex * 4 + 1];
         const v2 = tetrahedra[polyIndex * 4 + 2];
@@ -232,9 +235,7 @@ export class VolumeMesh {
           for (let i = 0; i < 3; i++) {
             const v = face[i];
             const vertexSeparate = computeSeparation(v, centroid);
-            tmpTriangleSoup.push(vertexSeparate.x);
-            tmpTriangleSoup.push(vertexSeparate.y);
-            tmpTriangleSoup.push(vertexSeparate.z);
+            tmpTriangleSoup.push(vertexSeparate.x, vertexSeparate.y, vertexSeparate.z);
           }
 
           tmpSegments.push(wireframeVertexCounter, wireframeVertexCounter + 1);
@@ -242,7 +243,7 @@ export class VolumeMesh {
           tmpSegments.push(wireframeVertexCounter + 2, wireframeVertexCounter);
           wireframeVertexCounter += 3;
         });
-      });
+      }
 
 
     } else {
@@ -356,6 +357,7 @@ export class VolumeMesh {
 
     if (fileFormat === "mesh") {
       const loader = new MeshLoader();
+      this.loadedFileType = "mesh";
       try {
         mesh = await loader.loadMesh(file);
       } catch (error) {
@@ -363,6 +365,7 @@ export class VolumeMesh {
       }
     } else if (fileFormat === "vtk") {
       const loader = new MeshLoader();
+      this.loadedFileType = "vtk";
       try {
         mesh = await loader.loadVTK(file);
       } catch (error) {
@@ -370,6 +373,7 @@ export class VolumeMesh {
       }
     } else if (fileFormat === "txt") {
       const loader = new MeshLoader();
+      this.loadedFileType = "txt";
       try {
         mesh = await loader.loadTxt(file);
       } catch (error) {
@@ -377,6 +381,7 @@ export class VolumeMesh {
       }
 
       if (mesh) {
+        this.tmpSurfaceMesh = mesh;
         this.loadSurfaceMeshFromTxt(mesh);
       }
 
@@ -387,6 +392,8 @@ export class VolumeMesh {
 
     if (mesh) {
       this.setMesh(mesh);
+      this.volumeMap.volumeMesh1.updateMeshLabels();
+
     }
   }
 
@@ -413,6 +420,9 @@ export class VolumeMesh {
     const volMeshNumVertices = volMesh.geometry.userData.vertices.length / 3;
 
     const txtVertexMap = new Map();
+    const surfaceVertexIds = new Set();
+    const triangleSoup = new Array();
+
     for (let i = 0; i < txtVerticesIds.length; i++) {
       const id = txtVerticesIds[i];
 
@@ -423,7 +433,7 @@ export class VolumeMesh {
       });
     }
 
-    const surfaceVertexIds = new Set();
+
     for (const [key, value] of adjacencyMap.entries()) {
       if (value.length !== 1) {
         continue;
@@ -436,15 +446,17 @@ export class VolumeMesh {
     for (const id of txtVerticesIds) {
       if (id >= volMeshNumVertices) {
         console.error(`id=${id} is out of range`);
+        this.volumeMap.volumeMesh1.updateMeshLabels(true);
         return;
       }
       if (!surfaceVertexIds.has(id)) {
         console.error(`${id} is not a surface vertex`);
+        this.volumeMap.volumeMesh1.updateMeshLabels(true);
         return;
       }
     }
 
-    const triangleSoup = new Array();
+
 
     for (const [key, value] of adjacencyMap.entries()) {
       if (value.length !== 1) {
@@ -475,10 +487,44 @@ export class VolumeMesh {
     this.meshRenderer.updateMesh();
 
     const wireframeGeometry = new THREE.BufferGeometry();
-    wireframeGeometry.setAttribute("position",new THREE.BufferAttribute(new Float32Array(triangleSoup), 3));
+    wireframeGeometry.setAttribute("position", new THREE.BufferAttribute(new Float32Array(triangleSoup), 3));
     this.wireframe = new THREE.LineSegments(new THREE.WireframeGeometry(wireframeGeometry), standardWireframeMaterial.clone());
     this.wireframe.position.copy(this.mesh.position);
     this.meshRenderer.toggleObject(true, this.wireframe);
+
+    this.tmpSurfaceMesh = null;
+    this.volumeMap.volumeMesh1.updateMeshLabels(false);
+  }
+
+  updateMeshLabels(isMismatch = false) {
+    const isVolMesh = (t) => t === "mesh" || t === "vtk";
+
+    const mesh1 = this.volumeMap.volumeMesh1;
+    const mesh2 = this.volumeMap.volumeMesh2;
+
+    const typeMesh1 = mesh1.loadedFileType;
+    const typeMesh2 = mesh2.loadedFileType;
+
+    if (isMismatch) {
+      if (typeMesh1) mesh1.controller.setMeshLabel(typeMesh1 === "txt" ? "Surface constraints" : "Input tetmesh", true);
+      if (typeMesh2) mesh2.controller.setMeshLabel(typeMesh2 === "txt" ? "Surface constraints" : "Input tetmesh", true);
+      return;
+    }
+
+    if (isVolMesh(typeMesh1) && isVolMesh(typeMesh2)) {
+      const vertices1 = mesh1.mesh.geometry.userData.vertices.length;
+      const vertices2 = mesh2.mesh.geometry.userData.vertices.length;
+      const tetrahedra1 = mesh1.mesh.geometry.userData.tetrahedra.length;
+      const tetrahedra2 = mesh2.mesh.geometry.userData.tetrahedra.length;
+      const match = (vertices1 === vertices2 && tetrahedra1 === tetrahedra2);
+
+      mesh1.controller.setMeshLabel("Domain tetmesh", !match);
+      mesh2.controller.setMeshLabel("Codomain tetmesh", !match);
+
+    } else if (isVolMesh(typeMesh1) && typeMesh2 === "txt") {
+      mesh1.controller.setMeshLabel("Input tetmesh", false);
+      mesh2.controller.setMeshLabel("Surface constraints", false);
+    }
   }
 
   toggleShell(flag) {
@@ -663,7 +709,7 @@ export class VolumeMesh {
       console.warn("Mesh not loaded yet");
       return false;
     }
-    this.separation = separation / 100 * 0.1;
+    this.separation = separation / 100 * 0.2;
     this.updateVisibleFaces(this.meshSlicer.isActive, this.volumeMap.distortionSlicer.isActive, this.digger.isActive);
     return true;
   }

@@ -5,7 +5,7 @@ export class MeshController {
   volumeMesh = null;
   //Mesh
   meshInput = null;
-  surfaceMeshWarning = null;
+  meshLabel = null;
   sampleMeshInput = null;
   //Rendering
   shellToggle = null;
@@ -43,7 +43,7 @@ export class MeshController {
 
     // Mesh
     this.meshInput = getElement(settingsContainer, "mesh-input");
-    this.surfaceMeshWarning = getElement(settingsContainer, "surface-mesh-warning");
+    this.meshLabel = getElement(canvasContainer, "mesh-label");
     this.sampleMeshInput = getElement(settingsContainer, "sample-mesh-input");
     // Rendering
     this.shellToggle = getElement(settingsContainer, "shell-toggle");
@@ -82,13 +82,9 @@ export class MeshController {
   // Add event listeners to the HTML elements
   appendEventListeners(volumeMesh) {
     // Mesh
-    const surfaceMeshWarning = this.surfaceMeshWarning;
     this.meshInput.onchange = async function () {
       const file = this.files[0];
       if (!file) return;
-
-      const isSurfaceMesh = file.name.endsWith(".txt");
-      surfaceMeshWarning.style.display = isSurfaceMesh ? "flex" : "none";
 
       volumeMesh.loadMesh(file);
     };
@@ -302,6 +298,11 @@ export class MeshController {
     window.addEventListener("resize", () => {
       volumeMesh.meshRenderer.resize();
     });
+  }
+
+  setMeshLabel(text, isMismatch) {
+    this.meshLabel.querySelector(".mesh-label-text").textContent = text;
+    this.meshLabel.classList.toggle("mismatch", isMismatch);
   }
 
   toggleSlicerContainer(flag) {
