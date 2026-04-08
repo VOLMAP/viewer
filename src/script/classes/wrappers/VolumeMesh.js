@@ -36,6 +36,8 @@ export class VolumeMesh {
   loadedFileType = null;
   plainColor = utils.whiteHex;
 
+  txtIsValid = false;
+
   shell = null;
   wireframe = null;
   boundingBox = null;
@@ -446,11 +448,13 @@ export class VolumeMesh {
     for (const id of txtVerticesIds) {
       if (id >= volMeshNumVertices) {
         console.error(`id=${id} is out of range`);
+        this.txtIsValid = false;
         this.volumeMap.volumeMesh1.updateMeshLabels(true);
         return;
       }
       if (!surfaceVertexIds.has(id)) {
         console.error(`${id} is not a surface vertex`);
+        this.txtIsValid = false;
         this.volumeMap.volumeMesh1.updateMeshLabels(true);
         return;
       }
@@ -493,6 +497,7 @@ export class VolumeMesh {
     this.meshRenderer.toggleObject(true, this.wireframe);
 
     this.tmpSurfaceMesh = null;
+    this.txtIsValid = true;
     this.volumeMap.volumeMesh1.updateMeshLabels(false);
   }
 
@@ -522,8 +527,8 @@ export class VolumeMesh {
       mesh2.controller.setMeshLabel("Codomain tetmesh", !match);
 
     } else if (isVolMesh(typeMesh1) && typeMesh2 === "txt") {
-      mesh1.controller.setMeshLabel("Input tetmesh", false);
-      mesh2.controller.setMeshLabel("Surface constraints", false);
+      mesh1.controller.setMeshLabel("Input tetmesh", !mesh2.txtIsValid);
+      mesh2.controller.setMeshLabel("Surface constraints", !mesh2.txtIsValid);
     }
   }
 
