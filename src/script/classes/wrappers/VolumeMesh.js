@@ -256,9 +256,16 @@ export class VolumeMesh {
     if (fileFormat === "mesh") {
       const loader = new MeshLoader();
       try {
-        mesh = await loader.load(file);
+        mesh = await loader.loadMesh(file);
       } catch (error) {
         console.error("Error loading .mesh file:", error);
+      }
+    } else if (fileFormat === "vtk"){
+      const loader = new MeshLoader();
+      try {
+        mesh = await loader.loadVTK(file);
+      } catch (error) {
+        console.error("Error loading .vtk file:", error);
       }
     } else {
       console.error("Invalid file format selected");
