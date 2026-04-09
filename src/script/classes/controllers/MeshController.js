@@ -305,6 +305,16 @@ export class MeshController {
     this.meshLabel.classList.toggle("mismatch", isMismatch);
   }
 
+  hideMeshLabel() {
+    this.meshLabel.style.display = "none";
+  }
+
+  setMeshLabel(text, isMismatch) {
+    this.meshLabel.style.display = "";
+    this.meshLabel.querySelector(".mesh-label-text").textContent = text;
+    this.meshLabel.classList.toggle("mismatch", isMismatch);
+  }
+
   toggleSlicerContainer(flag) {
     this.slicerSettingsContainer.style.visibility = flag ? "visible" : "hidden";
   }

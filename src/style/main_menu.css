@@ -258,8 +258,27 @@ input[type="color"]::-moz-color-swatch {
   box-shadow: #010b13 0px 0px 5px;
 }
 
-.mesh-label.mismatch {
-  background-color: #f1cd04;
+.canvas-container:first-child .mesh-label {
+  left: auto;
+  right: 10px;
+}
+
+.mismatch-label {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  padding: 8px 10px;
+  border: solid 2px #010b13;
+  border-radius: 5px;
+  background-color: #ef5350;
+  box-shadow: #010b13 0px 0px 5px;
+  white-space: nowrap;
+}
+
+.mismatch-label.hidden {
+  display: none;
 }
 
 .digger-radio-group {
