@@ -360,6 +360,11 @@ export class VolumeMesh {
     //Get the file format from its extension
     const fileFormat = fileName.split(".").pop();
 
+    if (fileFormat === "txt" && this.controller.isVolOnly) {
+      console.warn("txt files not allowed for this mesh");
+      return;
+    }
+
     var mesh = null;
 
     if (fileFormat === "mesh") {
@@ -409,6 +414,14 @@ export class VolumeMesh {
     const response = await fetch(url);
     const blob = await response.blob();
     const file = new File([blob], fileName);
+
+    await this.loadMesh(file);
+  }
+
+  async loadRemoteMesh(url, filename) {
+    const response = await fetch(url);
+    const blob = await response.blob();
+    const file = new File([blob], filename);
 
     await this.loadMesh(file);
   }
@@ -507,53 +520,53 @@ export class VolumeMesh {
   }
 
   updateMeshLabels(isMismatch = false) {
-  const isVolMesh = (t) => t === "mesh" || t === "vtk";
+    const isVolMesh = (t) => t === "mesh" || t === "vtk";
 
-  const mesh1 = this.volumeMap.volumeMesh1;
-  const mesh2 = this.volumeMap.volumeMesh2;
-  const typeMesh1 = mesh1.loadedFileType;
-  const typeMesh2 = mesh2.loadedFileType;
+    const mesh1 = this.volumeMap.volumeMesh1;
+    const mesh2 = this.volumeMap.volumeMesh2;
+    const typeMesh1 = mesh1.loadedFileType;
+    const typeMesh2 = mesh2.loadedFileType;
 
-  const mismatchLabel = document.getElementById("mismatch-label");
+    const mismatchLabel = document.getElementById("mismatch-label");
 
-  if (isMismatch) {
-    mesh1.controller.hideMeshLabel();
-    mesh2.controller.hideMeshLabel();
-    mismatchLabel.querySelector(".mismatch-label-text").textContent = "Mesh mismatch";
-    mismatchLabel.classList.remove("hidden");
-    return;
-  }
-
-  mismatchLabel.classList.add("hidden");
-
-  if (isVolMesh(typeMesh1) && isVolMesh(typeMesh2)) {
-    if (!mesh1.mesh || !mesh2.mesh) {
-      mesh1.controller.setMeshLabel("Domain tetmesh", false);
-      mesh2.controller.setMeshLabel("Codomain tetmesh", false);
-      return;
-    }
-
-    const vertices1 = mesh1.mesh.geometry.userData.vertices.length;
-    const vertices2 = mesh2.mesh.geometry.userData.vertices.length;
-    const tetrahedra1 = mesh1.mesh.geometry.userData.tetrahedra.length;
-    const tetrahedra2 = mesh2.mesh.geometry.userData.tetrahedra.length;
-    const match = (vertices1 === vertices2 && tetrahedra1 === tetrahedra2);
-
-    if (!match) {
+    if (isMismatch) {
       mesh1.controller.hideMeshLabel();
       mesh2.controller.hideMeshLabel();
       mismatchLabel.querySelector(".mismatch-label-text").textContent = "Mesh mismatch";
       mismatchLabel.classList.remove("hidden");
-    } else {
-      mesh1.controller.setMeshLabel("Domain tetmesh", false);
-      mesh2.controller.setMeshLabel("Codomain tetmesh", false);
+      return;
     }
 
-  } else if (isVolMesh(typeMesh1) && typeMesh2 === "txt") {
-    mesh1.controller.setMeshLabel("Input tetmesh", false);
-    mesh2.controller.setMeshLabel("Surface constraints", false);
+    mismatchLabel.classList.add("hidden");
+
+    if (isVolMesh(typeMesh1) && isVolMesh(typeMesh2)) {
+      if (!mesh1.mesh || !mesh2.mesh) {
+        mesh1.controller.setMeshLabel("Domain tetmesh", false);
+        mesh2.controller.setMeshLabel("Codomain tetmesh", false);
+        return;
+      }
+
+      const vertices1 = mesh1.mesh.geometry.userData.vertices.length;
+      const vertices2 = mesh2.mesh.geometry.userData.vertices.length;
+      const tetrahedra1 = mesh1.mesh.geometry.userData.tetrahedra.length;
+      const tetrahedra2 = mesh2.mesh.geometry.userData.tetrahedra.length;
+      const match = (vertices1 === vertices2 && tetrahedra1 === tetrahedra2);
+
+      if (!match) {
+        mesh1.controller.hideMeshLabel();
+        mesh2.controller.hideMeshLabel();
+        mismatchLabel.querySelector(".mismatch-label-text").textContent = "Mesh mismatch";
+        mismatchLabel.classList.remove("hidden");
+      } else {
+        mesh1.controller.setMeshLabel("Domain tetmesh", false);
+        mesh2.controller.setMeshLabel("Codomain tetmesh", false);
+      }
+
+    } else if (isVolMesh(typeMesh1) && typeMesh2 === "txt") {
+      mesh1.controller.setMeshLabel("Input tetmesh", false);
+      mesh2.controller.setMeshLabel("Surface constraints", false);
+    }
   }
-}
 
   toggleShell(flag) {
     if (!this.shell) {

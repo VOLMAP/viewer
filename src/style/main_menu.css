@@ -281,6 +281,19 @@ input[type="color"]::-moz-color-swatch {
   display: none;
 }
 
+.dataset-browser {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dataset-nav {
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+  align-items: center;
+}
+
 .digger-radio-group {
   display: flex;
   flex-direction: column;

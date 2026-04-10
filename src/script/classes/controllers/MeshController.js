@@ -7,6 +7,10 @@ export class MeshController {
   meshInput = null;
   meshLabel = null;
   sampleMeshInput = null;
+  isVolOnly = false;
+
+  datasetSelect = null;
+  datasetBackButton = null;
   //Rendering
   shellToggle = null;
   meshColorInput = null;
@@ -45,6 +49,9 @@ export class MeshController {
     this.meshInput = getElement(settingsContainer, "mesh-input");
     this.meshLabel = getElement(canvasContainer, "mesh-label");
     this.sampleMeshInput = getElement(settingsContainer, "sample-mesh-input");
+
+    this.datasetSelect = getElement(settingsContainer, "dataset-select");
+    this.datasetBackButton = getElement(settingsContainer, "dataset-back-button");
     // Rendering
     this.shellToggle = getElement(settingsContainer, "shell-toggle");
     this.meshColorInput = getElement(settingsContainer, "mesh-color-input");
@@ -92,6 +99,104 @@ export class MeshController {
       const sample = this.value;
 
       volumeMesh.loadSampleMesh(sample);
+    };
+
+    const DATASETS = [
+      { label: "VOLMAP/dataset", org: "VOLMAP", repo: "dataset", path: "" },
+      { label: "VOLMAP/results", org: "VOLMAP", repo: "results", path: "" },
+    ];
+
+    const controller = this;
+
+    let datasetNavStack = new Array();
+
+    const datasetPopulateRoot = () => {
+      controller.datasetSelect.innerHTML = "<option value=''>select</option>";
+      DATASETS.forEach((ds, i) => {
+        const option = document.createElement("option");
+        option.value = JSON.stringify({ type: "root", index: i });
+        option.textContent = ds.label;
+        controller.datasetSelect.appendChild(option);
+      });
+      controller.datasetBackButton.classList.remove("active");
+      datasetNavStack = new Array();
+    };
+
+    const datasetFetchFolder = (org, repo, path) => {
+      const url = path
+        ? `https://api.github.com/repos/${org}/${repo}/contents/${path}`
+        : `https://api.github.com/repos/${org}/${repo}/contents/`;
+
+      controller.datasetSelect.innerHTML = "<option value=''>loading...</option>";
+      controller.datasetSelect.disabled = true;
+
+      fetch(url)
+        .then(response => response.json())
+        .then(contents => {
+          controller.datasetSelect.innerHTML = "";
+
+          const placeholder = document.createElement("option");
+          placeholder.value = "";
+          placeholder.textContent = "select";
+          controller.datasetSelect.appendChild(placeholder);
+
+          const sorted = contents.sort((a, b) => {
+            if (a.type === b.type) {
+              return a.name.localeCompare(b.name);
+            }
+
+            return a.type === "dir" ? -1 : 1;
+          });
+          sorted.forEach(item => {
+            if (item.type !== "dir" && item.type !== "file") return;
+            if (item.type === "file" && !item.name.match(/\.(mesh|vtk|txt)$/)) return;
+            if (item.type === "file" && controller.isVolOnly && item.name.endsWith(".txt")) return;
+            const option = document.createElement("option");
+            option.value = JSON.stringify({
+              type: item.type,
+              org, repo,
+              path: item.type === "dir" ? (path ? `${path}/${item.name}` : item.name) : null,
+              download_url: item.download_url || null,
+              name: item.name,
+            });
+            option.textContent = item.name;
+            controller.datasetSelect.appendChild(option);
+          });
+          controller.datasetSelect.disabled = false;
+          controller.datasetBackButton.classList.add("active");
+        })
+        .catch(err => console.error("Error fetching dataset contents:", err));
+    };
+
+    datasetPopulateRoot();
+
+    this.datasetSelect.onchange = function () {
+      const selected = this.options[this.selectedIndex];
+      if (!selected || !selected.value) return;
+
+      const item = JSON.parse(selected.value);
+
+      if (item.type === "root") {
+        const ds = DATASETS[item.index];
+        datasetNavStack.push({ org: ds.org, repo: ds.repo, path: "" });
+        datasetFetchFolder(ds.org, ds.repo, ds.path);
+      } else if (item.type === "dir") {
+        datasetNavStack.push({ org: item.org, repo: item.repo, path: item.path });
+        datasetFetchFolder(item.org, item.repo, item.path);
+      } else if (item.type === "file") {
+        volumeMesh.loadRemoteMesh(item.download_url, item.name);
+      }
+    };
+
+    this.datasetBackButton.onclick = function () {
+      if (datasetNavStack.length === 0) return;
+      datasetNavStack.pop();
+      if (datasetNavStack.length === 0) {
+        datasetPopulateRoot();
+      } else {
+        const prev = datasetNavStack[datasetNavStack.length - 1];
+        datasetFetchFolder(prev.org, prev.repo, prev.path);
+      }
     };
 
     // Rendering
@@ -301,6 +406,7 @@ export class MeshController {
   }
 
   setMeshLabel(text, isMismatch) {
+    this.meshLabel.style.display = "";
     this.meshLabel.querySelector(".mesh-label-text").textContent = text;
     this.meshLabel.classList.toggle("mismatch", isMismatch);
   }
@@ -309,10 +415,9 @@ export class MeshController {
     this.meshLabel.style.display = "none";
   }
 
-  setMeshLabel(text, isMismatch) {
-    this.meshLabel.style.display = "";
-    this.meshLabel.querySelector(".mesh-label-text").textContent = text;
-    this.meshLabel.classList.toggle("mismatch", isMismatch);
+  restrictToVolOnly() {
+    this.isVolOnly = true;
+    this.meshInput.accept = ".mesh, .vtk";
   }
 
   toggleSlicerContainer(flag) {

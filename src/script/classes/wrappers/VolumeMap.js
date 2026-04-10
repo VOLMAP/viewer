@@ -29,6 +29,8 @@ export class VolumeMap {
     this.mapViewer = new MapViewer(this);
     this.distortionSlicer = new DistortionSlicer(this);
     this.digger = new TetrahedronDigger(this);
+
+    this.volumeMesh1.controller.restrictToVolOnly();
   }
 
   updateMesh(volumeMesh) {
