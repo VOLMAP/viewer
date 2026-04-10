@@ -27,6 +27,8 @@ export class MeshRenderer {
 
   volumeMesh = null;
 
+    autoCameraEnabled = true;
+
   debugEnabled = false;
   debugObjects = [];
 
@@ -209,6 +211,10 @@ export class MeshRenderer {
     this.controls.update();
     this.updateLightAndAxis();
     this.camera.updateProjectionMatrix();
+  }
+  
+  toggleAutoCamera(flag) {
+    this.autoCameraEnabled = flag;
   }
 
   ///DEBUG

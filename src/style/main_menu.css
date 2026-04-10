@@ -8,7 +8,7 @@
   background-color: #d5cbb2;
 }
 
-.settings-container > :not(:last-child) {
+.settings-container> :not(:last-child) {
   border-right: solid 2px #010b13;
 }
 
@@ -41,40 +41,42 @@
   overflow: hidden;
 }
 
-.dropbtn > p {
+.dropbtn>p {
   flex-shrink: 0;
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow: hidden;
 }
 
-.dropbtn > p {
+.dropbtn>p {
   font-weight: bold;
   margin-right: 5px;
 }
 
-.setting > p {
+.setting>p {
   margin-right: 5px;
 }
 
-.dropbtn > img,
-.setting > img {
+.dropbtn>img,
+.setting>img {
   width: 20px;
   height: 20px;
 }
 
 /*Smartphone and Tablet*/
 @media (max-aspect-ratio: 1/1) {
-  .dropbtn > img,
-  .setting > img {
+
+  .dropbtn>img,
+  .setting>img {
     width: 16px;
     height: 16px;
   }
 }
 
 @media (min-aspect-ratio: 1/1) and (max-width: 768px) {
-  .dropbtn > img,
-  .setting > img {
+
+  .dropbtn>img,
+  .setting>img {
     width: 16px;
     height: 16px;
   }
@@ -96,7 +98,7 @@
   background-color: #d5cbb2;
 }
 
-.dropcontent > :not(:last-child) {
+.dropcontent> :not(:last-child) {
   border-bottom: solid 2px #010b13;
 }
 
@@ -166,15 +168,15 @@
   content: "";
 }
 
-input:checked + .slider {
+input:checked+.slider {
   background-color: #d5cbb2;
 }
 
-#map_settings input:checked + .slider {
+#map_settings input:checked+.slider {
   background-color: #c1b2d5;
 }
 
-input:checked + .slider:before {
+input:checked+.slider:before {
   transform: translateX(18px);
 }
 
@@ -239,13 +241,59 @@ input[type="color"]::-moz-color-swatch {
   justify-content: center;
 }
 
-.img-button > img {
+.img-button>img {
   width: auto;
   height: 100%;
 }
 
+.mesh-label {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 1;
+  padding: 8px 10px;
+  border: solid 2px #010b13;
+  border-radius: 5px;
+  background-color: #c1b2d5;
+  box-shadow: #010b13 0px 0px 5px;
+}
 
-/* Radio button digger */
+.canvas-container:first-child .mesh-label {
+  left: auto;
+  right: 10px;
+}
+
+.mismatch-label {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  padding: 8px 10px;
+  border: solid 2px #010b13;
+  border-radius: 5px;
+  background-color: #ef5350;
+  box-shadow: #010b13 0px 0px 5px;
+  white-space: nowrap;
+}
+
+.mismatch-label.hidden {
+  display: none;
+}
+
+.dataset-browser {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dataset-nav {
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+  align-items: center;
+}
+
 .digger-radio-group {
   display: flex;
   flex-direction: column;
