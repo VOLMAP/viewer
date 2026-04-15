@@ -50,8 +50,8 @@ export class MeshController {
     this.meshLabel = getElement(canvasContainer, "mesh-label");
     this.sampleMeshInput = getElement(settingsContainer, "sample-mesh-input");
 
-    this.datasetSelect = getElement(settingsContainer, "dataset-select");
-    this.datasetBackButton = getElement(settingsContainer, "dataset-back-button");
+    this.datasetNav = getElement(settingsContainer, "dataset-nav");
+    this.datasetSelects = [];
     // Rendering
     this.shellToggle = getElement(settingsContainer, "shell-toggle");
     this.meshColorInput = getElement(settingsContainer, "mesh-color-input");
@@ -108,43 +108,67 @@ export class MeshController {
 
     const controller = this;
 
-    let datasetNavStack = new Array();
-
     const datasetPopulateRoot = () => {
-      controller.datasetSelect.innerHTML = "<option value=''>select</option>";
+      // Clear existing selects
+      controller.datasetNav.innerHTML = '';
+      controller.datasetSelects = [];
+      const select = document.createElement('select');
+      select.className = 'dataset-select';
+      select.innerHTML = "<option value=''>select</option>";
       DATASETS.forEach((ds, i) => {
         const option = document.createElement("option");
         option.value = JSON.stringify({ type: "root", index: i });
         option.textContent = ds.label;
-        controller.datasetSelect.appendChild(option);
+        select.appendChild(option);
       });
-      controller.datasetBackButton.classList.remove("active");
-      datasetNavStack = new Array();
+      controller.datasetNav.appendChild(select);
+      controller.datasetSelects.push(select);
+      select.onchange = controller.handleDatasetChange.bind(controller);
     };
 
-    const datasetFetchFolder = (org, repo, path) => {
-      const url = path
-        ? `https://api.github.com/repos/${org}/${repo}/contents/${path}`
-        : `https://api.github.com/repos/${org}/${repo}/contents/`;
+    controller.handleDatasetChange = (event) => {
+      const select = event.target;
+      const selected = select.options[select.selectedIndex];
+      if (!selected || !selected.value) return;
+      const item = JSON.parse(selected.value);
+      const selectIndex = controller.datasetSelects.indexOf(select);
+      // Remove selects after this one
+      while (controller.datasetSelects.length > selectIndex + 1) {
+        const toRemove = controller.datasetSelects.pop();
+        toRemove.remove();
+      }
+      if (item.type === "root") {
+        const ds = DATASETS[item.index];
+        controller.populateSelectForFolder(ds.org, ds.repo, ds.path, selectIndex + 1);
+      } else if (item.type === "dir") {
+        controller.populateSelectForFolder(item.org, item.repo, item.path, selectIndex + 1);
+      } else if (item.type === "file") {
+        volumeMesh.loadRemoteMesh(item.download_url, item.name);
+      }
+    };
 
-      controller.datasetSelect.innerHTML = "<option value=''>loading...</option>";
-      controller.datasetSelect.disabled = true;
-
+    controller.populateSelectForFolder = (org, repo, path, level) => {
+      const url = path ? `https://api.github.com/repos/${org}/${repo}/contents/${path}` : `https://api.github.com/repos/${org}/${repo}/contents/`;
+      // Create a new select
+      const select = document.createElement('select');
+      select.className = 'dataset-select';
+      select.innerHTML = "<option value=''>loading...</option>";
+      select.disabled = true;
+      controller.datasetNav.appendChild(select);
+      controller.datasetSelects.push(select);
+      select.onchange = controller.handleDatasetChange.bind(controller);
       fetch(url)
         .then(response => response.json())
         .then(contents => {
-          controller.datasetSelect.innerHTML = "";
-
+          select.innerHTML = "";
           const placeholder = document.createElement("option");
           placeholder.value = "";
           placeholder.textContent = "select";
-          controller.datasetSelect.appendChild(placeholder);
-
+          select.appendChild(placeholder);
           const sorted = contents.sort((a, b) => {
             if (a.type === b.type) {
               return a.name.localeCompare(b.name);
             }
-
             return a.type === "dir" ? -1 : 1;
           });
           sorted.forEach(item => {
@@ -160,44 +184,14 @@ export class MeshController {
               name: item.name,
             });
             option.textContent = item.name;
-            controller.datasetSelect.appendChild(option);
+            select.appendChild(option);
           });
-          controller.datasetSelect.disabled = false;
-          controller.datasetBackButton.classList.add("active");
+          select.disabled = false;
         })
         .catch(err => console.error("Error fetching dataset contents:", err));
     };
 
     datasetPopulateRoot();
-
-    this.datasetSelect.onchange = function () {
-      const selected = this.options[this.selectedIndex];
-      if (!selected || !selected.value) return;
-
-      const item = JSON.parse(selected.value);
-
-      if (item.type === "root") {
-        const ds = DATASETS[item.index];
-        datasetNavStack.push({ org: ds.org, repo: ds.repo, path: "" });
-        datasetFetchFolder(ds.org, ds.repo, ds.path);
-      } else if (item.type === "dir") {
-        datasetNavStack.push({ org: item.org, repo: item.repo, path: item.path });
-        datasetFetchFolder(item.org, item.repo, item.path);
-      } else if (item.type === "file") {
-        volumeMesh.loadRemoteMesh(item.download_url, item.name);
-      }
-    };
-
-    this.datasetBackButton.onclick = function () {
-      if (datasetNavStack.length === 0) return;
-      datasetNavStack.pop();
-      if (datasetNavStack.length === 0) {
-        datasetPopulateRoot();
-      } else {
-        const prev = datasetNavStack[datasetNavStack.length - 1];
-        datasetFetchFolder(prev.org, prev.repo, prev.path);
-      }
-    };
 
     // Rendering
     this.shellToggle.onchange = function () {
@@ -405,15 +399,6 @@ export class MeshController {
     });
   }
 
-  setMeshLabel(text, isMismatch) {
-    this.meshLabel.style.display = "";
-    this.meshLabel.querySelector(".mesh-label-text").textContent = text;
-    this.meshLabel.classList.toggle("mismatch", isMismatch);
-  }
-
-  hideMeshLabel() {
-    this.meshLabel.style.display = "none";
-  }
 
   restrictToVolOnly() {
     this.isVolOnly = true;

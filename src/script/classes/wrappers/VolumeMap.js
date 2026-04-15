@@ -86,6 +86,11 @@ export class VolumeMap {
       const vertices2 = mesh2.geometry.userData.vertices;
       const tetrahedra1 = mesh1.geometry.userData.tetrahedra;
       const tetrahedra2 = mesh2.geometry.userData.tetrahedra;
+      
+      if (!tetrahedra1 || !tetrahedra2 || !vertices1 || !vertices2) {
+        console.warn("mesh1 or mesh2 missing vertices or tetrahedra");
+        return false;
+      }
 
       if (vertices1.length != vertices2.length) {
         console.warn("mesh1 and mesh2 have different number of vertices");
@@ -363,6 +368,7 @@ export class VolumeMap {
       this.volumeMesh2.meshSlicer.isActive,
       this.distortionSlicer.isActive,
     );
+    
     return true;
   }
 }

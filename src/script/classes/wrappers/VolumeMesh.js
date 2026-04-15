@@ -527,45 +527,52 @@ export class VolumeMesh {
     const typeMesh1 = mesh1.loadedFileType;
     const typeMesh2 = mesh2.loadedFileType;
 
-    const mismatchLabel = document.getElementById("mismatch-label");
+    const statusLabel = mesh2.meshRenderer.canvasContainer.getElementsByClassName("status-label")[0];
+    const labelText = statusLabel.querySelector(".status-label-text");
+
+    const showLabel = (text, type) => {
+      labelText.textContent = text;
+      statusLabel.classList.remove("hidden", "mismatch", "constraint");
+      statusLabel.classList.add(type);
+    };
+
+    const hideLabel = () => {
+      statusLabel.classList.add("hidden");
+      statusLabel.classList.remove("mismatch", "constraint");
+      labelText.textContent = "";
+    };
 
     if (isMismatch) {
-      mesh1.controller.hideMeshLabel();
-      mesh2.controller.hideMeshLabel();
-      mismatchLabel.querySelector(".mismatch-label-text").textContent = "Mesh mismatch";
-      mismatchLabel.classList.remove("hidden");
+      showLabel("Mesh mismatch", "mismatch");
       return;
     }
 
-    mismatchLabel.classList.add("hidden");
-
     if (isVolMesh(typeMesh1) && isVolMesh(typeMesh2)) {
-      if (!mesh1.mesh || !mesh2.mesh) {
-        mesh1.controller.setMeshLabel("Domain tetmesh", false);
-        mesh2.controller.setMeshLabel("Codomain tetmesh", false);
-        return;
-      }
+      if (!mesh1.mesh || !mesh2.mesh) return;
 
-      const vertices1 = mesh1.mesh.geometry.userData.vertices.length;
-      const vertices2 = mesh2.mesh.geometry.userData.vertices.length;
-      const tetrahedra1 = mesh1.mesh.geometry.userData.tetrahedra.length;
-      const tetrahedra2 = mesh2.mesh.geometry.userData.tetrahedra.length;
-      const match = (vertices1 === vertices2 && tetrahedra1 === tetrahedra2);
+      const v1 = mesh1.mesh.geometry.userData.vertices.length;
+      const v2 = mesh2.mesh.geometry.userData.vertices.length;
+      const t1 = mesh1.mesh.geometry.userData.tetrahedra.length;
+      const t2 = mesh2.mesh.geometry.userData.tetrahedra.length;
 
-      if (!match) {
-        mesh1.controller.hideMeshLabel();
-        mesh2.controller.hideMeshLabel();
-        mismatchLabel.querySelector(".mismatch-label-text").textContent = "Mesh mismatch";
-        mismatchLabel.classList.remove("hidden");
+      if (v1 !== v2 || t1 !== t2) {
+        showLabel("Mesh mismatch", "mismatch");
       } else {
-        mesh1.controller.setMeshLabel("Domain tetmesh", false);
-        mesh2.controller.setMeshLabel("Codomain tetmesh", false);
+        hideLabel();
       }
-
-    } else if (isVolMesh(typeMesh1) && typeMesh2 === "txt") {
-      mesh1.controller.setMeshLabel("Input tetmesh", false);
-      mesh2.controller.setMeshLabel("Surface constraints", false);
+      return;
     }
+
+    if (isVolMesh(typeMesh1) && typeMesh2 === "txt") {
+      if (!mesh2.txtIsValid) {
+        showLabel("Mesh mismatch", "mismatch");
+      } else {
+        showLabel("Surface constraints", "constraint");
+      }
+      return;
+    }
+
+    hideLabel();
   }
 
   toggleShell(flag) {
