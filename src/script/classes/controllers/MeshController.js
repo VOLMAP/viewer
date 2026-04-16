@@ -1,5 +1,7 @@
 const minSliderValue = -100;
 const maxSliderValue = 100;
+const DATASET_REPO = "dataset";
+const DATASET_G1 = "G1";
 
 export class MeshController {
   volumeMesh = null;
@@ -51,7 +53,7 @@ export class MeshController {
     this.sampleMeshInput = getElement(settingsContainer, "sample-mesh-input");
 
     this.datasetNav = getElement(settingsContainer, "dataset-nav");
-    this.datasetSelects = [];
+    this.datasetSelects = new Array();
     // Rendering
     this.shellToggle = getElement(settingsContainer, "shell-toggle");
     this.meshColorInput = getElement(settingsContainer, "mesh-color-input");
@@ -102,8 +104,8 @@ export class MeshController {
     };
 
     const DATASETS = [
-      { label: "VOLMAP/dataset", org: "VOLMAP", repo: "dataset", path: "" },
-      { label: "VOLMAP/results", org: "VOLMAP", repo: "results", path: "" },
+      { label: "dataset", org: "VOLMAP", repo: "dataset", path: "" },
+      { label: "results", org: "VOLMAP", repo: "results", path: "" },
     ];
 
     const controller = this;
@@ -112,9 +114,11 @@ export class MeshController {
       // Clear existing selects
       controller.datasetNav.innerHTML = '';
       controller.datasetSelects = [];
+
       const select = document.createElement('select');
       select.className = 'dataset-select';
       select.innerHTML = "<option value=''>select</option>";
+
       DATASETS.forEach((ds, i) => {
         const option = document.createElement("option");
         option.value = JSON.stringify({ type: "root", index: i });
@@ -139,24 +143,44 @@ export class MeshController {
       }
       if (item.type === "root") {
         const ds = DATASETS[item.index];
-        controller.populateSelectForFolder(ds.org, ds.repo, ds.path, selectIndex + 1);
+        controller.activeDataset = ds;
+        controller.populateSelectForFolder(ds.org, ds.repo, ds.path);
       } else if (item.type === "dir") {
         controller.populateSelectForFolder(item.org, item.repo, item.path, selectIndex + 1);
       } else if (item.type === "file") {
         volumeMesh.loadRemoteMesh(item.download_url, item.name);
+
+        const isDatasetRepo = controller.activeDataset?.repo === DATASET_REPO;
+        const isFromG1 = item.parentPath === DATASET_G1;
+
+        if (isDatasetRepo && isFromG1) {
+          const prefix = item.name.replace(/\.(mesh|vtk)$/, "");
+          const mesh2Controller = volumeMesh?.volumeMap?.volumeMesh2?.controller;
+          if (mesh2Controller) {
+            mesh2Controller.populateCompanionFiles(
+              controller.activeDataset.org,
+              controller.activeDataset.repo,
+              prefix,
+              volumeMesh.volumeMap.volumeMesh2
+            );
+          }
+        }
       }
     };
 
     controller.populateSelectForFolder = (org, repo, path, level) => {
-      const url = path ? `https://api.github.com/repos/${org}/${repo}/contents/${path}` : `https://api.github.com/repos/${org}/${repo}/contents/`;
-      // Create a new select
+      const url = path ? `https://api.github.com/repos/${org}/${repo}/contents/${path}`
+        : `https://api.github.com/repos/${org}/${repo}/contents/`;
+
       const select = document.createElement('select');
       select.className = 'dataset-select';
       select.innerHTML = "<option value=''>loading...</option>";
       select.disabled = true;
+
       controller.datasetNav.appendChild(select);
       controller.datasetSelects.push(select);
       select.onchange = controller.handleDatasetChange.bind(controller);
+
       fetch(url)
         .then(response => response.json())
         .then(contents => {
@@ -180,6 +204,7 @@ export class MeshController {
               type: item.type,
               org, repo,
               path: item.type === "dir" ? (path ? `${path}/${item.name}` : item.name) : null,
+              parentPath: path || "",
               download_url: item.download_url || null,
               name: item.name,
             });
@@ -397,6 +422,99 @@ export class MeshController {
     window.addEventListener("resize", () => {
       volumeMesh.meshRenderer.resize();
     });
+  }
+
+  async populateCompanionFiles(org, repo, prefix, volumeMesh) {
+    this.datasetNav.innerHTML =
+      "<span>loading...</span>";
+    this.datasetSelects = new Array();
+
+    let rootContents;
+    try {
+      const resp = await fetch(`https://api.github.com/repos/${org}/${repo}/contents/`);
+      rootContents = await resp.json();
+    } catch (e) {
+      console.error("Error fetching repo root:", e);
+      this.datasetNav.innerHTML = "";
+      return;
+    }
+
+    const folders = rootContents.filter(i => i.type === "dir" && i.name !== DATASET_G1);
+
+    const companionFiles = new Array();
+    await Promise.all(folders.map(async (folder) => {
+      try {
+        const resp = await fetch(`https://api.github.com/repos/${org}/${repo}/contents/${folder.name}`);
+        const contents = await resp.json();
+        if (!Array.isArray(contents)) return;
+        contents.forEach(item => {
+          if (item.type !== "file") return;
+          if (!item.name.match(/\.(mesh|vtk|txt)$/)) return;
+          const nameNoExt = item.name.replace(/\.(mesh|vtk|txt)$/, "");
+          if (nameNoExt.startsWith(prefix + "_")) {
+            companionFiles.push({
+              name: item.name,
+              download_url: item.download_url,
+              folder: folder.name,
+            });
+          }
+        });
+      } catch (e) { }
+    }));
+
+    this.datasetNav.innerHTML = "";
+    this.datasetSelects = [];
+
+    const DATASETS = [
+      { label: "dataset", org: "VOLMAP", repo: "dataset", path: "" },
+      { label: "results", org: "VOLMAP", repo: "results", path: "" },
+    ];
+
+    const rootSelect = document.createElement('select');
+    rootSelect.className = 'dataset-select';
+    DATASETS.forEach((ds, i) => {
+      const option = document.createElement("option");
+      option.value = JSON.stringify({ type: "root", index: i });
+      option.textContent = ds.label;
+      if (ds.repo === repo) option.selected = true;
+      rootSelect.appendChild(option);
+    });
+    this.datasetNav.appendChild(rootSelect);
+    this.datasetSelects.push(rootSelect);
+    rootSelect.onchange = this.handleDatasetChange.bind(this);
+
+    if (companionFiles.length === 0) {
+      const span = document.createElement("span");
+      span.textContent = `No file for "${prefix}"`;
+      this.datasetNav.appendChild(span);
+      return;
+    }
+
+    const select = document.createElement("select");
+    select.className = "dataset-select";
+
+    const ph = document.createElement("option");
+    ph.value = "";
+    ph.textContent = "select";
+    select.appendChild(ph);
+
+    companionFiles
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .forEach(f => {
+        const opt = document.createElement("option");
+        opt.value = JSON.stringify({ download_url: f.download_url, name: f.name });
+        opt.textContent = f.name;
+        select.appendChild(opt);
+      });
+
+    select.onchange = function () {
+      if (!this.value) return;
+      const item = JSON.parse(this.value);
+      volumeMesh.loadRemoteMesh(item.download_url, item.name);
+    };
+
+    this.datasetNav.appendChild(select);
+    this.datasetSelects.push(select);
   }
 
 
