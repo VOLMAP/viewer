@@ -291,6 +291,10 @@ input[type="color"]::-moz-color-swatch {
   align-items: flex-start;
 }
 
+#mesh2_settings .setting:has(.dataset-nav) {
+  display: none !important;
+}
+
 .digger-radio-group {
   display: flex;
   flex-direction: column;

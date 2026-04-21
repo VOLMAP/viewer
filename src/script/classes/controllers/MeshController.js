@@ -1,11 +1,18 @@
 const minSliderValue = -100;
 const maxSliderValue = 100;
+
 const DATASET_REPO = "dataset";
 const DATASET_G1 = "G1";
+const RESULTS_REPO = "results";
+const DATASETS = [
+  { label: "dataset", repo: "dataset", path: "" },
+  { label: "results", repo: "results", path: "" },
+];
+
+const DATASET_SUFFIXES = ["cube", "tet", "octa", "pyr", "star", "sphere", "pc"];
 
 export class MeshController {
   volumeMesh = null;
-  //Mesh
   meshInput = null;
   meshLabel = null;
   sampleMeshInput = null;
@@ -13,7 +20,7 @@ export class MeshController {
 
   datasetSelect = null;
   datasetBackButton = null;
-  //Rendering
+
   shellToggle = null;
   meshColorInput = null;
   wireframeToggle = null;
@@ -22,7 +29,7 @@ export class MeshController {
   boundingBoxToggle = null;
   slicerToggle = null;
   resetRenderingButton = null;
-  //Slicing
+
   slicerSettingsContainer = null;
   xSlider = null;
   xPlaneToggle = null;
@@ -33,7 +40,7 @@ export class MeshController {
   zSlider = null;
   zPlaneToggle = null;
   zReverseButton = null;
-  //Control
+
   axisToggle = null;
   orbitalToggle = null;
   resetControlButton = null;
@@ -45,6 +52,18 @@ export class MeshController {
 
   constructor(volumeMesh, settingsContainer, canvasContainer) {
     this.volumeMesh = volumeMesh;
+    this.datasetIndex = null;
+
+    Promise.all([
+      fetch("./src/dataset/dataset.json").then(res => res.json()),
+      fetch("./src/dataset/results.json").then(res => res.json()),
+    ]).then(([datasetData, resultsData]) => {
+      this.datasetIndex = {
+        dataset: datasetData.dataset,
+        results: resultsData.results,
+      };
+    });
+
     const getElement = (container, className) => container.getElementsByClassName(className)[0];
 
     // Mesh
@@ -53,6 +72,7 @@ export class MeshController {
     this.sampleMeshInput = getElement(settingsContainer, "sample-mesh-input");
 
     this.datasetNav = getElement(settingsContainer, "dataset-nav");
+    this.datasetLabel = this.datasetNav.closest(".setting").querySelector("p");
     this.datasetSelects = new Array();
     // Rendering
     this.shellToggle = getElement(settingsContainer, "shell-toggle");
@@ -97,34 +117,30 @@ export class MeshController {
 
       volumeMesh.loadMesh(file);
     };
+
     this.sampleMeshInput.onchange = async function () {
       const sample = this.value;
 
       volumeMesh.loadSampleMesh(sample);
     };
 
-    const DATASETS = [
-      { label: "dataset", org: "VOLMAP", repo: "dataset", path: "" },
-      { label: "results", org: "VOLMAP", repo: "results", path: "" },
-    ];
-
     const controller = this;
 
     const datasetPopulateRoot = () => {
-      // Clear existing selects
       controller.datasetNav.innerHTML = '';
-      controller.datasetSelects = [];
+      controller.datasetSelects = new Array();
 
       const select = document.createElement('select');
       select.className = 'dataset-select';
       select.innerHTML = "<option value=''>select</option>";
 
-      DATASETS.forEach((ds, i) => {
+      DATASETS.forEach((dataset, i) => {
         const option = document.createElement("option");
         option.value = JSON.stringify({ type: "root", index: i });
-        option.textContent = ds.label;
+        option.textContent = dataset.label;
         select.appendChild(option);
       });
+
       controller.datasetNav.appendChild(select);
       controller.datasetSelects.push(select);
       select.onchange = controller.handleDatasetChange.bind(controller);
@@ -134,86 +150,120 @@ export class MeshController {
       const select = event.target;
       const selected = select.options[select.selectedIndex];
       if (!selected || !selected.value) return;
+
       const item = JSON.parse(selected.value);
       const selectIndex = controller.datasetSelects.indexOf(select);
-      // Remove selects after this one
+
       while (controller.datasetSelects.length > selectIndex + 1) {
         const toRemove = controller.datasetSelects.pop();
         toRemove.remove();
       }
+
       if (item.type === "root") {
-        const ds = DATASETS[item.index];
-        controller.activeDataset = ds;
-        controller.populateSelectForFolder(ds.org, ds.repo, ds.path);
+        const dataset = DATASETS[item.index];
+        controller.activeDataset = dataset;
+        controller.populateSelectForFolder(dataset.repo, dataset.path);
+
       } else if (item.type === "dir") {
-        controller.populateSelectForFolder(item.org, item.repo, item.path, selectIndex + 1);
+        controller.populateSelectForFolder(item.repo, item.path);
+
       } else if (item.type === "file") {
         volumeMesh.loadRemoteMesh(item.download_url, item.name);
 
-        const isDatasetRepo = controller.activeDataset?.repo === DATASET_REPO;
+        const mesh2Controller = volumeMesh.volumeMap.volumeMesh2.controller;
+
+        const isDatasetRepo = controller.activeDataset.repo === DATASET_REPO;
         const isFromG1 = item.parentPath === DATASET_G1;
+
 
         if (isDatasetRepo && isFromG1) {
           const prefix = item.name.replace(/\.(mesh|vtk)$/, "");
-          const mesh2Controller = volumeMesh?.volumeMap?.volumeMesh2?.controller;
           if (mesh2Controller) {
-            mesh2Controller.populateCompanionFiles(
-              controller.activeDataset.org,
+            mesh2Controller.populateDatasetCompanion(
               controller.activeDataset.repo,
               prefix,
               volumeMesh.volumeMap.volumeMesh2
             );
           }
         }
+
+        const isResultsRepo = controller.activeDataset.repo === RESULTS_REPO;
+        if (isResultsRepo && item.parentPath) {
+          if (mesh2Controller) {
+            mesh2Controller.populateResultsCompanion(
+              item.parentPath,
+              item.name,
+              item.download_url,
+              volumeMesh.volumeMap.volumeMesh2
+            );
+          }
+        }
+
+
+        if (mesh2Controller) {
+          mesh2Controller.datasetNav.closest(".setting").style.setProperty("display", "flex", "important");
+          if (isDatasetRepo) mesh2Controller.datasetLabel.textContent = "Constraint:";
+          else if (isResultsRepo) mesh2Controller.datasetLabel.textContent = "Map:";
+        }
       }
     };
 
-    controller.populateSelectForFolder = (org, repo, path, level) => {
-      const url = path ? `https://api.github.com/repos/${org}/${repo}/contents/${path}`
-        : `https://api.github.com/repos/${org}/${repo}/contents/`;
+    controller.populateSelectForFolder = (repo, path = "") => {
+      if (!controller.datasetIndex) return;
+
+      const data = controller.datasetIndex[repo];
+      if (!data) return;
 
       const select = document.createElement('select');
       select.className = 'dataset-select';
-      select.innerHTML = "<option value=''>loading...</option>";
-      select.disabled = true;
-
+      const placeholder = document.createElement("option");
+      placeholder.value = "";
+      placeholder.textContent = "select";
+      select.appendChild(placeholder);
       controller.datasetNav.appendChild(select);
       controller.datasetSelects.push(select);
       select.onchange = controller.handleDatasetChange.bind(controller);
 
-      fetch(url)
-        .then(response => response.json())
-        .then(contents => {
-          select.innerHTML = "";
-          const placeholder = document.createElement("option");
-          placeholder.value = "";
-          placeholder.textContent = "select";
-          select.appendChild(placeholder);
-          const sorted = contents.sort((a, b) => {
-            if (a.type === b.type) {
-              return a.name.localeCompare(b.name);
-            }
-            return a.type === "dir" ? -1 : 1;
-          });
-          sorted.forEach(item => {
-            if (item.type !== "dir" && item.type !== "file") return;
-            if (item.type === "file" && !item.name.match(/\.(mesh|vtk|txt)$/)) return;
-            if (item.type === "file" && controller.isVolOnly && item.name.endsWith(".txt")) return;
+      Object.keys(data).forEach(key => {
+        const isInPath = path === "" ? true : key === path || key.startsWith(path + "/");
+        if (!isInPath) return;
+
+        const relative = path === "" ? key : key.slice(path.length).replace(/^\/+/, "");
+        const parts = relative.split("/").filter(Boolean);
+
+        if (parts.length === 0) {
+          data[key].forEach(file => {
+            if (!file.name.match(/\.(mesh|vtk)$/)) return;
+
             const option = document.createElement("option");
             option.value = JSON.stringify({
-              type: item.type,
-              org, repo,
-              path: item.type === "dir" ? (path ? `${path}/${item.name}` : item.name) : null,
-              parentPath: path || "",
-              download_url: item.download_url || null,
-              name: item.name,
+              type: "file",
+              repo,
+              path: null,
+              parentPath: key,
+              download_url: file.download_url,
+              name: file.name,
             });
-            option.textContent = item.name;
+            option.textContent = file.name;
             select.appendChild(option);
           });
-          select.disabled = false;
-        })
-        .catch(err => console.error("Error fetching dataset contents:", err));
+        } else {
+          const dirName = parts[0];
+          const dirPath = path ? `${path}/${dirName}` : dirName;
+
+          const option = document.createElement("option");
+          option.value = JSON.stringify({
+            type: "dir",
+            repo,
+            path: dirPath,
+            parentPath: "",
+            download_url: null,
+            name: dirName,
+          });
+          option.textContent = dirName;
+          select.appendChild(option);
+        }
+      });
     };
 
     datasetPopulateRoot();
@@ -226,6 +276,7 @@ export class MeshController {
         this.checked = !flag;
       }
     };
+
     this.meshColorInput.oninput = function () {
       if (!this.oldValue) {
         // Save the first valid value
@@ -243,6 +294,7 @@ export class MeshController {
         this.oldValue = this.value;
       }
     };
+
     this.wireframeToggle.onchange = function () {
       const flag = this.checked;
 
@@ -250,6 +302,7 @@ export class MeshController {
         this.checked = !flag;
       }
     };
+
     this.wireframeColorInput.oninput = function () {
       if (!this.oldValue) {
         // Save the first valid value
@@ -265,6 +318,7 @@ export class MeshController {
         this.oldValue = this.value;
       }
     };
+
     this.separationSlider.onchange = function () {
       volumeMesh.separate(this.value);
     };
@@ -276,6 +330,7 @@ export class MeshController {
         this.checked = !flag;
       }
     };
+
     this.slicerToggle.onchange = function () {
       const flag = this.checked;
 
@@ -283,6 +338,7 @@ export class MeshController {
         this.checked = !flag;
       }
     };
+
     this.resetRenderingButton.onclick = function () {
       volumeMesh.resetRendering();
       volumeMesh.controller.resetRendering();
@@ -424,88 +480,39 @@ export class MeshController {
     });
   }
 
-  async populateCompanionFiles(org, repo, prefix, volumeMesh) {
-    this.datasetNav.innerHTML =
-      "<span>loading...</span>";
-    this.datasetSelects = new Array();
+  async populateDatasetCompanion(repo, prefix, volumeMesh) {
+    const data = this.datasetIndex[repo];
+    if (!data) return;
 
-    let rootContents;
-    try {
-      const resp = await fetch(`https://api.github.com/repos/${org}/${repo}/contents/`);
-      rootContents = await resp.json();
-    } catch (e) {
-      console.error("Error fetching repo root:", e);
-      this.datasetNav.innerHTML = "";
-      return;
-    }
+    const g1Files = data[DATASET_G1] || [];
+    const meshFile = g1Files.find(f => f.name.replace(/\.(mesh|vtk)$/, "") === prefix);
+    if (!meshFile) return;
 
-    const folders = rootContents.filter(i => i.type === "dir" && i.name !== DATASET_G1);
-
-    const companionFiles = new Array();
-    await Promise.all(folders.map(async (folder) => {
-      try {
-        const resp = await fetch(`https://api.github.com/repos/${org}/${repo}/contents/${folder.name}`);
-        const contents = await resp.json();
-        if (!Array.isArray(contents)) return;
-        contents.forEach(item => {
-          if (item.type !== "file") return;
-          if (!item.name.match(/\.(mesh|vtk|txt)$/)) return;
-          const nameNoExt = item.name.replace(/\.(mesh|vtk|txt)$/, "");
-          if (nameNoExt.startsWith(prefix + "_")) {
-            companionFiles.push({
-              name: item.name,
-              download_url: item.download_url,
-              folder: folder.name,
-            });
-          }
-        });
-      } catch (e) { }
-    }));
+    const companionFiles = [];
+    DATASET_SUFFIXES.forEach(suffix => {
+      const url = meshFile[suffix];
+      if (!url) return;
+      const name = url.split("/").pop();
+      companionFiles.push({ suffix, name, download_url: url });
+    });
 
     this.datasetNav.innerHTML = "";
     this.datasetSelects = [];
 
-    const DATASETS = [
-      { label: "dataset", org: "VOLMAP", repo: "dataset", path: "" },
-      { label: "results", org: "VOLMAP", repo: "results", path: "" },
-    ];
-
-    const rootSelect = document.createElement('select');
-    rootSelect.className = 'dataset-select';
-    DATASETS.forEach((ds, i) => {
-      const option = document.createElement("option");
-      option.value = JSON.stringify({ type: "root", index: i });
-      option.textContent = ds.label;
-      if (ds.repo === repo) option.selected = true;
-      rootSelect.appendChild(option);
-    });
-    this.datasetNav.appendChild(rootSelect);
-    this.datasetSelects.push(rootSelect);
-    rootSelect.onchange = this.handleDatasetChange.bind(this);
-
-    if (companionFiles.length === 0) {
-      const span = document.createElement("span");
-      span.textContent = `No file for "${prefix}"`;
-      this.datasetNav.appendChild(span);
-      return;
-    }
-
     const select = document.createElement("select");
     select.className = "dataset-select";
 
-    const ph = document.createElement("option");
-    ph.value = "";
-    ph.textContent = "select";
-    select.appendChild(ph);
+    const placeholder = document.createElement("option");
+    placeholder.value = "";
+    placeholder.textContent = companionFiles.length > 0 ? "companion" : "no companion";
+    select.appendChild(placeholder);
 
-    companionFiles
-      .sort((a, b) => a.name.localeCompare(b.name))
-      .forEach(f => {
-        const opt = document.createElement("option");
-        opt.value = JSON.stringify({ download_url: f.download_url, name: f.name });
-        opt.textContent = f.name;
-        select.appendChild(opt);
-      });
+    companionFiles.forEach(f => {
+      const option = document.createElement("option");
+      option.value = JSON.stringify(f);
+      option.textContent = `${f.suffix}`;
+      select.appendChild(option);
+    });
 
     select.onchange = function () {
       if (!this.value) return;
@@ -515,8 +522,50 @@ export class MeshController {
 
     this.datasetNav.appendChild(select);
     this.datasetSelects.push(select);
+
+    if (companionFiles.length > 0) {
+      const first = companionFiles[0];
+      select.value = JSON.stringify(first);
+      volumeMesh.loadRemoteMesh(first.download_url, first.name);
+    }
   }
 
+
+  async populateResultsCompanion(parentPath, fileName, selectedUrl, volumeMesh) {
+    const data = this.datasetIndex[RESULTS_REPO];
+    if (!data) return;
+
+    const files = data[parentPath] || [];
+
+    const isInput = /_(input)\.(mesh|vtk)$/i.test(fileName);
+    const isOutput = /_(output)\.(mesh|vtk)$/i.test(fileName);
+    if (!isInput && !isOutput) return;
+
+    const prefix = fileName
+      .replace(/_(input|output)\.(mesh|vtk)$/i, "");
+
+    const oppositeType = isInput ? "output" : "input";
+    const companion = files.find(f => {
+      const nameNoExt = f.name.replace(/\.(mesh|vtk)$/i, "");
+      return nameNoExt === `${prefix}_${oppositeType}`;
+    });
+
+    this.datasetNav.innerHTML = "";
+    this.datasetSelects = new Array();
+
+    if (companion) {
+      const label = document.createElement("span");
+      label.className = "dataset-companion-label";
+      label.textContent = `${companion.path}`;
+      this.datasetNav.appendChild(label);
+      volumeMesh.loadRemoteMesh(companion.download_url, companion.name);
+    } else {
+      const label = document.createElement("span");
+      label.className = "dataset-companion-label";
+      label.textContent = "no companion";
+      this.datasetNav.appendChild(label);
+    }
+  }
 
   restrictToVolOnly() {
     this.isVolOnly = true;
