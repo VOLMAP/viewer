@@ -4,7 +4,7 @@ import { ArcballControls } from "../../../libs/three/addons/controls/ArcballCont
 
 const defaultFOV = 50;
 const defaultFar = 1000;
-const defaultNear = 0.1;
+const defaultNear = 0.01;
 
 export class MeshRenderer {
   canvasContainer = null;
@@ -27,7 +27,7 @@ export class MeshRenderer {
 
   volumeMesh = null;
 
-    autoCameraEnabled = true;
+  autoCameraEnabled = true;
 
   debugEnabled = false;
   debugObjects = [];
@@ -43,6 +43,7 @@ export class MeshRenderer {
     this.setCameraAndLight();
     this.setAxisAndControls();
     this.updateLightAndAxis();
+    this.setDoubleClickPivot();
   }
 
   updateMesh() {
@@ -212,7 +213,33 @@ export class MeshRenderer {
     this.updateLightAndAxis();
     this.camera.updateProjectionMatrix();
   }
-  
+
+  setDoubleClickPivot() {
+    this.controls.enableFocus = false;
+
+    this.renderer.domElement.addEventListener("dblclick", (event) => {
+      const rect = this.renderer.domElement.getBoundingClientRect();
+
+      const mouse = new THREE.Vector2(
+        ((event.clientX - rect.left) / rect.width) * 2 - 1,
+        -((event.clientY - rect.top) / rect.height) * 2 + 1
+      );
+
+      const raycaster = new THREE.Raycaster();
+      raycaster.setFromCamera(mouse, this.camera);
+
+      const intersects = raycaster.intersectObject(this.volumeMesh.mesh, true);
+
+      if (intersects.length > 0) {
+        this.controls.focus(intersects[0].point, 2);
+
+        this.controls._cameraMatrixState.copy(this.camera.matrix);
+        this.controls._gizmoMatrixState.copy(this.controls._gizmos.matrix);
+        this.controls._tbRadius = this.controls.calculateTbRadius(this.camera);
+      }
+    });
+  }
+
   toggleAutoCamera(flag) {
     this.autoCameraEnabled = flag;
   }

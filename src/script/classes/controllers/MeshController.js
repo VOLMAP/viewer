@@ -455,6 +455,11 @@ export class MeshController {
       volumeMesh.meshRenderer.resetControl();
       volumeMesh.controller.resetControl();
     };
+    window.addEventListener("keydown", (event) => {
+      if (event.key === "r" || event.key === "R") {
+        this.resetControlButton.click();
+      }
+    });
     Array.from(this.diggerModeInputs).forEach(function (radio) {
       radio.onchange = function () {
         volumeMesh.setDiggerMode(this.value);
