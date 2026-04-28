@@ -383,6 +383,14 @@ export class VolumeMesh {
       } catch (error) {
         console.error("Error loading .vtk file:", error);
       }
+    } else if (fileFormat === "ovm") {
+      const loader = new MeshLoader();
+      this.loadedFileType = "ovm";
+      try {
+        mesh = await loader.loadOVM(file);
+      } catch (error) {
+        console.error("Error loading .ovm file:", error);
+      }
     } else if (fileFormat === "txt") {
       const loader = new MeshLoader();
       this.loadedFileType = "txt";
@@ -520,7 +528,7 @@ export class VolumeMesh {
   }
 
   updateMeshLabels(isMismatch = false) {
-    const isVolMesh = (t) => t === "mesh" || t === "vtk";
+    const isVolMesh = (t) => t === "mesh" || t === "vtk" || t === "ovm";
 
     const mesh1 = this.volumeMap.volumeMesh1;
     const mesh2 = this.volumeMap.volumeMesh2;

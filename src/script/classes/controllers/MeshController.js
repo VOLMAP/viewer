@@ -177,7 +177,7 @@ export class MeshController {
 
 
         if (isDatasetRepo && isFromG1) {
-          const prefix = item.name.replace(/\.(mesh|vtk)$/, "");
+          const prefix = item.name.replace(/\.(mesh|vtk|ovm)$/, "");
           if (mesh2Controller) {
             mesh2Controller.populateDatasetCompanion(
               controller.activeDataset.repo,
@@ -233,7 +233,7 @@ export class MeshController {
 
         if (parts.length === 0) {
           data[key].forEach(file => {
-            if (!file.name.match(/\.(mesh|vtk)$/)) return;
+            if (!file.name.match(/\.(mesh|vtk|ovm)$/)) return;
 
             const option = document.createElement("option");
             option.value = JSON.stringify({
@@ -251,7 +251,10 @@ export class MeshController {
           const dirName = parts[0];
           const dirPath = path ? `${path}/${dirName}` : dirName;
 
+          if (select.querySelector(`option[data-dir="${dirName}"]`)) return;
+
           const option = document.createElement("option");
+          option.dataset.dir = dirName;
           option.value = JSON.stringify({
             type: "dir",
             repo,
@@ -485,7 +488,7 @@ export class MeshController {
     if (!data) return;
 
     const g1Files = data[DATASET_G1] || [];
-    const meshFile = g1Files.find(f => f.name.replace(/\.(mesh|vtk)$/, "") === prefix);
+    const meshFile = g1Files.find(f => f.name.replace(/\.(mesh|vtk|ovm)$/, "") === prefix);
     if (!meshFile) return;
 
     const companionFiles = [];
@@ -537,16 +540,16 @@ export class MeshController {
 
     const files = data[parentPath] || [];
 
-    const isInput = /_(input)\.(mesh|vtk)$/i.test(fileName);
-    const isOutput = /_(output)\.(mesh|vtk)$/i.test(fileName);
+    const isInput = /_(input)\.(mesh|vtk|ovm)$/i.test(fileName);
+    const isOutput = /_(output)\.(mesh|vtk|ovm)$/i.test(fileName);
     if (!isInput && !isOutput) return;
 
     const prefix = fileName
-      .replace(/_(input|output)\.(mesh|vtk)$/i, "");
+      .replace(/_(input|output)\.(mesh|vtk|ovm)$/i, "");
 
     const oppositeType = isInput ? "output" : "input";
     const companion = files.find(f => {
-      const nameNoExt = f.name.replace(/\.(mesh|vtk)$/i, "");
+      const nameNoExt = f.name.replace(/\.(mesh|vtk|ovm)$/i, "");
       return nameNoExt === `${prefix}_${oppositeType}`;
     });
 
@@ -569,7 +572,7 @@ export class MeshController {
 
   restrictToVolOnly() {
     this.isVolOnly = true;
-    this.meshInput.accept = ".mesh, .vtk";
+    this.meshInput.accept = ".mesh, .vtk, .ovm";
   }
 
   toggleSlicerContainer(flag) {
