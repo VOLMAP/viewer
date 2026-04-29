@@ -335,9 +335,7 @@ export class MapViewer {
 
   setDegenerateColorActive(flag) {
     this.isDegenerateColorActive = flag;
-    if (this.isDegenerateColorActive) {
-      this.updateGradient();
-    }
+    this.updateGradient();
   }
 
   setDegenerateColor(color) {

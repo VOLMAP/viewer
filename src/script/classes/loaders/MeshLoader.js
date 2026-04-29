@@ -170,6 +170,166 @@ export class MeshLoader {
     return new THREE.Mesh(geometry);
   }
 
+  async loadOVM(file) {
+    const text = await file.text();
+    const lines = text.split(/\r?\n/);
+
+    let lineIndex = 0;
+
+    let header = null;
+
+    var vertices = new Array();
+    var numVertices = 0;
+    var edges = new Array();        
+    var numEdges = 0;
+    var faces = new Array(); 
+    var triangles = new Array();       
+    var numFaces = 0;
+    var polyhedra = new Array();
+    var numPolyhedra = 0;
+    var tetrahedra = new Array();    
+    var numTetrahedra = 0;
+
+
+    var adjacencyMap = new Map();
+
+    function nextLine() {
+      while (lineIndex < lines.length) {
+        const newLine = lines[lineIndex].trim();
+        lineIndex++;
+        if (newLine.length > 0) {
+          return newLine;
+        }
+      }
+
+      return null;
+    }
+
+
+    header = nextLine();
+    if (!header || !header.startsWith("OVM")) {
+      throw new Error("Not a valid OVM file");
+    }
+    if(header.includes("BINARY")){
+      throw new Error("OVM binary files are not supported");
+    }
+
+    var line;
+
+    while ((line = nextLine()) !== null) {
+      //Split the line into tokens
+      var tokens = line.split(/\s+/);
+
+      if (tokens[0] === "Vertices") {
+        numVertices = parseInt(nextLine());
+        for (let i = 0; i < numVertices; i++) {
+          const cell = nextLine().split(/\s+/);
+          vertices.push(parseFloat(cell[0]));
+          vertices.push(parseFloat(cell[1]));
+          vertices.push(parseFloat(cell[2]));
+        }
+      } else if (tokens[0] === "Edges") {
+        numEdges = parseInt(nextLine());
+        for (let i = 0; i < numEdges; i++) {
+          const parts = nextLine().split(/\s+/);
+          edges.push([parseInt(parts[0]), parseInt(parts[1])]);
+        }
+      } else if (tokens[0] === "Faces") {
+        numFaces = parseInt(nextLine());
+        for (let i = 0; i < numFaces; i++) {
+          const parts = nextLine().split(/\s+/);
+          const count = parseInt(parts[0]);
+          const halfEdges = new Array;
+          for (let k = 1; k <= count; k++) {
+            halfEdges.push(parseInt(parts[k]));
+          }
+          faces.push(halfEdges);
+        }
+      } else if (tokens[0] === "Polyhedra") {
+        numPolyhedra = parseInt(nextLine());
+        for (let i = 0; i < numPolyhedra; i++) {
+          const parts = nextLine().split(/\s+/);
+          const count = parseInt(parts[0]);
+          const halfFaces = new Array();
+          for (let k = 1; k <= count; k++) {
+            halfFaces.push(parseInt(parts[k]));
+          }
+          polyhedra.push(halfFaces);
+        }
+      }
+    }
+
+    for (let i = 0; i < polyhedra.length; i++) {
+      const halfFaces = polyhedra[i];
+      if (halfFaces.length !== 4) continue;
+
+      const vertexSet = new Set();
+
+      for (const hf of halfFaces) {
+        const faceIdx = Math.floor(hf / 2);
+        const halfEdgeList = faces[faceIdx];
+
+        for (const he of halfEdgeList) {
+          const edgeIdx = Math.floor(he / 2);
+          const edge = edges[edgeIdx];
+          vertexSet.add(edge[0]);
+          vertexSet.add(edge[1]);
+        }
+      }
+
+      if (vertexSet.size !== 4) continue;
+
+      const [v0, v1, v2, v3] = [...vertexSet];
+
+  
+      tetrahedra.push(v1, v0, v2, v3);
+    }
+
+    numTetrahedra = tetrahedra.length / 4;
+
+    if (!numVertices) {
+      throw new Error("No vertices found in this file.")
+    }
+    if (!numTetrahedra) {
+      throw new Error("No tetrahedra found in this file.")
+    }
+    if (vertices.length !== numVertices * 3){
+      throw new Error("Dimension not matching (vertices)");
+    }
+    if (tetrahedra.length !== numTetrahedra * 4){
+      throw new Error("Dimension not matching (tetrahedra)");
+    }
+      
+
+
+    const tmp = this.generateTrianglesAndAdjacencyMap(tetrahedra);
+    triangles = tmp.triangles;
+    adjacencyMap = tmp.adjacencyMap;
+
+    const triangleSoup = this.generateTriangleSoup(vertices, triangles);
+
+    const geometry = new THREE.BufferGeometry();
+    const positionAttribute = new THREE.BufferAttribute(
+      new Float32Array(triangleSoup), 3
+    );
+    geometry.setAttribute("position", positionAttribute);
+
+    geometry.userData = {
+      vertices,
+      triangles,
+      tetrahedra,
+      triangleSoup,
+      adjacencyMap,
+      polyCentroids: null,
+      polyColor: null,
+      polyDistortion: null,
+      clampedPolyDistortion: null,
+    };
+
+    return new THREE.Mesh(geometry);
+  
+  }
+
   async loadVTK(file) {
     const text = await file.text();
     const lines = text.split(/\r?\n/);
@@ -184,7 +344,6 @@ export class MeshLoader {
     var vertices = new Array();
     var numVertices = 0;
     var triangles = new Array();
-    var numTriangles = 0;
     var tetrahedra = new Array();
     var numTetrahedra = 0;
 
@@ -229,6 +388,9 @@ export class MeshLoader {
         numVertices = parseInt(tokens[1]);
         for (let i = 0; i < numVertices; i++) {
           line = nextLine();
+          if (line === null) {
+            throw new Error("Not enough vertices in this file");
+          }
           const vertex = line.split(/\s+/);
           for (let k = 0; k < 3; k++) {
             vertices.push(parseFloat(vertex[k]));
@@ -238,6 +400,9 @@ export class MeshLoader {
         numCells = parseInt(tokens[1]);
         for (let i = 0; i < numCells; i++) {
           line = nextLine();
+          if (line === null) {
+            throw new Error("Not enough cells in this file");
+          }
           const cell = line.split(/\s+/);
           const count = parseInt(cell[0]);
           var ids = new Array();
@@ -250,6 +415,9 @@ export class MeshLoader {
         numCellTypes = parseInt(tokens[1]);
         for (let i = 0; i < numCellTypes; i++) {
           line = nextLine();
+          if (line === null) {
+            throw new Error("Not enough cell types in this file");
+          }
           const cellType = line.split(/\s+/);
           cellTypes.push(parseInt(cellType[0]));
         }
@@ -283,7 +451,7 @@ export class MeshLoader {
     if (tetrahedra.length !== numTetrahedra * 4) {
       throw new Error("Dimension not matching (tetrahedra)");
     }
-    
+
     //Generate triangles and adjacency map from tetrahedra
     const tmp = this.generateTrianglesAndAdjacencyMap(tetrahedra);
     triangles = tmp.triangles;
@@ -301,6 +469,78 @@ export class MeshLoader {
       tetrahedra: tetrahedra,
       triangleSoup: triangleSoup,
       adjacencyMap: adjacencyMap,
+      polyCentroids: null,
+      polyColor: null,
+      polyDistortion: null,
+      clampedPolyDistortion: null,
+    };
+
+    return new THREE.Mesh(geometry);
+  }
+
+  async loadTxt(file) {
+    const text = await file.text();
+    const lines = text.split(/\r?\n/);
+
+    let lineIndex = 0;
+
+    var vertices = new Array();
+    var numVertices = 0;
+    var verticesIds = new Array();
+
+    function nextLine() {
+      while (lineIndex < lines.length) {
+        const newLine = lines[lineIndex].trim();
+        lineIndex++;
+        if (newLine.length > 0) {
+          return newLine;
+        }
+      }
+
+      return null;
+    }
+
+    var line;
+
+    while ((line = nextLine()) !== null) {
+      //Split the line into tokens
+      var tokens = line.split(/\s+/);
+
+      const id = parseInt(tokens[0]);
+      const x = parseFloat(tokens[1]);
+      const y = parseFloat(tokens[2]);
+      const z = parseFloat(tokens[3]);
+
+      vertices.push(x, y, z);
+      numVertices++;
+      verticesIds.push(id);
+
+    }
+
+    if (!numVertices) {
+      throw new Error("No vertices found in this file.");
+    }
+
+    if (vertices.length !== numVertices * 3) {
+      throw new Error("Dimension not matching (vertices)");
+    }
+
+    if (verticesIds.length !== numVertices ) {
+      throw new Error("Dimension not matching (verticesIds)");
+    }
+
+
+    const geometry = new THREE.BufferGeometry();
+    const positionAttribute = new THREE.BufferAttribute(new Float32Array(vertices), 3);
+    geometry.setAttribute("position", positionAttribute);
+
+    geometry.userData = {
+      vertices: vertices,
+      verticesIds: verticesIds,
+      triangles: null,
+      tetrahedra: null,
+      triangleSoup: null,
+      adjacencyMap: null,
       polyCentroids: null,
       polyColor: null,
       polyDistortion: null,

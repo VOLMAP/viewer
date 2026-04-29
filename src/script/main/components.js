@@ -30,6 +30,12 @@ async function initializeComponents() {
 
   mainMenu.innerHTML = meshSettings1 + mapSettings + meshSettings2;
   doubleCanvas.innerHTML = canvas1 + distortionSlicerSettings + canvas2;
+
+  const mismatchLabel = document.createElement("div");
+  mismatchLabel.id = "mismatch-label";
+  mismatchLabel.className = "mismatch-label hidden";
+  mismatchLabel.innerHTML = `<p class="mismatch-label-text"></p>`;
+  doubleCanvas.appendChild(mismatchLabel);
   statusBar.innerHTML = statusBarContent;
   // Set up dropdown menus
   const dropdowns = Array.from(mainMenu.getElementsByClassName("dropdown"));

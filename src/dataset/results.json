@@ -1,0 +1,1188 @@
+{
+  "results": {
+    "G1_EC/G1_EC_cube_map": [
+      {
+        "name": "bimba_input.mesh",
+        "path": "G1_EC/G1_EC_cube_map/bimba_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_EC/G1_EC_cube_map/bimba_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_EC/G1_EC_cube_map/bimba_output.mesh"
+      },
+      {
+        "name": "bimba_output.mesh",
+        "path": "G1_EC/G1_EC_cube_map/bimba_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_EC/G1_EC_cube_map/bimba_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_EC/G1_EC_cube_map/bimba_input.mesh"
+      },
+      {
+        "name": "bone_input.mesh",
+        "path": "G1_EC/G1_EC_cube_map/bone_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_EC/G1_EC_cube_map/bone_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_EC/G1_EC_cube_map/bone_output.mesh"
+      },
+      {
+        "name": "bone_output.mesh",
+        "path": "G1_EC/G1_EC_cube_map/bone_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_EC/G1_EC_cube_map/bone_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_EC/G1_EC_cube_map/bone_input.mesh"
+      },
+      {
+        "name": "foot_input.mesh",
+        "path": "G1_EC/G1_EC_cube_map/foot_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_EC/G1_EC_cube_map/foot_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_EC/G1_EC_cube_map/foot_output.mesh"
+      },
+      {
+        "name": "foot_output.mesh",
+        "path": "G1_EC/G1_EC_cube_map/foot_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_EC/G1_EC_cube_map/foot_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_EC/G1_EC_cube_map/foot_input.mesh"
+      }
+    ],
+    "G1_EC/G1_EC_octa_map": [
+      {
+        "name": "bone_input.mesh",
+        "path": "G1_EC/G1_EC_octa_map/bone_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_EC/G1_EC_octa_map/bone_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_EC/G1_EC_octa_map/bone_output.mesh"
+      },
+      {
+        "name": "bone_output.mesh",
+        "path": "G1_EC/G1_EC_octa_map/bone_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_EC/G1_EC_octa_map/bone_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_EC/G1_EC_octa_map/bone_input.mesh"
+      },
+      {
+        "name": "foot_input.mesh",
+        "path": "G1_EC/G1_EC_octa_map/foot_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_EC/G1_EC_octa_map/foot_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_EC/G1_EC_octa_map/foot_output.mesh"
+      },
+      {
+        "name": "foot_output.mesh",
+        "path": "G1_EC/G1_EC_octa_map/foot_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_EC/G1_EC_octa_map/foot_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_EC/G1_EC_octa_map/foot_input.mesh"
+      }
+    ],
+    "G1_EC/G1_EC_pyr_map": [
+      {
+        "name": "bone_input.mesh",
+        "path": "G1_EC/G1_EC_pyr_map/bone_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_EC/G1_EC_pyr_map/bone_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_EC/G1_EC_pyr_map/bone_output.mesh"
+      },
+      {
+        "name": "bone_output.mesh",
+        "path": "G1_EC/G1_EC_pyr_map/bone_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_EC/G1_EC_pyr_map/bone_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_EC/G1_EC_pyr_map/bone_input.mesh"
+      }
+    ],
+    "G1_EC/G1_EC_star_map": [
+      {
+        "name": "bone_input.mesh",
+        "path": "G1_EC/G1_EC_star_map/bone_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_EC/G1_EC_star_map/bone_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_EC/G1_EC_star_map/bone_output.mesh"
+      },
+      {
+        "name": "bone_output.mesh",
+        "path": "G1_EC/G1_EC_star_map/bone_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_EC/G1_EC_star_map/bone_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_EC/G1_EC_star_map/bone_input.mesh"
+      }
+    ],
+    "G1_EC/G1_EC_tet_map": [
+      {
+        "name": "bimba_input.mesh",
+        "path": "G1_EC/G1_EC_tet_map/bimba_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_EC/G1_EC_tet_map/bimba_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_EC/G1_EC_tet_map/bimba_output.mesh"
+      },
+      {
+        "name": "bimba_output.mesh",
+        "path": "G1_EC/G1_EC_tet_map/bimba_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_EC/G1_EC_tet_map/bimba_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_EC/G1_EC_tet_map/bimba_input.mesh"
+      },
+      {
+        "name": "bone_input.mesh",
+        "path": "G1_EC/G1_EC_tet_map/bone_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_EC/G1_EC_tet_map/bone_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_EC/G1_EC_tet_map/bone_output.mesh"
+      },
+      {
+        "name": "bone_output.mesh",
+        "path": "G1_EC/G1_EC_tet_map/bone_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_EC/G1_EC_tet_map/bone_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_EC/G1_EC_tet_map/bone_input.mesh"
+      },
+      {
+        "name": "bunny_input.mesh",
+        "path": "G1_EC/G1_EC_tet_map/bunny_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_EC/G1_EC_tet_map/bunny_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_EC/G1_EC_tet_map/bunny_output.mesh"
+      },
+      {
+        "name": "bunny_output.mesh",
+        "path": "G1_EC/G1_EC_tet_map/bunny_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_EC/G1_EC_tet_map/bunny_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_EC/G1_EC_tet_map/bunny_input.mesh"
+      },
+      {
+        "name": "foot_input.mesh",
+        "path": "G1_EC/G1_EC_tet_map/foot_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_EC/G1_EC_tet_map/foot_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_EC/G1_EC_tet_map/foot_output.mesh"
+      },
+      {
+        "name": "foot_output.mesh",
+        "path": "G1_EC/G1_EC_tet_map/foot_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_EC/G1_EC_tet_map/foot_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_EC/G1_EC_tet_map/foot_input.mesh"
+      },
+      {
+        "name": "octa_flower_input.mesh",
+        "path": "G1_EC/G1_EC_tet_map/octa_flower_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_EC/G1_EC_tet_map/octa_flower_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_EC/G1_EC_tet_map/octa_flower_output.mesh"
+      },
+      {
+        "name": "octa_flower_output.mesh",
+        "path": "G1_EC/G1_EC_tet_map/octa_flower_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_EC/G1_EC_tet_map/octa_flower_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_EC/G1_EC_tet_map/octa_flower_input.mesh"
+      }
+    ],
+    "G1_GM/G1_GM_cube_map": [
+      {
+        "name": "bimba_input.mesh",
+        "path": "G1_GM/G1_GM_cube_map/bimba_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/bimba_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/bimba_output.mesh"
+      },
+      {
+        "name": "bimba_output.mesh",
+        "path": "G1_GM/G1_GM_cube_map/bimba_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/bimba_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/bimba_input.mesh"
+      },
+      {
+        "name": "bird_input.mesh",
+        "path": "G1_GM/G1_GM_cube_map/bird_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/bird_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/bird_output.mesh"
+      },
+      {
+        "name": "bird_output.mesh",
+        "path": "G1_GM/G1_GM_cube_map/bird_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/bird_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/bird_input.mesh"
+      },
+      {
+        "name": "blade_input.mesh",
+        "path": "G1_GM/G1_GM_cube_map/blade_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/blade_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/blade_output.mesh"
+      },
+      {
+        "name": "blade_output.mesh",
+        "path": "G1_GM/G1_GM_cube_map/blade_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/blade_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/blade_input.mesh"
+      },
+      {
+        "name": "bone_input.mesh",
+        "path": "G1_GM/G1_GM_cube_map/bone_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/bone_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/bone_output.mesh"
+      },
+      {
+        "name": "bone_output.mesh",
+        "path": "G1_GM/G1_GM_cube_map/bone_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/bone_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/bone_input.mesh"
+      },
+      {
+        "name": "bumpy_sphere_input.mesh",
+        "path": "G1_GM/G1_GM_cube_map/bumpy_sphere_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/bumpy_sphere_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/bumpy_sphere_output.mesh"
+      },
+      {
+        "name": "bumpy_sphere_output.mesh",
+        "path": "G1_GM/G1_GM_cube_map/bumpy_sphere_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/bumpy_sphere_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/bumpy_sphere_input.mesh"
+      },
+      {
+        "name": "bunny_input.mesh",
+        "path": "G1_GM/G1_GM_cube_map/bunny_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/bunny_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/bunny_output.mesh"
+      },
+      {
+        "name": "bunny_output.mesh",
+        "path": "G1_GM/G1_GM_cube_map/bunny_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/bunny_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/bunny_input.mesh"
+      },
+      {
+        "name": "buste_input.mesh",
+        "path": "G1_GM/G1_GM_cube_map/buste_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/buste_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/buste_output.mesh"
+      },
+      {
+        "name": "buste_output.mesh",
+        "path": "G1_GM/G1_GM_cube_map/buste_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/buste_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/buste_input.mesh"
+      },
+      {
+        "name": "camile_hand_input.mesh",
+        "path": "G1_GM/G1_GM_cube_map/camile_hand_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/camile_hand_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/camile_hand_output.mesh"
+      },
+      {
+        "name": "camile_hand_output.mesh",
+        "path": "G1_GM/G1_GM_cube_map/camile_hand_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/camile_hand_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/camile_hand_input.mesh"
+      },
+      {
+        "name": "chinese_dragon_input.mesh",
+        "path": "G1_GM/G1_GM_cube_map/chinese_dragon_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/chinese_dragon_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/chinese_dragon_output.mesh"
+      },
+      {
+        "name": "chinese_dragon_output.mesh",
+        "path": "G1_GM/G1_GM_cube_map/chinese_dragon_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/chinese_dragon_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/chinese_dragon_input.mesh"
+      },
+      {
+        "name": "david_input.mesh",
+        "path": "G1_GM/G1_GM_cube_map/david_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/david_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/david_output.mesh"
+      },
+      {
+        "name": "david_output.mesh",
+        "path": "G1_GM/G1_GM_cube_map/david_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/david_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/david_input.mesh"
+      },
+      {
+        "name": "devil_input.mesh",
+        "path": "G1_GM/G1_GM_cube_map/devil_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/devil_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/devil_output.mesh"
+      },
+      {
+        "name": "devil_output.mesh",
+        "path": "G1_GM/G1_GM_cube_map/devil_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/devil_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/devil_input.mesh"
+      },
+      {
+        "name": "dilo_input.mesh",
+        "path": "G1_GM/G1_GM_cube_map/dilo_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/dilo_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/dilo_output.mesh"
+      },
+      {
+        "name": "dilo_output.mesh",
+        "path": "G1_GM/G1_GM_cube_map/dilo_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/dilo_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/dilo_input.mesh"
+      },
+      {
+        "name": "duck_input.mesh",
+        "path": "G1_GM/G1_GM_cube_map/duck_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/duck_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/duck_output.mesh"
+      },
+      {
+        "name": "duck_output.mesh",
+        "path": "G1_GM/G1_GM_cube_map/duck_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/duck_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/duck_input.mesh"
+      },
+      {
+        "name": "foot_input.mesh",
+        "path": "G1_GM/G1_GM_cube_map/foot_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/foot_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/foot_output.mesh"
+      },
+      {
+        "name": "foot_output.mesh",
+        "path": "G1_GM/G1_GM_cube_map/foot_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/foot_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/foot_input.mesh"
+      },
+      {
+        "name": "gargoyle_input.mesh",
+        "path": "G1_GM/G1_GM_cube_map/gargoyle_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/gargoyle_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/gargoyle_output.mesh"
+      },
+      {
+        "name": "gargoyle_output.mesh",
+        "path": "G1_GM/G1_GM_cube_map/gargoyle_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/gargoyle_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/gargoyle_input.mesh"
+      },
+      {
+        "name": "hand_input.mesh",
+        "path": "G1_GM/G1_GM_cube_map/hand_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/hand_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/hand_output.mesh"
+      },
+      {
+        "name": "hand_output.mesh",
+        "path": "G1_GM/G1_GM_cube_map/hand_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/hand_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/hand_input.mesh"
+      },
+      {
+        "name": "homer_input.mesh",
+        "path": "G1_GM/G1_GM_cube_map/homer_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/homer_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/homer_output.mesh"
+      },
+      {
+        "name": "homer_output.mesh",
+        "path": "G1_GM/G1_GM_cube_map/homer_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/homer_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/homer_input.mesh"
+      },
+      {
+        "name": "isidora_horse_input.mesh",
+        "path": "G1_GM/G1_GM_cube_map/isidora_horse_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/isidora_horse_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/isidora_horse_output.mesh"
+      },
+      {
+        "name": "isidora_horse_output.mesh",
+        "path": "G1_GM/G1_GM_cube_map/isidora_horse_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/isidora_horse_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/isidora_horse_input.mesh"
+      },
+      {
+        "name": "moai_input.mesh",
+        "path": "G1_GM/G1_GM_cube_map/moai_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/moai_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/moai_output.mesh"
+      },
+      {
+        "name": "moai_output.mesh",
+        "path": "G1_GM/G1_GM_cube_map/moai_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/moai_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/moai_input.mesh"
+      },
+      {
+        "name": "mouse_input.mesh",
+        "path": "G1_GM/G1_GM_cube_map/mouse_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/mouse_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/mouse_output.mesh"
+      },
+      {
+        "name": "mouse_output.mesh",
+        "path": "G1_GM/G1_GM_cube_map/mouse_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/mouse_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/mouse_input.mesh"
+      },
+      {
+        "name": "octa_flower_input.mesh",
+        "path": "G1_GM/G1_GM_cube_map/octa_flower_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/octa_flower_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/octa_flower_output.mesh"
+      },
+      {
+        "name": "octa_flower_output.mesh",
+        "path": "G1_GM/G1_GM_cube_map/octa_flower_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/octa_flower_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/octa_flower_input.mesh"
+      },
+      {
+        "name": "pig_input.mesh",
+        "path": "G1_GM/G1_GM_cube_map/pig_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/pig_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/pig_output.mesh"
+      },
+      {
+        "name": "pig_output.mesh",
+        "path": "G1_GM/G1_GM_cube_map/pig_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/pig_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/pig_input.mesh"
+      },
+      {
+        "name": "ramses_input.mesh",
+        "path": "G1_GM/G1_GM_cube_map/ramses_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/ramses_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/ramses_output.mesh"
+      },
+      {
+        "name": "ramses_output.mesh",
+        "path": "G1_GM/G1_GM_cube_map/ramses_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/ramses_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/ramses_input.mesh"
+      },
+      {
+        "name": "sphinx_input.mesh",
+        "path": "G1_GM/G1_GM_cube_map/sphinx_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/sphinx_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/sphinx_output.mesh"
+      },
+      {
+        "name": "sphinx_output.mesh",
+        "path": "G1_GM/G1_GM_cube_map/sphinx_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/sphinx_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_cube_map/sphinx_input.mesh"
+      }
+    ],
+    "G1_GM/G1_GM_octa_map": [
+      {
+        "name": "bimba_input.mesh",
+        "path": "G1_GM/G1_GM_octa_map/bimba_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/bimba_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/bimba_output.mesh"
+      },
+      {
+        "name": "bimba_output.mesh",
+        "path": "G1_GM/G1_GM_octa_map/bimba_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/bimba_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/bimba_input.mesh"
+      },
+      {
+        "name": "bird_input.mesh",
+        "path": "G1_GM/G1_GM_octa_map/bird_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/bird_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/bird_output.mesh"
+      },
+      {
+        "name": "bird_output.mesh",
+        "path": "G1_GM/G1_GM_octa_map/bird_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/bird_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/bird_input.mesh"
+      },
+      {
+        "name": "blade_input.mesh",
+        "path": "G1_GM/G1_GM_octa_map/blade_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/blade_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/blade_output.mesh"
+      },
+      {
+        "name": "blade_output.mesh",
+        "path": "G1_GM/G1_GM_octa_map/blade_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/blade_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/blade_input.mesh"
+      },
+      {
+        "name": "bone_input.mesh",
+        "path": "G1_GM/G1_GM_octa_map/bone_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/bone_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/bone_output.mesh"
+      },
+      {
+        "name": "bone_output.mesh",
+        "path": "G1_GM/G1_GM_octa_map/bone_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/bone_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/bone_input.mesh"
+      },
+      {
+        "name": "bumpy_sphere_input.mesh",
+        "path": "G1_GM/G1_GM_octa_map/bumpy_sphere_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/bumpy_sphere_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/bumpy_sphere_output.mesh"
+      },
+      {
+        "name": "bumpy_sphere_output.mesh",
+        "path": "G1_GM/G1_GM_octa_map/bumpy_sphere_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/bumpy_sphere_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/bumpy_sphere_input.mesh"
+      },
+      {
+        "name": "buste_input.mesh",
+        "path": "G1_GM/G1_GM_octa_map/buste_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/buste_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/buste_output.mesh"
+      },
+      {
+        "name": "buste_output.mesh",
+        "path": "G1_GM/G1_GM_octa_map/buste_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/buste_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/buste_input.mesh"
+      },
+      {
+        "name": "chinese_dragon_input.mesh",
+        "path": "G1_GM/G1_GM_octa_map/chinese_dragon_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/chinese_dragon_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/chinese_dragon_output.mesh"
+      },
+      {
+        "name": "chinese_dragon_output.mesh",
+        "path": "G1_GM/G1_GM_octa_map/chinese_dragon_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/chinese_dragon_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/chinese_dragon_input.mesh"
+      },
+      {
+        "name": "david_input.mesh",
+        "path": "G1_GM/G1_GM_octa_map/david_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/david_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/david_output.mesh"
+      },
+      {
+        "name": "david_output.mesh",
+        "path": "G1_GM/G1_GM_octa_map/david_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/david_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/david_input.mesh"
+      },
+      {
+        "name": "devil_input.mesh",
+        "path": "G1_GM/G1_GM_octa_map/devil_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/devil_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/devil_output.mesh"
+      },
+      {
+        "name": "devil_output.mesh",
+        "path": "G1_GM/G1_GM_octa_map/devil_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/devil_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/devil_input.mesh"
+      },
+      {
+        "name": "duck_input.mesh",
+        "path": "G1_GM/G1_GM_octa_map/duck_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/duck_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/duck_output.mesh"
+      },
+      {
+        "name": "duck_output.mesh",
+        "path": "G1_GM/G1_GM_octa_map/duck_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/duck_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/duck_input.mesh"
+      },
+      {
+        "name": "foot_input.mesh",
+        "path": "G1_GM/G1_GM_octa_map/foot_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/foot_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/foot_output.mesh"
+      },
+      {
+        "name": "foot_output.mesh",
+        "path": "G1_GM/G1_GM_octa_map/foot_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/foot_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/foot_input.mesh"
+      },
+      {
+        "name": "hand_input.mesh",
+        "path": "G1_GM/G1_GM_octa_map/hand_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/hand_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/hand_output.mesh"
+      },
+      {
+        "name": "hand_output.mesh",
+        "path": "G1_GM/G1_GM_octa_map/hand_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/hand_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/hand_input.mesh"
+      },
+      {
+        "name": "homer_input.mesh",
+        "path": "G1_GM/G1_GM_octa_map/homer_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/homer_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/homer_output.mesh"
+      },
+      {
+        "name": "homer_output.mesh",
+        "path": "G1_GM/G1_GM_octa_map/homer_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/homer_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/homer_input.mesh"
+      },
+      {
+        "name": "isidora_horse_input.mesh",
+        "path": "G1_GM/G1_GM_octa_map/isidora_horse_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/isidora_horse_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/isidora_horse_output.mesh"
+      },
+      {
+        "name": "isidora_horse_output.mesh",
+        "path": "G1_GM/G1_GM_octa_map/isidora_horse_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/isidora_horse_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/isidora_horse_input.mesh"
+      },
+      {
+        "name": "moai_input.mesh",
+        "path": "G1_GM/G1_GM_octa_map/moai_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/moai_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/moai_output.mesh"
+      },
+      {
+        "name": "moai_output.mesh",
+        "path": "G1_GM/G1_GM_octa_map/moai_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/moai_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/moai_input.mesh"
+      },
+      {
+        "name": "mouse_input.mesh",
+        "path": "G1_GM/G1_GM_octa_map/mouse_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/mouse_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/mouse_output.mesh"
+      },
+      {
+        "name": "mouse_output.mesh",
+        "path": "G1_GM/G1_GM_octa_map/mouse_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/mouse_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/mouse_input.mesh"
+      },
+      {
+        "name": "octa_flower_input.mesh",
+        "path": "G1_GM/G1_GM_octa_map/octa_flower_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/octa_flower_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/octa_flower_output.mesh"
+      },
+      {
+        "name": "octa_flower_output.mesh",
+        "path": "G1_GM/G1_GM_octa_map/octa_flower_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/octa_flower_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/octa_flower_input.mesh"
+      },
+      {
+        "name": "pig_input.mesh",
+        "path": "G1_GM/G1_GM_octa_map/pig_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/pig_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/pig_output.mesh"
+      },
+      {
+        "name": "pig_output.mesh",
+        "path": "G1_GM/G1_GM_octa_map/pig_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/pig_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/pig_input.mesh"
+      },
+      {
+        "name": "ramses_input.mesh",
+        "path": "G1_GM/G1_GM_octa_map/ramses_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/ramses_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/ramses_output.mesh"
+      },
+      {
+        "name": "ramses_output.mesh",
+        "path": "G1_GM/G1_GM_octa_map/ramses_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/ramses_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/ramses_input.mesh"
+      },
+      {
+        "name": "sphinx_input.mesh",
+        "path": "G1_GM/G1_GM_octa_map/sphinx_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/sphinx_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/sphinx_output.mesh"
+      },
+      {
+        "name": "sphinx_output.mesh",
+        "path": "G1_GM/G1_GM_octa_map/sphinx_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/sphinx_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_octa_map/sphinx_input.mesh"
+      }
+    ],
+    "G1_GM/G1_GM_pyr_map": [
+      {
+        "name": "bimba_input.mesh",
+        "path": "G1_GM/G1_GM_pyr_map/bimba_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/bimba_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/bimba_output.mesh"
+      },
+      {
+        "name": "bimba_output.mesh",
+        "path": "G1_GM/G1_GM_pyr_map/bimba_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/bimba_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/bimba_input.mesh"
+      },
+      {
+        "name": "bird_input.mesh",
+        "path": "G1_GM/G1_GM_pyr_map/bird_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/bird_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/bird_output.mesh"
+      },
+      {
+        "name": "bird_output.mesh",
+        "path": "G1_GM/G1_GM_pyr_map/bird_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/bird_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/bird_input.mesh"
+      },
+      {
+        "name": "bone_input.mesh",
+        "path": "G1_GM/G1_GM_pyr_map/bone_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/bone_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/bone_output.mesh"
+      },
+      {
+        "name": "bone_output.mesh",
+        "path": "G1_GM/G1_GM_pyr_map/bone_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/bone_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/bone_input.mesh"
+      },
+      {
+        "name": "bumpy_sphere_input.mesh",
+        "path": "G1_GM/G1_GM_pyr_map/bumpy_sphere_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/bumpy_sphere_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/bumpy_sphere_output.mesh"
+      },
+      {
+        "name": "bumpy_sphere_output.mesh",
+        "path": "G1_GM/G1_GM_pyr_map/bumpy_sphere_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/bumpy_sphere_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/bumpy_sphere_input.mesh"
+      },
+      {
+        "name": "buste_input.mesh",
+        "path": "G1_GM/G1_GM_pyr_map/buste_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/buste_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/buste_output.mesh"
+      },
+      {
+        "name": "buste_output.mesh",
+        "path": "G1_GM/G1_GM_pyr_map/buste_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/buste_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/buste_input.mesh"
+      },
+      {
+        "name": "chinese_dragon_input.mesh",
+        "path": "G1_GM/G1_GM_pyr_map/chinese_dragon_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/chinese_dragon_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/chinese_dragon_output.mesh"
+      },
+      {
+        "name": "chinese_dragon_output.mesh",
+        "path": "G1_GM/G1_GM_pyr_map/chinese_dragon_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/chinese_dragon_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/chinese_dragon_input.mesh"
+      },
+      {
+        "name": "david_input.mesh",
+        "path": "G1_GM/G1_GM_pyr_map/david_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/david_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/david_output.mesh"
+      },
+      {
+        "name": "david_output.mesh",
+        "path": "G1_GM/G1_GM_pyr_map/david_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/david_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/david_input.mesh"
+      },
+      {
+        "name": "devil_input.mesh",
+        "path": "G1_GM/G1_GM_pyr_map/devil_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/devil_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/devil_output.mesh"
+      },
+      {
+        "name": "devil_output.mesh",
+        "path": "G1_GM/G1_GM_pyr_map/devil_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/devil_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/devil_input.mesh"
+      },
+      {
+        "name": "duck_input.mesh",
+        "path": "G1_GM/G1_GM_pyr_map/duck_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/duck_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/duck_output.mesh"
+      },
+      {
+        "name": "duck_output.mesh",
+        "path": "G1_GM/G1_GM_pyr_map/duck_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/duck_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/duck_input.mesh"
+      },
+      {
+        "name": "foot_input.mesh",
+        "path": "G1_GM/G1_GM_pyr_map/foot_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/foot_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/foot_output.mesh"
+      },
+      {
+        "name": "foot_output.mesh",
+        "path": "G1_GM/G1_GM_pyr_map/foot_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/foot_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/foot_input.mesh"
+      },
+      {
+        "name": "gargoyle_input.mesh",
+        "path": "G1_GM/G1_GM_pyr_map/gargoyle_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/gargoyle_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/gargoyle_output.mesh"
+      },
+      {
+        "name": "gargoyle_output.mesh",
+        "path": "G1_GM/G1_GM_pyr_map/gargoyle_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/gargoyle_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/gargoyle_input.mesh"
+      },
+      {
+        "name": "hand_input.mesh",
+        "path": "G1_GM/G1_GM_pyr_map/hand_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/hand_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/hand_output.mesh"
+      },
+      {
+        "name": "hand_output.mesh",
+        "path": "G1_GM/G1_GM_pyr_map/hand_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/hand_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/hand_input.mesh"
+      },
+      {
+        "name": "homer_input.mesh",
+        "path": "G1_GM/G1_GM_pyr_map/homer_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/homer_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/homer_output.mesh"
+      },
+      {
+        "name": "homer_output.mesh",
+        "path": "G1_GM/G1_GM_pyr_map/homer_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/homer_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/homer_input.mesh"
+      },
+      {
+        "name": "isidora_horse_input.mesh",
+        "path": "G1_GM/G1_GM_pyr_map/isidora_horse_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/isidora_horse_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/isidora_horse_output.mesh"
+      },
+      {
+        "name": "isidora_horse_output.mesh",
+        "path": "G1_GM/G1_GM_pyr_map/isidora_horse_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/isidora_horse_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/isidora_horse_input.mesh"
+      },
+      {
+        "name": "moai_input.mesh",
+        "path": "G1_GM/G1_GM_pyr_map/moai_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/moai_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/moai_output.mesh"
+      },
+      {
+        "name": "moai_output.mesh",
+        "path": "G1_GM/G1_GM_pyr_map/moai_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/moai_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/moai_input.mesh"
+      },
+      {
+        "name": "mouse_input.mesh",
+        "path": "G1_GM/G1_GM_pyr_map/mouse_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/mouse_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/mouse_output.mesh"
+      },
+      {
+        "name": "mouse_output.mesh",
+        "path": "G1_GM/G1_GM_pyr_map/mouse_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/mouse_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/mouse_input.mesh"
+      },
+      {
+        "name": "octa_flower_input.mesh",
+        "path": "G1_GM/G1_GM_pyr_map/octa_flower_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/octa_flower_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/octa_flower_output.mesh"
+      },
+      {
+        "name": "octa_flower_output.mesh",
+        "path": "G1_GM/G1_GM_pyr_map/octa_flower_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/octa_flower_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/octa_flower_input.mesh"
+      },
+      {
+        "name": "pig_input.mesh",
+        "path": "G1_GM/G1_GM_pyr_map/pig_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/pig_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/pig_output.mesh"
+      },
+      {
+        "name": "pig_output.mesh",
+        "path": "G1_GM/G1_GM_pyr_map/pig_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/pig_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/pig_input.mesh"
+      },
+      {
+        "name": "ramses_input.mesh",
+        "path": "G1_GM/G1_GM_pyr_map/ramses_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/ramses_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/ramses_output.mesh"
+      },
+      {
+        "name": "ramses_output.mesh",
+        "path": "G1_GM/G1_GM_pyr_map/ramses_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/ramses_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/ramses_input.mesh"
+      },
+      {
+        "name": "sphinx_input.mesh",
+        "path": "G1_GM/G1_GM_pyr_map/sphinx_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/sphinx_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/sphinx_output.mesh"
+      },
+      {
+        "name": "sphinx_output.mesh",
+        "path": "G1_GM/G1_GM_pyr_map/sphinx_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/sphinx_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_pyr_map/sphinx_input.mesh"
+      }
+    ],
+    "G1_GM/G1_GM_star_map": [
+      {
+        "name": "duck_input.mesh",
+        "path": "G1_GM/G1_GM_star_map/duck_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_star_map/duck_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_star_map/duck_output.mesh"
+      },
+      {
+        "name": "duck_output.mesh",
+        "path": "G1_GM/G1_GM_star_map/duck_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_star_map/duck_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_star_map/duck_input.mesh"
+      }
+    ],
+    "G1_GM/G1_GM_tet_map": [
+      {
+        "name": "bimba_input.mesh",
+        "path": "G1_GM/G1_GM_tet_map/bimba_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/bimba_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/bimba_output.mesh"
+      },
+      {
+        "name": "bimba_output.mesh",
+        "path": "G1_GM/G1_GM_tet_map/bimba_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/bimba_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/bimba_input.mesh"
+      },
+      {
+        "name": "bird_input.mesh",
+        "path": "G1_GM/G1_GM_tet_map/bird_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/bird_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/bird_output.mesh"
+      },
+      {
+        "name": "bird_output.mesh",
+        "path": "G1_GM/G1_GM_tet_map/bird_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/bird_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/bird_input.mesh"
+      },
+      {
+        "name": "blade_input.mesh",
+        "path": "G1_GM/G1_GM_tet_map/blade_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/blade_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/blade_output.mesh"
+      },
+      {
+        "name": "blade_output.mesh",
+        "path": "G1_GM/G1_GM_tet_map/blade_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/blade_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/blade_input.mesh"
+      },
+      {
+        "name": "bone_input.mesh",
+        "path": "G1_GM/G1_GM_tet_map/bone_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/bone_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/bone_output.mesh"
+      },
+      {
+        "name": "bone_output.mesh",
+        "path": "G1_GM/G1_GM_tet_map/bone_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/bone_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/bone_input.mesh"
+      },
+      {
+        "name": "bumpy_sphere_input.mesh",
+        "path": "G1_GM/G1_GM_tet_map/bumpy_sphere_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/bumpy_sphere_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/bumpy_sphere_output.mesh"
+      },
+      {
+        "name": "bumpy_sphere_output.mesh",
+        "path": "G1_GM/G1_GM_tet_map/bumpy_sphere_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/bumpy_sphere_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/bumpy_sphere_input.mesh"
+      },
+      {
+        "name": "buste_input.mesh",
+        "path": "G1_GM/G1_GM_tet_map/buste_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/buste_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/buste_output.mesh"
+      },
+      {
+        "name": "buste_output.mesh",
+        "path": "G1_GM/G1_GM_tet_map/buste_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/buste_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/buste_input.mesh"
+      },
+      {
+        "name": "chinese_dragon_input.mesh",
+        "path": "G1_GM/G1_GM_tet_map/chinese_dragon_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/chinese_dragon_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/chinese_dragon_output.mesh"
+      },
+      {
+        "name": "chinese_dragon_output.mesh",
+        "path": "G1_GM/G1_GM_tet_map/chinese_dragon_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/chinese_dragon_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/chinese_dragon_input.mesh"
+      },
+      {
+        "name": "david_input.mesh",
+        "path": "G1_GM/G1_GM_tet_map/david_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/david_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/david_output.mesh"
+      },
+      {
+        "name": "david_output.mesh",
+        "path": "G1_GM/G1_GM_tet_map/david_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/david_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/david_input.mesh"
+      },
+      {
+        "name": "duck_input.mesh",
+        "path": "G1_GM/G1_GM_tet_map/duck_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/duck_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/duck_output.mesh"
+      },
+      {
+        "name": "duck_output.mesh",
+        "path": "G1_GM/G1_GM_tet_map/duck_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/duck_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/duck_input.mesh"
+      },
+      {
+        "name": "foot_input.mesh",
+        "path": "G1_GM/G1_GM_tet_map/foot_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/foot_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/foot_output.mesh"
+      },
+      {
+        "name": "foot_output.mesh",
+        "path": "G1_GM/G1_GM_tet_map/foot_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/foot_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/foot_input.mesh"
+      },
+      {
+        "name": "gargoyle_input.mesh",
+        "path": "G1_GM/G1_GM_tet_map/gargoyle_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/gargoyle_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/gargoyle_output.mesh"
+      },
+      {
+        "name": "gargoyle_output.mesh",
+        "path": "G1_GM/G1_GM_tet_map/gargoyle_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/gargoyle_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/gargoyle_input.mesh"
+      },
+      {
+        "name": "hand_input.mesh",
+        "path": "G1_GM/G1_GM_tet_map/hand_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/hand_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/hand_output.mesh"
+      },
+      {
+        "name": "hand_output.mesh",
+        "path": "G1_GM/G1_GM_tet_map/hand_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/hand_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/hand_input.mesh"
+      },
+      {
+        "name": "homer_input.mesh",
+        "path": "G1_GM/G1_GM_tet_map/homer_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/homer_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/homer_output.mesh"
+      },
+      {
+        "name": "homer_output.mesh",
+        "path": "G1_GM/G1_GM_tet_map/homer_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/homer_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/homer_input.mesh"
+      },
+      {
+        "name": "isidora_horse_input.mesh",
+        "path": "G1_GM/G1_GM_tet_map/isidora_horse_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/isidora_horse_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/isidora_horse_output.mesh"
+      },
+      {
+        "name": "isidora_horse_output.mesh",
+        "path": "G1_GM/G1_GM_tet_map/isidora_horse_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/isidora_horse_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/isidora_horse_input.mesh"
+      },
+      {
+        "name": "moai_input.mesh",
+        "path": "G1_GM/G1_GM_tet_map/moai_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/moai_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/moai_output.mesh"
+      },
+      {
+        "name": "moai_output.mesh",
+        "path": "G1_GM/G1_GM_tet_map/moai_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/moai_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/moai_input.mesh"
+      },
+      {
+        "name": "mouse_input.mesh",
+        "path": "G1_GM/G1_GM_tet_map/mouse_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/mouse_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/mouse_output.mesh"
+      },
+      {
+        "name": "mouse_output.mesh",
+        "path": "G1_GM/G1_GM_tet_map/mouse_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/mouse_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/mouse_input.mesh"
+      },
+      {
+        "name": "octa_flower_input.mesh",
+        "path": "G1_GM/G1_GM_tet_map/octa_flower_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/octa_flower_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/octa_flower_output.mesh"
+      },
+      {
+        "name": "octa_flower_output.mesh",
+        "path": "G1_GM/G1_GM_tet_map/octa_flower_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/octa_flower_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/octa_flower_input.mesh"
+      },
+      {
+        "name": "pig_input.mesh",
+        "path": "G1_GM/G1_GM_tet_map/pig_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/pig_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/pig_output.mesh"
+      },
+      {
+        "name": "pig_output.mesh",
+        "path": "G1_GM/G1_GM_tet_map/pig_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/pig_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/pig_input.mesh"
+      },
+      {
+        "name": "ramses_input.mesh",
+        "path": "G1_GM/G1_GM_tet_map/ramses_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/ramses_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/ramses_output.mesh"
+      },
+      {
+        "name": "ramses_output.mesh",
+        "path": "G1_GM/G1_GM_tet_map/ramses_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/ramses_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/ramses_input.mesh"
+      },
+      {
+        "name": "sphinx_input.mesh",
+        "path": "G1_GM/G1_GM_tet_map/sphinx_input.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/sphinx_input.mesh",
+        "output": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/sphinx_output.mesh"
+      },
+      {
+        "name": "sphinx_output.mesh",
+        "path": "G1_GM/G1_GM_tet_map/sphinx_output.mesh",
+        "download_url": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/sphinx_output.mesh",
+        "input": "https://raw.githubusercontent.com/VOLMAP/results/HEAD/G1_GM/G1_GM_tet_map/sphinx_input.mesh"
+      }
+    ]
+  }
+}

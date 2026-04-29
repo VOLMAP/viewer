@@ -10,15 +10,23 @@
       <!-- Load Mesh -->
       <div class="setting">
         <p>Load:</p>
-        <input type="file" class="mesh-input" accept=".mesh, .vtk" />
+        <input type="file" class="mesh-input" accept=".mesh, .vtk, .txt, .ovm" />
       </div>
       <!-- Load Sample Mesh -->
-      <div class="setting">
+      <div class="setting hiddenLoadSetting">
         <p>Load sample:</p>
         <select class="sample-mesh-input" name="sample-mesh-input">
           <option value="hand_aigerman.mesh">Hand Aigerman (Domain)</option>
           <option value="hand_pc_aigerman.mesh">Hand Aigerman (Codomain)</option>
         </select>
+      </div>
+      <!-- Dataset Browser -->
+      <div class="setting">
+        <p class ="datasetLabel">Dataset:</p>
+        <div class="dataset-browser">
+          <div class="dataset-nav">
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -52,6 +60,11 @@
           <span class="slider round"></span>
         </label>
         <input type="color" class="wireframe-color-input margin-left" value="#000000" />
+      </div>
+      <!-- Separate -->
+      <div class="setting">
+        <p>Separate:</p>
+        <input type="range" min="0" max="100" value="0" class="separation-slider" />
       </div>
       <!-- Bounding Box -->
       <div class="setting">
@@ -138,6 +151,13 @@
         <p>Link digging:</p>
         <label class="switch">
           <input type="checkbox" class="digger-link-toggle" />
+          <span class="slider round"></span>
+        </label>
+      </div>
+      <div class="setting">
+        <p>Picker Auto Camera:</p>
+        <label class="switch">
+          <input type="checkbox" checked="true" class="picker-auto-camera-toggle" />
           <span class="slider round"></span>
         </label>
       </div>
