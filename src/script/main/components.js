@@ -31,6 +31,10 @@ async function initializeComponents() {
   mainMenu.innerHTML = meshSettings1 + mapSettings + meshSettings2;
   doubleCanvas.innerHTML = canvas1 + distortionSlicerSettings + canvas2;
 
+  const histDiv = document.createElement("div");
+  histDiv.id = "histogram-divider";
+  doubleCanvas.appendChild(histDiv);
+
   const mismatchLabel = document.createElement("div");
   mismatchLabel.id = "mismatch-label";
   mismatchLabel.className = "mismatch-label hidden";

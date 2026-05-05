@@ -146,6 +146,49 @@ export class MapViewer {
     mesh2.geometry.userData.polyDistortion = tmpPolyDistortion;
   }
 
+  // Call this instead of computeDistortion() to get both directions at once.
+  // Returns { forward: Array, reverse: Array }
+  computeDistortionBothDirections() {
+    const mesh1 = this.volumeMap.volumeMesh1.mesh;
+    const mesh2 = this.volumeMap.volumeMesh2.mesh;
+
+    const vertices1 = mesh1.geometry.userData.vertices;
+    const vertices2 = mesh2.geometry.userData.vertices;
+    const tetrahedra = mesh1.geometry.userData.tetrahedra;
+
+    const forward = [];
+    const reverse = [];
+
+    for (let i = 0; i < tetrahedra.length; i += 4) {
+      const tet1 = [], tet2 = [];
+      for (let j = 0; j < 4; j++) {
+        const vi = tetrahedra[i + j];
+        tet1.push({ x: vertices1[vi*3], y: vertices1[vi*3+1], z: vertices1[vi*3+2] });
+        tet2.push({ x: vertices2[vi*3], y: vertices2[vi*3+1], z: vertices2[vi*3+2] });
+      }
+
+      // Forward: mesh1 → mesh2
+      const Jf = matrixUtils.jacobianMatrix(tet1, tet2);
+      if (matrixUtils.determinant3x3(Jf) <= 0) {
+        forward.push(NaN);
+      } else {
+        const Sf = matrixUtils.computeSingularValues(Jf);
+        forward.push(this.computeTetDistortion(Sf[0], Sf[1], Sf[2], this.energy));
+      }
+
+      // Reverse: mesh2 → mesh1
+      const Jr = matrixUtils.jacobianMatrix(tet2, tet1);
+      if (matrixUtils.determinant3x3(Jr) <= 0) {
+        reverse.push(NaN);
+      } else {
+        const Sr = matrixUtils.computeSingularValues(Jr);
+        reverse.push(this.computeTetDistortion(Sr[0], Sr[1], Sr[2], this.energy));
+      }
+    }
+
+    return { forward, reverse };
+  }
+
   computeTetDistortion(s_max, s_mid, s_min, energy) {
     switch (energy) {
       case "Conformal":

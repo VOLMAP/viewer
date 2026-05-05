@@ -52,30 +52,34 @@ export class TetrahedronPicker {
   }
 
   updateColor() {
-    const faceKeys = this.volumeMap.volumeMesh1.mesh.geometry.userData.faceKeys;
-    const adjacencyMap = this.volumeMap.volumeMesh1.mesh.geometry.userData.adjacencyMap;
-    const polyColor = this.volumeMap.volumeMesh1.mesh.geometry.userData.polyColor;
+    const mesh = this.volumeMap.volumeMesh1.mesh;
 
-    if (this.lastPickedPolyhedronIndex !== null && this.lastPickedPolyhedronColor !== null) {
-      const key = faceKeys[this.lastPickedPolyhedronIndex];
-      const value = adjacencyMap.get(key);
-      this.lastPickedPolyhedronColor = polyColor[value[0].polyIndex];
-      const colorRGB = {
-        r: 1.0 - this.lastPickedPolyhedronColor.r,
-        g: 1.0 - this.lastPickedPolyhedronColor.g,
-        b: 1.0 - this.lastPickedPolyhedronColor.b,
-      };
-      this._colorPolyhedron(
-        this.volumeMap.volumeMesh1.mesh,
-        this.lastPickedPolyhedronIndex,
-        colorRGB
-      );
-      this._colorPolyhedron(
-        this.volumeMap.volumeMesh2.mesh,
-        this.lastPickedPolyhedronIndex,
-        colorRGB
-      );
-    }
+    const faceKeys = mesh.geometry?.userData?.faceKeys;
+    const adjacencyMap = mesh.geometry?.userData?.adjacencyMap;
+    const polyColor = mesh.geometry?.userData?.polyColor;
+
+    if (
+      this.lastPickedPolyhedronIndex === null || !faceKeys || !adjacencyMap || !polyColor
+    ) return;
+
+    const key = faceKeys[this.lastPickedPolyhedronIndex];
+    const value = adjacencyMap.get(key);
+
+    if (!value || !value[0]) return;
+
+    const colorData = polyColor[value[0].polyIndex];
+    if (!colorData) return;
+
+    this.lastPickedPolyhedronColor = colorData;
+
+    const colorRGB = {
+      r: 1.0 - colorData.r,
+      g: 1.0 - colorData.g,
+      b: 1.0 - colorData.b,
+    };
+
+    this._colorPolyhedron(mesh, this.lastPickedPolyhedronIndex, colorRGB);
+    this._colorPolyhedron(this.volumeMap.volumeMesh2.mesh, this.lastPickedPolyhedronIndex, colorRGB);
   }
 
   pickPolyhedron(event, meshRendererId) {
@@ -155,7 +159,7 @@ export class TetrahedronPicker {
 
       for (let i = 0; i < otherFaceKeys.length; i++) {
         const value = otherAdjacencyMap.get(otherFaceKeys[i]);
-        
+
         if (value[0].polyIndex === pickedPolyhedron || (value.length === 2 && value[1].polyIndex === pickedPolyhedron)) {
           otherFaceIndex = i;
           break;
@@ -165,7 +169,7 @@ export class TetrahedronPicker {
       if (meshRenderer.autoCameraEnabled) {
         otherVolumeMesh.meshRenderer.focusCameraOnPolyhedron(otherFaceIndex, otherVolumeMesh.mesh.geometry);
       }
-      
+
 
       this.volumeMap.controller.updatePickerInfo(pickedPolyhedron, pickedPolyhedronDistortion);
     } else {

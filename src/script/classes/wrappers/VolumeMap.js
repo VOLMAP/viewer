@@ -5,6 +5,7 @@ import { TetrahedronPicker } from "../map_inspection/TetrahedronPicker.js";
 import { MapViewer } from "../map_inspection/MapViewer.js";
 import { DistortionSlicer } from "../map_inspection/DistortionSlicer.js";
 import { TetrahedronDigger } from "../map_inspection/TetrahedronDigger.js";
+import { HistogramPanel } from "../map_inspection/HistogramPanel.js";
 
 export class VolumeMap {
   isValid = false;
@@ -29,8 +30,13 @@ export class VolumeMap {
     this.mapViewer = new MapViewer(this);
     this.distortionSlicer = new DistortionSlicer(this);
     this.digger = new TetrahedronDigger(this);
+    const histEl = document.getElementById('histogram-divider');
+    this.histogramPanel = new HistogramPanel(histEl);
+    this.histogramPanel.hide();
 
     this.volumeMesh1.controller.restrictToVolOnly();
+
+
   }
 
   updateMesh(volumeMesh) {
@@ -40,6 +46,8 @@ export class VolumeMap {
     if (oldValidity !== this.isValid) {
       if (this.isValid) {
         this.mapViewer.updateMap();
+        const { forward, reverse } = this.mapViewer.computeDistortionBothDirections();
+        this.histogramPanel.setData(forward, reverse, this.mapViewer.clampStart, this.mapViewer.clampEnd);
         this.distortionSlicer.updateMap();
         const data = this.volumeMesh1.mesh.geometry.userData;
         this.controller.updateModelInfo(
@@ -48,6 +56,7 @@ export class VolumeMap {
           data.tetrahedra.length / 4,
         );
       } else {
+        this.histogramPanel.reset();;
         this.distortionSlicer.setActive(false);
         this.distortionSlicer.resetSlicer();
         if (volumeMesh === this.volumeMesh1) {
@@ -86,7 +95,7 @@ export class VolumeMap {
       const vertices2 = mesh2.geometry.userData.vertices;
       const tetrahedra1 = mesh1.geometry.userData.tetrahedra;
       const tetrahedra2 = mesh2.geometry.userData.tetrahedra;
-      
+
       if (!tetrahedra1 || !tetrahedra2 || !vertices1 || !vertices2) {
         console.warn("mesh1 or mesh2 missing vertices or tetrahedra");
         return false;
@@ -153,6 +162,8 @@ export class VolumeMap {
       this.controller.updateEnergyInfo(this.mapViewer.energy);
       this.controller.updateClampInfo(this.mapViewer.clampStart, this.mapViewer.clampEnd);
       this.controller.updateClampInputInfo(this.mapViewer.clampStart, this.mapViewer.clampEnd);
+      const { forward, reverse } = this.mapViewer.computeDistortionBothDirections();
+      this.histogramPanel.setData(forward, reverse, this.mapViewer.clampStart, this.mapViewer.clampEnd);
     }
     return result;
   }
@@ -171,6 +182,7 @@ export class VolumeMap {
     const result = this.mapViewer.setClampRange(start, end);
     if (result) {
       this.controller.updateClampInfo(this.mapViewer.clampStart, this.mapViewer.clampEnd);
+      this.histogramPanel.updateClamp(this.mapViewer.clampStart, this.mapViewer.clampEnd);
     }
     return result;
   }
@@ -198,6 +210,14 @@ export class VolumeMap {
       );
     }
     return result;
+  }
+
+  toggleHistogram(flag) {
+    if (flag && this.isValid) {
+      this.histogramPanel.show();
+    } else {
+      this.histogramPanel.hide();
+    }
   }
 
   toggleDegenerateColor(flag) {
@@ -257,6 +277,9 @@ export class VolumeMap {
 
     this.mapViewer.resetSettings();
     this.mapViewer.updateDistortion();
+
+    const { forward, reverse } = this.mapViewer.computeDistortionBothDirections();
+    this.histogramPanel.setData(forward, reverse, this.mapViewer.clampStart, this.mapViewer.clampEnd);
     return true;
   }
 
@@ -368,7 +391,7 @@ export class VolumeMap {
       this.volumeMesh2.meshSlicer.isActive,
       this.distortionSlicer.isActive,
     );
-    
+
     return true;
   }
 }

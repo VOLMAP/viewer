@@ -13,7 +13,22 @@
 }
 
 .canvas-container:first-child {
-  border-right: 2px solid #010b13;
+  position: relative;
+  border-right: none;
+}
+
+.canvas-container:first-child::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 1px;
+  height: 100%;
+  background-color: #010b13;
+}
+
+.canvas-container:first-child.histogram-visible::after {
+  height: 70%;
 }
 
 /*Smartphone and Tablet*/
@@ -29,37 +44,6 @@
   }
 }
 
-.axis-container {
-  position: absolute;
-  z-index: 1;
-  width: 100px;
-  height: 100px;
-}
-
-.orbital-container {
-  position: absolute;
-  z-index: 1;
-  width: 100px;
-  height: 100px;
-  right: 10px;
-  bottom: 10px;
-}
-
-.axis-container {
-  left: 10px;
-  bottom: 10px;
-}
-
-/*Smartphone and Tablet*/
-@media (max-aspect-ratio: 1/1) {
-  .axis-container {
-    left: auto;
-    bottom: auto;
-    right: 10px;
-    top: 10px;
-  }
-}
-
 .slicer-settings-container {
   position: absolute;
   z-index: 1;
@@ -68,14 +52,36 @@
   visibility: hidden;
 }
 
-.canvas-container:first-child .slicer-settings-container {
+#mesh1_canvas .slicer-settings-container {
   top: 2px;
   left: 2px;
 }
 
-.canvas-container:last-child .slicer-settings-container {
+#mesh2_canvas .slicer-settings-container {
   top: 2px;
   right: 2px;
+  left: unset;
+}
+
+#histogram-divider {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  width: 340px;
+  height: 30%;
+}
+
+@media (max-aspect-ratio: 1/1) {
+  .histogram-container {
+    width: 80%;
+    max-width: 300px;
+    top: unset;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
 }
 
 /*Smartphone and Tablet*/

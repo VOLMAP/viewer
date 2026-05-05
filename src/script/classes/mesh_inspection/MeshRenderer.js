@@ -8,12 +8,8 @@ const defaultNear = 0.01;
 
 export class MeshRenderer {
   canvasContainer = null;
-  axisContainer = null;
-  orbitalContainer = null;
 
   renderer = null;
-  axisRenderer = null;
-  orbitalRenderer = null;
 
   scene = null;
   axisScene = null;
@@ -35,8 +31,6 @@ export class MeshRenderer {
   constructor(volumeMesh, canvasContainer) {
     this.volumeMesh = volumeMesh;
     this.canvasContainer = canvasContainer;
-    this.axisContainer = this.canvasContainer.getElementsByClassName("axis-container")[0];
-    this.orbitalContainer = this.canvasContainer.getElementsByClassName("orbital-container")[0];
 
     this.setRenderers();
     this.setScenes();
@@ -75,55 +69,26 @@ export class MeshRenderer {
   }
 
   setRenderers() {
-    //Activate antialiasis to improve resolution
-    this.renderer = new THREE.WebGLRenderer({
-      antialias: true,
-    });
+    this.renderer = new THREE.WebGLRenderer({ antialias: true });
     this.renderer.setSize(this.canvasContainer.clientWidth, this.canvasContainer.clientHeight);
     this.renderer.setClearColor(utils.greyHex);
+    this.renderer.autoClear = false;
     this.canvasContainer.appendChild(this.renderer.domElement);
     this.renderer.domElement.classList.add("mesh-renderer");
-    //Get aspect ratio to maintain perspective in the additional scenes also
-    const aspect = this.canvasContainer.clientWidth / this.canvasContainer.clientHeight;
-    if (aspect > 1) {
-      const newHeight = 100 / aspect;
-      this.axisContainer.style.width = "100px";
-      this.orbitalContainer.style.width = "100px";
-      this.axisContainer.style.height = `${newHeight}px`;
-      this.orbitalContainer.style.height = `${newHeight}px`;
-    } else {
-      const newWidth = 100 * aspect;
-      this.axisContainer.style.height = "100px";
-      this.orbitalContainer.style.height = "100px";
-      this.axisContainer.style.width = `${newWidth}px`;
-      this.orbitalContainer.style.width = `${newWidth}px`;
-    }
-
-    this.axisRenderer = new THREE.WebGLRenderer({
-      alpha: true,
-      antialias: true,
-    });
-    this.axisRenderer.setSize(this.axisContainer.clientWidth, this.axisContainer.clientHeight);
-    // Make the background transparent using alpha
-    this.axisRenderer.setClearColor(utils.whiteHex, 0);
-    this.axisContainer.appendChild(this.axisRenderer.domElement);
-
-    this.orbitalRenderer = new THREE.WebGLRenderer({
-      alpha: true,
-      antialias: true,
-    });
-    this.orbitalRenderer.setSize(
-      this.orbitalContainer.clientWidth,
-      this.orbitalContainer.clientHeight
-    );
-    // Make the background transparent using alpha
-    this.orbitalRenderer.setClearColor(utils.whiteHex, 0);
-    this.orbitalContainer.appendChild(this.orbitalRenderer.domElement);
 
     this.renderer.setAnimationLoop(() => {
+      this.renderer.clear();
       this.renderer.render(this.scene, this.camera);
-      this.axisRenderer.render(this.axisScene, this.camera);
-      this.orbitalRenderer.render(this.orbitalScene, this.camera);
+
+      if (this.axis.visible) {
+        this.renderer.clearDepth();
+        this.renderer.render(this.axisScene, this.camera);
+      }
+
+      if (this.controls._gizmos.visible) {
+        this.renderer.clearDepth();
+        this.renderer.render(this.orbitalScene, this.camera);
+      }
     });
   }
 
@@ -159,6 +124,7 @@ export class MeshRenderer {
     this.axis.setColors(utils.redHex, utils.blueHex, utils.greenHex);
     this.axis.material.transparent = true;
     this.axis.material.opacity = 0.6;
+    this.axis.visible = false;
     this.axisScene.add(this.axis);
 
     this.controls = new ArcballControls(this.camera, this.renderer.domElement);
@@ -172,6 +138,7 @@ export class MeshRenderer {
     this.controls.addEventListener("end", () => {
       this.axis.material.opacity = 0.6;
     });
+    this.controls._gizmos.visible = false;
     this.orbitalScene.add(this.controls._gizmos);
   }
 
@@ -281,23 +248,11 @@ export class MeshRenderer {
   }
 
   toggleAxis(flag) {
-    if (flag) {
-      this.axisScene.remove(this.axis);
-      this.scene.add(this.axis);
-    } else {
-      this.scene.remove(this.axis);
-      this.axisScene.add(this.axis);
-    }
+    this.axis.visible = flag;
   }
 
   toggleOrbital(flag) {
-    if (flag) {
-      this.orbitalScene.remove(this.controls._gizmos);
-      this.scene.add(this.controls._gizmos);
-    } else {
-      this.scene.remove(this.controls._gizmos);
-      this.orbitalScene.add(this.controls._gizmos);
-    }
+    this.controls._gizmos.visible = flag;
   }
 
   toggleObject(flag, object) {
@@ -348,29 +303,7 @@ export class MeshRenderer {
 
   resize() {
     this.renderer.setSize(this.canvasContainer.clientWidth, this.canvasContainer.clientHeight);
-    //Get aspect ratio to maintain perspective in the additional scenes also
-    const aspect = () => this.canvasContainer.clientWidth / this.canvasContainer.clientHeight;
-    if (aspect() > 1) {
-      const newHeight = 100 / aspect();
-      this.axisContainer.style.width = "100px";
-      this.orbitalContainer.style.width = "100px";
-      this.axisContainer.style.height = `${newHeight}px`;
-      this.orbitalContainer.style.height = `${newHeight}px`;
-    } else {
-      const newWidth = 100 * aspect();
-      this.axisContainer.style.height = "100px";
-      this.orbitalContainer.style.height = "100px";
-      this.axisContainer.style.width = `${newWidth}px`;
-      this.orbitalContainer.style.width = `${newWidth}px`;
-    }
-
-    this.axisRenderer.setSize(this.axisContainer.clientWidth, this.axisContainer.clientHeight);
-    this.orbitalRenderer.setSize(
-      this.orbitalContainer.clientWidth,
-      this.orbitalContainer.clientHeight
-    );
-
-    this.camera.aspect = aspect();
+    this.camera.aspect = this.canvasContainer.clientWidth / this.canvasContainer.clientHeight;
     this.camera.updateProjectionMatrix();
   }
 
