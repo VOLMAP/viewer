@@ -139,17 +139,11 @@ export class MapController {
 
     this.histogramToggle.addEventListener("change", function () {
       const flag = this.checked;
-      volumeMap.toggleHistogram(flag);
-
-      const containers = document.querySelectorAll('.canvas-container');
-
-      containers.forEach(c => {
-        if (flag) {
-          c.classList.add('histogram-visible');
-        } else {
-          c.classList.remove('histogram-visible');
-        }
-      });
+      if (!volumeMap.toggleHistogram(flag)) {
+        this.checked = !flag;
+      } else {
+        volumeMap.controller.setHistogramVisibility(flag);
+      }
     });
 
     this.degenerateColorToggle.addEventListener("change", function () {
@@ -326,5 +320,13 @@ export class MapController {
 
   toggleDistortionSlicer(flag) {
     this.distortionSlicerToggle.checked = flag;
+  }
+
+  setHistogramVisibility(flag) {
+    this.histogramToggle.checked = flag;
+
+    document.querySelectorAll('.canvas-container').forEach(container => {
+      container.classList.toggle('histogram-visible', flag);
+    });
   }
 }

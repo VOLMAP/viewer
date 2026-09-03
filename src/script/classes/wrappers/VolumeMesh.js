@@ -404,7 +404,6 @@ export class VolumeMesh {
         this.tmpSurfaceMesh = mesh;
         this.loadSurfaceMeshFromTxt(mesh);
       }
-
       return;
     } else {
       console.error("Invalid file format selected");
@@ -475,13 +474,17 @@ export class VolumeMesh {
       if (id >= volMeshNumVertices) {
         console.error(`id=${id} is out of range`);
         this.txtIsValid = false;
+        this.mesh = null;
         this.volumeMap.volumeMesh1.updateMeshLabels(true);
+        this.volumeMap.updateMesh(this);
         return;
       }
       if (!surfaceVertexIds.has(id)) {
         console.error(`${id} is not a surface vertex`);
         this.txtIsValid = false;
+        this.mesh = null;
         this.volumeMap.volumeMesh1.updateMeshLabels(true);
+        this.volumeMap.updateMesh(this);
         return;
       }
     }
@@ -502,6 +505,8 @@ export class VolumeMesh {
 
     if (triangleSoup.length === 0) {
       console.error("No surface faces found matching the txt vertex IDs");
+      this.mesh = null;
+      this.volumeMap.updateMesh(this);
       return;
     }
 

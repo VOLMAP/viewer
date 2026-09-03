@@ -64,15 +64,15 @@ export class HistogramPanel {
   }
 
   show() {
-    const p = this.container.querySelector('.hist-panel');
-    if (p) p.style.display = 'block';
+    const panel = this.container.querySelector('.hist-panel');
+    if (panel) panel.style.display = 'block';
     this.isVisible = true;
     if (this.dataForward && this.d3) this.draw();
   }
 
   hide() {
-    const p = this.container.querySelector('.hist-panel');
-    if (p) p.style.display = 'none';
+    const panel = this.container.querySelector('.hist-panel');
+    if (panel) panel.style.display = 'none';
     this.isVisible = false;
   }
 
@@ -85,24 +85,24 @@ export class HistogramPanel {
   }
 
   filterFinite(data) {
-    return data.filter(v => !isNaN(v) && isFinite(v));
+    return data.filter(value => !isNaN(value) && isFinite(value));
   }
 
   buildBins(data) {
     const step = (this.clampMax - this.clampMin) / 10;
     const bins = Array.from({ length: 12 }, (_, i) => ({ index: i, count: 0 }));
 
-    for (const v of data) {
-      if (v < this.clampMin) {
+    for (const value of data) {
+      if (value < this.clampMin) {
         bins[0].count++;
-      } else if (v > this.clampMax) {
+      } else if (value > this.clampMax) {
         bins[11].count++;
-      } else if (v === this.clampMin) {
+      } else if (value === this.clampMin) {
         bins[0].count++;
-      } else if (v === this.clampMax) {
+      } else if (value === this.clampMax) {
         bins[11].count++;
       } else {
-        const i = Math.min(9, Math.floor((v - this.clampMin) / step));
+        const i = Math.min(9, Math.floor((value - this.clampMin) / step));
         bins[i + 1].count++;
       }
     }
@@ -113,8 +113,8 @@ export class HistogramPanel {
     const d3 = this.d3;
     if (!d3 || !this.dataForward || !this.dataReverse) return;
 
-    const svgEl = this.container.querySelector('.hist-svg');
-    if (!svgEl) return;
+    const svgElement = this.container.querySelector('.hist-svg');
+    if (!svgElement) return;
 
     const TOTAL_BINS = 12;
     const TICK_FONT  = 11;
@@ -129,9 +129,9 @@ export class HistogramPanel {
     const sideW    = (W - Y_AXIS_W) / 2;
     const innerH   = H - X_AXIS_H - BOTTOM;
 
-    svgEl.setAttribute('viewBox', `0 0 ${W} ${H}`);
-    svgEl.setAttribute('width', W);
-    svgEl.setAttribute('height', H);
+    svgElement.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    svgElement.setAttribute('width', W);
+    svgElement.setAttribute('height', H);
 
     const fwd = this.filterFinite(this.dataForward);
     const rev = this.filterFinite(this.dataReverse);
@@ -141,8 +141,8 @@ export class HistogramPanel {
     const revBins = this.buildBins(rev);
 
     const maxCount = Math.max(
-      d3.max(fwdBins, b => b.count),
-      d3.max(revBins, b => b.count)
+      d3.max(fwdBins, bin => bin.count),
+      d3.max(revBins, bin => bin.count)
     ) || 1;
 
     const yBand = d3.scaleBand()
@@ -169,7 +169,7 @@ export class HistogramPanel {
       return d3.format(".2f")(maxVal);
     });
 
-    const svg = d3.select(svgEl);
+    const svg = d3.select(svgElement);
     svg.selectAll('*').remove();
 
     svg.append('g')

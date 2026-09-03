@@ -56,7 +56,8 @@ export class VolumeMap {
           data.tetrahedra.length / 4,
         );
       } else {
-        this.histogramPanel.reset();;
+        this.histogramPanel.reset();
+        this.controller.setHistogramVisibility(false);
         this.distortionSlicer.setActive(false);
         this.distortionSlicer.resetSlicer();
         if (volumeMesh === this.volumeMesh1) {
@@ -213,11 +214,17 @@ export class VolumeMap {
   }
 
   toggleHistogram(flag) {
-    if (flag && this.isValid) {
+    if (flag && !this.isValid) {
+      console.warn("Cannot toggle Histogram: the map is not valid");
+      return false;
+    } 
+    
+    if (flag) {
       this.histogramPanel.show();
     } else {
       this.histogramPanel.hide();
     }
+    return true;
   }
 
   toggleDegenerateColor(flag) {
