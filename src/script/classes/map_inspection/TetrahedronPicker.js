@@ -179,6 +179,8 @@ export class TetrahedronPicker {
   }
 
   _colorPolyhedron(mesh, polyhedron, colorRGB) {
+    if (!mesh || !mesh.geometry) return;
+
     const faceKeys = mesh.geometry.userData.faceKeys;
     const adjacencyMap = mesh.geometry.userData.adjacencyMap;
     const color = mesh.geometry.getAttribute("color");

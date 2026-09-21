@@ -1,3 +1,5 @@
+import * as utils from "../../main/utils.js";
+
 function _loadD3UMD() {
   return new Promise((resolve, reject) => {
     if (window.d3) { resolve(window.d3); return; }
@@ -12,12 +14,14 @@ function _loadD3UMD() {
 export class HistogramPanel {
   isVisible = false;
   container = null;
-  dataForward = null;
-  dataReverse = null;
+  dataLeft = null;
+  dataRight = null;
   clampMin = 1;
   clampMax = 12;
   resizeObserver = null;
   d3 = null;
+  gradientStart = utils.whiteHex;
+  gradientEnd = utils.mapRedHex;
 
   constructor(containerElement) {
     this.container = containerElement;
@@ -26,14 +30,14 @@ export class HistogramPanel {
       .then(d3 => {
         this.d3 = d3;
         this.attachResizeObserver();
-        if (this.dataForward) this.draw();
+        if (this.dataLeft) this.draw();
       })
       .catch(e => console.error("[HistogramPanel] Failed to load d3:", e));
   }
 
-  setData(forward, reverse, clampStart, clampEnd) {
-    this.dataForward = forward;
-    this.dataReverse = reverse;
+  setData(left, right, clampStart, clampEnd) {
+    this.dataLeft = left;
+    this.dataRight = right;
     this.clampMin = clampStart;
     this.clampMax = clampEnd;
     if (this.d3 && this.isVisible) this.draw();
@@ -42,44 +46,45 @@ export class HistogramPanel {
   updateClamp(start, end) {
     this.clampMin = start;
     this.clampMax = end;
-    if (this.dataForward && this.d3 && this.isVisible) this.draw();
+    if (this.dataLeft && this.d3 && this.isVisible) this.draw();
+  }
+
+  setGradient(start, end) {
+    this.gradientStart = start;
+    this.gradientEnd = end;
+    if (this.dataLeft && this.d3 && this.isVisible) this.draw();
   }
 
   reset() {
-    this.dataForward = null;
-    this.dataReverse = null;
+    this.dataLeft = null;
+    this.dataRight = null;
     this.hide();
   }
 
-  destroy() {
-    if (this.resizeObserver) this.resizeObserver.disconnect();
-  }
-
   buildDOM() {
-    this.container.innerHTML = `
-      <div class="hist-panel" style="display:none; width:100%; height:100%;">
-        <svg class="hist-svg" style="width:100%; height:100%; display:block;" role="img"></svg>
-      </div>
+    this.container.innerHTML =
+      `
+      <svg class="histogram-svg"  role="img"></svg>
     `;
   }
 
   show() {
-    const panel = this.container.querySelector('.hist-panel');
-    if (panel) panel.style.display = 'block';
+    const svg = this.container.querySelector('.histogram-svg');
+    if (svg) svg.style.display = 'block';
     this.isVisible = true;
-    if (this.dataForward && this.d3) this.draw();
+    if (this.dataLeft && this.d3) this.draw();
   }
 
   hide() {
-    const panel = this.container.querySelector('.hist-panel');
-    if (panel) panel.style.display = 'none';
+    const svg = this.container.querySelector('.histogram-svg');
+    if (svg) svg.style.display = 'none';
     this.isVisible = false;
   }
 
   attachResizeObserver() {
     if (typeof ResizeObserver === 'undefined') return;
     this.resizeObserver = new ResizeObserver(() => {
-      if (this.dataForward && this.d3 && this.isVisible) this.draw();
+      if (this.dataLeft && this.d3 && this.isVisible) this.draw();
     });
     this.resizeObserver.observe(this.container);
   }
@@ -109,40 +114,58 @@ export class HistogramPanel {
     return bins;
   }
 
+  interpolateBinColor(t) {
+    const startRGB = utils.hexToRGB(this.gradientStart);
+    const endRGB = utils.hexToRGB(this.gradientEnd);
+    const whiteRGB = { r: 1, g: 1, b: 1 };
+    const isWhite = (c) => c.r === 1 && c.g === 1 && c.b === 1;
+
+    let resultRGB;
+    if (isWhite(startRGB) || isWhite(endRGB)) {
+      resultRGB = utils.lerpColor(startRGB, endRGB, t);
+    } else {
+      resultRGB = t < 0.5
+        ? utils.lerpColor(startRGB, whiteRGB, t * 2)
+        : utils.lerpColor(whiteRGB, endRGB, (t - 0.5) * 2);
+    }
+
+    const hex = utils.RGBToHex(resultRGB);
+    return '#' + hex.toString(16).padStart(6, '0');
+  }
+
   draw() {
     const d3 = this.d3;
-    if (!d3 || !this.dataForward || !this.dataReverse) return;
+    if (!d3 || !this.dataLeft || !this.dataRight) return;
 
-    const svgElement = this.container.querySelector('.hist-svg');
+    const svgElement = this.container.querySelector('.histogram-svg');
     if (!svgElement) return;
 
     const TOTAL_BINS = 12;
-    const TICK_FONT  = 11;
-    const BAR_COLOR  = '#ff0000';
+    const TICK_FONT = 11;
 
-    const W = Math.max(this.container.clientWidth, 100);
-    const H = Math.max(this.container.clientHeight, 120);
+    const svgRect = svgElement.getBoundingClientRect();
+    const W = Math.max(svgRect.width, 100);
+    const H = Math.max(svgRect.height, 120);
 
     const Y_AXIS_W = 35;
     const X_AXIS_H = 24;
-    const BOTTOM   = 6;
-    const sideW    = (W - Y_AXIS_W) / 2;
-    const innerH   = H - X_AXIS_H - BOTTOM;
+    const BOTTOM = 6;
+    const HORIZONTAL_PADDING = 8;
+    const sideW = (W - Y_AXIS_W) / 2;
+    const innerH = H - X_AXIS_H - BOTTOM;
 
     svgElement.setAttribute('viewBox', `0 0 ${W} ${H}`);
-    svgElement.setAttribute('width', W);
-    svgElement.setAttribute('height', H);
 
-    const fwd = this.filterFinite(this.dataForward);
-    const rev = this.filterFinite(this.dataReverse);
-    if (fwd.length === 0 || rev.length === 0) return;
+    const left = this.filterFinite(this.dataLeft);
+    const right = this.filterFinite(this.dataRight);
+    if (left.length === 0 || right.length === 0) return;
 
-    const fwdBins = this.buildBins(fwd);
-    const revBins = this.buildBins(rev);
+    const leftBins = this.buildBins(left);
+    const rightBins = this.buildBins(right);
 
     const maxCount = Math.max(
-      d3.max(fwdBins, bin => bin.count),
-      d3.max(revBins, bin => bin.count)
+      d3.max(leftBins, bin => bin.count),
+      d3.max(rightBins, bin => bin.count)
     ) || 1;
 
     const yBand = d3.scaleBand()
@@ -154,11 +177,11 @@ export class HistogramPanel {
 
     const xLeft = d3.scaleLinear()
       .domain([0, maxCount])
-      .range([sideW, 0]);
+      .range([sideW - HORIZONTAL_PADDING, HORIZONTAL_PADDING]);
 
     const xRight = d3.scaleLinear()
       .domain([0, maxCount])
-      .range([0, sideW]);
+      .range([HORIZONTAL_PADDING, sideW - HORIZONTAL_PADDING]);
 
     const step = (this.clampMax - this.clampMin) / 10;
 
@@ -169,21 +192,35 @@ export class HistogramPanel {
       return d3.format(".2f")(maxVal);
     });
 
+    const binColors = Array.from({ length: TOTAL_BINS }, (_, i) => {
+      const t = i / (TOTAL_BINS - 1);
+      return this.interpolateBinColor(t);
+    });
+
     const svg = d3.select(svgElement);
     svg.selectAll('*').remove();
+
+    svg.append('rect')
+      .attr('width', W)
+      .attr('height', H)
+      .attr('fill', '#f3f3f3')
+      .attr('stroke', '#010b13')
+      .attr('stroke-width', 1);
 
     svg.append('g')
       .attr('transform', `translate(0,${X_AXIS_H})`)
       .selectAll('.bar')
-      .data(fwdBins)
+      .data(leftBins)
       .join('rect')
       .attr('class', 'bar')
       .attr('y', d => yBand(d.index))
       .attr('height', binH)
       .attr('x', d => xLeft(d.count))
-      .attr('width', d => sideW - xLeft(d.count))
-      .attr('fill', BAR_COLOR)
-      .attr('rx', 1);
+      .attr('width', d => sideW - HORIZONTAL_PADDING - xLeft(d.count))
+      .attr('fill', d => binColors[d.index])
+      .attr('rx', 1)
+      .attr('stroke', '#666')
+      .attr('stroke-width', 1);
 
     svg.append('g')
       .attr('transform', `translate(0,${X_AXIS_H})`)
@@ -216,15 +253,16 @@ export class HistogramPanel {
     svg.append('g')
       .attr('transform', `translate(${sideW + Y_AXIS_W},${X_AXIS_H})`)
       .selectAll('.bar')
-      .data(revBins)
+      .data(rightBins)
       .join('rect')
       .attr('class', 'bar')
       .attr('y', d => yBand(d.index))
       .attr('height', binH)
       .attr('x', 0)
       .attr('width', d => xRight(d.count))
-      .attr('fill', BAR_COLOR)
-      .attr('rx', 1);
+      .attr('fill', d => binColors[d.index])
+      .attr('rx', 1)
+      .attr('stroke', '#666').attr('stroke-width', 1);;
 
     svg.append('g')
       .attr('transform', `translate(${sideW + Y_AXIS_W},${X_AXIS_H})`)

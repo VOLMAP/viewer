@@ -59,10 +59,7 @@ export class VolumeMesh {
   setMesh(mesh) {
     const otherMesh = this.volumeMap.volumeMesh1 === this ? this.volumeMap.volumeMesh2 : this.volumeMap.volumeMesh1;
 
-    if (this.volumeMap.tetrahedronPicker.lastPickedPolyhedronIndex !== null) {
-      this.volumeMap.tetrahedronPicker.lastPickedPolyhedronIndex = null;
-      this.volumeMap.tetrahedronPicker.lastPickedPolyhedronColor = null;
-    }
+    this.volumeMap.tetrahedronPicker.resetPicker();
 
     this.mesh = mesh;
     this.mesh.material = standardMaterial.clone();

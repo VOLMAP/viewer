@@ -32,6 +32,7 @@ export class VolumeMap {
     this.digger = new TetrahedronDigger(this);
     const histEl = document.getElementById('histogram-divider');
     this.histogramPanel = new HistogramPanel(histEl);
+    this.histogramPanel.setGradient(this.mapViewer.gradientStart, this.mapViewer.gradientEnd);
     this.histogramPanel.hide();
 
     this.volumeMesh1.controller.restrictToVolOnly();
@@ -46,8 +47,8 @@ export class VolumeMap {
     if (oldValidity !== this.isValid) {
       if (this.isValid) {
         this.mapViewer.updateMap();
-        const { forward, reverse } = this.mapViewer.computeDistortionBothDirections();
-        this.histogramPanel.setData(forward, reverse, this.mapViewer.clampStart, this.mapViewer.clampEnd);
+        const { left, right } = this.mapViewer.computeDistortionBothDirections();
+        this.histogramPanel.setData(left, right, this.mapViewer.clampStart, this.mapViewer.clampEnd);
         this.distortionSlicer.updateMap();
         const data = this.volumeMesh1.mesh.geometry.userData;
         this.controller.updateModelInfo(
@@ -163,8 +164,8 @@ export class VolumeMap {
       this.controller.updateEnergyInfo(this.mapViewer.energy);
       this.controller.updateClampInfo(this.mapViewer.clampStart, this.mapViewer.clampEnd);
       this.controller.updateClampInputInfo(this.mapViewer.clampStart, this.mapViewer.clampEnd);
-      const { forward, reverse } = this.mapViewer.computeDistortionBothDirections();
-      this.histogramPanel.setData(forward, reverse, this.mapViewer.clampStart, this.mapViewer.clampEnd);
+      const { left, right } = this.mapViewer.computeDistortionBothDirections();
+      this.histogramPanel.setData(left, right, this.mapViewer.clampStart, this.mapViewer.clampEnd);
     }
     return result;
   }
@@ -209,6 +210,8 @@ export class VolumeMap {
         this.mapViewer.gradientEnd,
         isWhiteMid,
       );
+      
+      this.histogramPanel.setGradient(this.mapViewer.gradientStart, this.mapViewer.gradientEnd);
     }
     return result;
   }
@@ -285,8 +288,8 @@ export class VolumeMap {
     this.mapViewer.resetSettings();
     this.mapViewer.updateDistortion();
 
-    const { forward, reverse } = this.mapViewer.computeDistortionBothDirections();
-    this.histogramPanel.setData(forward, reverse, this.mapViewer.clampStart, this.mapViewer.clampEnd);
+    const { left, right } = this.mapViewer.computeDistortionBothDirections();
+    this.histogramPanel.setData(left, right, this.mapViewer.clampStart, this.mapViewer.clampEnd);
     return true;
   }
 

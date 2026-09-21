@@ -325,8 +325,6 @@ export class MapController {
   setHistogramVisibility(flag) {
     this.histogramToggle.checked = flag;
 
-    document.querySelectorAll('.canvas-container').forEach(container => {
-      container.classList.toggle('histogram-visible', flag);
-    });
+    
   }
 }
