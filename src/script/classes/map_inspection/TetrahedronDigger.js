@@ -1,5 +1,6 @@
 import * as THREE from "../../../libs/three/three.module.js";
 import * as utils from "../../main/utils.js";
+import { POLY_TYPES } from "../geometry/Polytypes.js";
 
 export class TetrahedronDigger {
   isActive = false;
@@ -126,9 +127,11 @@ export class TetrahedronDigger {
 
 
   updateMesh() {
-    const tetrahedra = this.volumeMesh.mesh.geometry.userData.tetrahedra;
-    const numTetrahedra = tetrahedra.length / 4;
-    this.polyVisibility = new Array(numTetrahedra).fill(true);
+    const polyhedra = this.volumeMesh.mesh.geometry.userData.polyhedra;
+    const polyType = this.volumeMesh.mesh.geometry.userData.polyType;
+    const vertsPerPoly = POLY_TYPES[polyType].vertsPerPoly;
+    const numPolyhedra = polyhedra.length / vertsPerPoly;
+    this.polyVisibility = new Array(numPolyhedra).fill(true);
   }
 
   isPolyVisible(polyIndex) {
@@ -140,27 +143,20 @@ export class TetrahedronDigger {
   }
 
   isolate(pickedPolyhedron) {
-    const tetrahedra = this.volumeMesh.mesh.geometry.userData.tetrahedra;
-    const numTetrahedra = tetrahedra.length / 4;
+    const polyhedra = this.volumeMesh.mesh.geometry.userData.polyhedra;
+    const polyType = this.volumeMesh.mesh.geometry.userData.polyType;
+    const vertsPerPoly = POLY_TYPES[polyType].vertsPerPoly;
+    const numPolyhedra = polyhedra.length / vertsPerPoly;
     const vertexIndex = new Array;
-    for (let i = 0; i < 4; i++) {
-      vertexIndex[i] = tetrahedra[pickedPolyhedron * 4 + i];
+    for (let i = 0; i < vertsPerPoly; i++) {
+      vertexIndex[i] = polyhedra[pickedPolyhedron * vertsPerPoly + i];
     }
 
-    for (let j = 0; j < numTetrahedra; j++) {
-      const v0 = tetrahedra[j * 4];
-      const v1 = tetrahedra[j * 4 + 1];
-      const v2 = tetrahedra[j * 4 + 2];
-      const v3 = tetrahedra[j * 4 + 3];
+    for (let j = 0; j < numPolyhedra; j++) {
+      const verts = polyhedra.slice(j * vertsPerPoly, j * vertsPerPoly + vertsPerPoly);
 
       this.polyVisibility[j] = this.polyVisibility[j] &&
-        !(
-          vertexIndex.includes(v0) ||
-          vertexIndex.includes(v1) ||
-          vertexIndex.includes(v2) ||
-          vertexIndex.includes(v3)
-        );
-
+        !verts.some(v => vertexIndex.includes(v));
     }
 
     this.polyVisibility[pickedPolyhedron] = true;

@@ -5,6 +5,7 @@ import { MeshLoader } from "../loaders/MeshLoader.js";
 import { TetrahedronDigger } from "../map_inspection/TetrahedronDigger.js";
 import { MeshRenderer } from "../mesh_inspection/MeshRenderer.js";
 import { MeshSlicer } from "../mesh_inspection/MeshSlicer.js";
+import { POLY_TYPES } from "../geometry/Polytypes.js";
 
 /* PolygonOffset to avoid z-fighting when rendering, in external to internal order: 
    wireframe -> mesh -> shell */
@@ -154,7 +155,11 @@ export class VolumeMesh {
   updateVisibleFaces(isSlicerActive, isDistortionSlicerActive, isDiggerActive) {
     const adjacencyMap = this.mesh.geometry.userData.adjacencyMap;
     const vertices = this.mesh.geometry.userData.vertices;
-    const tetrahedra = this.mesh.geometry.userData.tetrahedra;
+    const polyhedra = this.mesh.geometry.userData.polyhedra;
+    const polyType = this.mesh.geometry.userData.polyType;
+    const polyTypeInfo = POLY_TYPES[polyType];
+    const vertsPerPoly = polyTypeInfo.vertsPerPoly;
+    const polyFaces = polyTypeInfo.faces;
 
     //Mesh attributes
     var tmpTriangleSoup = new Array();
@@ -214,35 +219,25 @@ export class VolumeMesh {
 
       var wireframeVertexCounter = 0;
 
-      for (let i = 0; i < tetrahedra.length; i += 4) {
-        const polyIndex = i / 4;
+      for (let i = 0; i < polyhedra.length; i += vertsPerPoly) {
+        const polyIndex = i / vertsPerPoly;
 
         if (!isPolyVisible(polyIndex)) continue;
 
-        const v0 = tetrahedra[i];
-        const v1 = tetrahedra[i + 1];
-        const v2 = tetrahedra[i + 2];
-        const v3 = tetrahedra[i + 3];
+        const v = polyhedra.slice(i, i + vertsPerPoly);
 
-        if (!surfaceVertexIds.has(v0) && !surfaceVertexIds.has(v1) &&
-          !surfaceVertexIds.has(v2) && !surfaceVertexIds.has(v3)) continue;
+        if (!v.some(id => surfaceVertexIds.has(id))) continue;
 
-        const faces = [
-          [v0, v2, v1],
-          [v0, v1, v3],
-          [v0, v3, v2],
-          [v1, v2, v3],
-        ];
-
-        const centroid = computeCentroid([v0, v1, v2, v3]);
+        const faces = polyFaces(v);
+        const centroid = computeCentroid(v);
 
         faces.forEach((face) => {
           const faceKey = [...face].sort((a, b) => a - b).join(",");
           tmpFaces.push(faceKey);
 
           for (let j = 0; j < 3; j++) {
-            const v = face[j];
-            const vertexSeparate = computeSeparation(v, centroid);
+            const vt = face[j];
+            const vertexSeparate = computeSeparation(vt, centroid);
             tmpTriangleSoup.push(vertexSeparate.x, vertexSeparate.y, vertexSeparate.z);
           }
 
@@ -562,8 +557,8 @@ export class VolumeMesh {
 
       const v1 = mesh1.mesh.geometry.userData.vertices.length;
       const v2 = mesh2.mesh.geometry.userData.vertices.length;
-      const t1 = mesh1.mesh.geometry.userData.tetrahedra.length;
-      const t2 = mesh2.mesh.geometry.userData.tetrahedra.length;
+      const t1 = mesh1.mesh.geometry.userData.polyhedra.length;
+      const t2 = mesh2.mesh.geometry.userData.polyhedra.length;
 
       if (v1 !== v2 || t1 !== t2) {
         showLabel("Mesh mismatch", "mismatch");

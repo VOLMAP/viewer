@@ -1,5 +1,6 @@
 import * as THREE from "../../../libs/three/three.module.js";
 import * as utils from "../../main/utils.js";
+import { POLY_TYPES } from "../geometry/Polytypes.js";
 
 const minSliderValue = -100;
 const maxSliderValue = 100;
@@ -49,18 +50,20 @@ export class MeshSlicer {
 
   // This method computes the centroids of the mesh's tetrahedra
   computeCentroids() {
-    const tetrahedra = this.volumeMesh.mesh.geometry.userData.tetrahedra;
+    const polyhedra = this.volumeMesh.mesh.geometry.userData.polyhedra;
     const vertices = this.volumeMesh.mesh.geometry.userData.vertices;
     const translation = this.volumeMesh.mesh.position;
+    const polyType = this.volumeMesh.mesh.geometry.userData.polyType;
+    const vertsPerPoly = POLY_TYPES[polyType].vertsPerPoly;
 
-    const numTetrahedra = tetrahedra.length / 4;
-    let centroids = new Array(numTetrahedra * 3);
+    const numPolyhedra = polyhedra.length / vertsPerPoly;
+    let centroids = new Array(numPolyhedra * 3);
 
-    for (let i = 0; i < numTetrahedra; i++) {
+    for (let i = 0; i < numPolyhedra; i++) {
       let centroid = [0, 0, 0];
       //Visit every vertex of the tetrahedron
-      for (let j = 0; j < 4; j++) {
-        const vertexIndex = tetrahedra[i * 4 + j];
+      for (let j = 0; j < vertsPerPoly; j++) {
+        const vertexIndex = polyhedra[i * vertsPerPoly + j];
         //Visit every coordinate of the vertex and sum it to the other corresponding coordinates
         for (let k = 0; k < 3; k++) {
           centroid[k] += vertices[vertexIndex * 3 + k];
@@ -69,7 +72,7 @@ export class MeshSlicer {
 
       //Average the sum of the corresponding coordinates and assign it
       for (let k = 0; k < 3; k++) {
-        centroid[k] /= 4;
+        centroid[k] /= vertsPerPoly;
         centroids[i * 3 + k] = centroid[k];
       }
 

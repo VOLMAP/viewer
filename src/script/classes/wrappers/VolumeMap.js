@@ -6,6 +6,7 @@ import { MapViewer } from "../map_inspection/MapViewer.js";
 import { DistortionSlicer } from "../map_inspection/DistortionSlicer.js";
 import { TetrahedronDigger } from "../map_inspection/TetrahedronDigger.js";
 import { HistogramPanel } from "../map_inspection/HistogramPanel.js";
+import { POLY_TYPES } from "../geometry/Polytypes.js";
 
 export class VolumeMap {
   isValid = false;
@@ -51,10 +52,11 @@ export class VolumeMap {
         this.histogramPanel.setData(left, right, this.mapViewer.clampStart, this.mapViewer.clampEnd);
         this.distortionSlicer.updateMap();
         const data = this.volumeMesh1.mesh.geometry.userData;
+        const vertsPerPoly = POLY_TYPES[data.polyType].vertsPerPoly;
         this.controller.updateModelInfo(
           data.vertices.length / 3,
           data.triangles.length / 3,
-          data.tetrahedra.length / 4,
+          data.polyhedra.length / vertsPerPoly,
         );
       } else {
         this.histogramPanel.reset();
@@ -95,38 +97,39 @@ export class VolumeMap {
     } else {
       const vertices1 = mesh1.geometry.userData.vertices;
       const vertices2 = mesh2.geometry.userData.vertices;
-      const tetrahedra1 = mesh1.geometry.userData.tetrahedra;
-      const tetrahedra2 = mesh2.geometry.userData.tetrahedra;
+      const polyhedra1 = mesh1.geometry.userData.polyhedra;
+      const polyhedra2 = mesh2.geometry.userData.polyhedra;
+      const polyType1 = mesh1.geometry.userData.polyType;
+      const polyType2 = mesh2.geometry.userData.polyType;
 
-      if (!tetrahedra1 || !tetrahedra2 || !vertices1 || !vertices2) {
-        console.warn("mesh1 or mesh2 missing vertices or tetrahedra");
+      if (!polyhedra1 || !polyhedra2 || !vertices1 || !vertices2) {
+        console.warn("mesh1 or mesh2 missing vertices or polyhedra");
         return false;
       }
+
+      if (polyType1 !== polyType2) {
+        console.warn("mesh1 and mesh2 have different polyhedron types");
+        return false;
+      }
+
+      const vertsPerPoly = POLY_TYPES[polyType1].vertsPerPoly;
 
       if (vertices1.length != vertices2.length) {
         console.warn("mesh1 and mesh2 have different number of vertices");
         return false;
-      } else if (tetrahedra1.length != tetrahedra2.length) {
-        console.warn("mesh1 and mesh2 have different number of tetrahedra");
+      } else if (polyhedra1.length != polyhedra2.length) {
+        console.warn("mesh1 and mesh2 have different number of polyhedra");
         return false;
       } else {
-        for (let i = 0; i < tetrahedra1.length; i += 4) {
-          const t1 = [
-            tetrahedra1[i],
-            tetrahedra1[i + 1],
-            tetrahedra1[i + 2],
-            tetrahedra1[i + 3],
-          ].sort((a, b) => a - b);
-          const t2 = [
-            tetrahedra2[i],
-            tetrahedra2[i + 1],
-            tetrahedra2[i + 2],
-            tetrahedra2[i + 3],
-          ].sort((a, b) => a - b);
+        for (let i = 0; i < polyhedra1.length; i += vertsPerPoly) {
+          const t1 = polyhedra1.slice(i, i + vertsPerPoly).sort((a, b) => a - b);
+          const t2 = polyhedra2.slice(i, i + vertsPerPoly).sort((a, b) => a - b);
 
-          if (t1[0] != t2[0] || t1[1] != t2[1] || t1[2] != t2[2] || t1[3] != t2[3]) {
-            console.warn("mesh1 and mesh2 have different tetrahedra connectivity");
-            return false;
+          for (let j = 0; j < vertsPerPoly; j++) {
+            if (t1[j] != t2[j]) {
+              console.warn("mesh1 and mesh2 have different polyhedra connectivity");
+              return false;
+            }
           }
         }
         return true;

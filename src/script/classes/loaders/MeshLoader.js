@@ -1,5 +1,6 @@
 import * as THREE from "../../../libs/three/three.module.js";
 import * as utils from "../../main/utils.js";
+import { POLY_TYPES } from "../geometry/Polytypes.js";
 
 export class MeshLoader {
   constructor() { }
@@ -19,12 +20,13 @@ export class MeshLoader {
     var numVertices = 0;
     var triangles = new Array();
     var numTriangles = 0;
-    var tetrahedra = new Array();
-    var numTetrahedra = 0;
+    var polyhedra = new Array();
+    var numPolyhedra = 0;
+    var polyType = null;
 
     var verticesLabels = new Array();
     var trianglesLabels = new Array();
-    var tetrahedraLabels = new Array();
+    var polyhedraLabels = new Array();
 
     var adjacencyMap = new Map();
 
@@ -77,15 +79,27 @@ export class MeshLoader {
           mode = "vertices";
         } else if (tokens[0] === "Tetrahedra") {
           if (tokens.length < 2) {
-            //Read the next line for the number of tetrahedra
+             //Read the next line for the number of tetrahedra
             line = buffer.slice(0, buffer.indexOf("\n")).trim();
             buffer = buffer.slice(buffer.indexOf("\n") + 1);
             tokens = line.split(/\s+/);
-            numTetrahedra = parseInt(tokens[0]);
+            numPolyhedra = parseInt(tokens[0]);
           } else {
-            numTetrahedra = parseInt(tokens[1]);
+            numPolyhedra = parseInt(tokens[1]);
           }
+          polyType = "TETRAHEDRON";
           mode = "tetrahedra";
+        } else if (tokens[0] === "Hexahedra") {
+          if (tokens.length < 2) {
+            line = buffer.slice(0, buffer.indexOf("\n")).trim();
+            buffer = buffer.slice(buffer.indexOf("\n") + 1);
+            tokens = line.split(/\s+/);
+            numPolyhedra = parseInt(tokens[0]);
+          } else {
+            numPolyhedra = parseInt(tokens[1]);
+          }
+          polyType = "HEXAHEDRON";
+          mode = "hexahedra";
         } else if (tokens[0] === "Triangles") {
           if (tokens.length < 2) {
             line = buffer.slice(0, buffer.indexOf("\n")).trim();
@@ -103,11 +117,17 @@ export class MeshLoader {
           verticesLabels.push(tokens[3]);
         } else if (mode === "tetrahedra" && tokens.length === 5) {
           //Note: converting to zero-based indexing and changing vertex order for correct face orientation
-          tetrahedra.push(parseInt(tokens[1]) - 1);
-          tetrahedra.push(parseInt(tokens[0]) - 1);
-          tetrahedra.push(parseInt(tokens[2]) - 1);
-          tetrahedra.push(parseInt(tokens[3]) - 1);
-          tetrahedraLabels.push(tokens[4]);
+          polyhedra.push(parseInt(tokens[1]) - 1);
+          polyhedra.push(parseInt(tokens[0]) - 1);
+          polyhedra.push(parseInt(tokens[2]) - 1);
+          polyhedra.push(parseInt(tokens[3]) - 1);
+          polyhedraLabels.push(tokens[4]);
+        } else if (mode === "hexahedra" && tokens.length === 9) {
+          for (let i = 0; i < 8; i++) {
+            polyhedra.push(parseInt(tokens[i]) - 1);
+          }
+
+          polyhedraLabels.push(tokens[8]);
         } else if (mode === "triangles" && tokens.length === 4) {
           for (let i = 0; i < 3; i++) {
             triangles.push(parseInt(tokens[i]) - 1);
@@ -118,34 +138,36 @@ export class MeshLoader {
             throw new Error("Version not found");
           }
 
-          if (!dimension) {
+         if (!dimension) {
             throw new Error("Dimension not found");
           }
 
           if (!numVertices) {
             throw new Error("No vertices found in this file.");
           }
-
-          if (!numTetrahedra) {
-            throw new Error("No tetrahedra found in this file.");
+          
+          if (!numPolyhedra) {
+            throw new Error("No polyhedra found in this file.");
           }
 
           if (vertices.length !== numVertices * 3) {
             throw new Error("Dimension not matching (vertices)");
+
           }
 
-          if (tetrahedra.length !== numTetrahedra * 4) {
-            throw new Error("Dimension not matching (tetrahedra)");
+          const { vertsPerPoly } = POLY_TYPES[polyType];
+          if (polyhedra.length !== numPolyhedra * vertsPerPoly) {
+            throw new Error("Dimension not matching (polyhedra)");
           }
 
-          if (verticesLabels.length !== numVertices || tetrahedraLabels.length !== numTetrahedra) {
+          if (verticesLabels.length !== numVertices || polyhedraLabels.length !== numPolyhedra) {
             throw new Error("Dimension not matching (labels)");
           }
         }
       }
     }
     //Generate triangles and adjacency map from tetrahedra
-    const tmp = this.generateTrianglesAndAdjacencyMap(tetrahedra);
+    const tmp = this.generateTrianglesAndAdjacencyMap(polyhedra, polyType);
     triangles = tmp.triangles;
     adjacencyMap = tmp.adjacencyMap;
     //Generate triangle soup from vertices and triangles
@@ -158,7 +180,8 @@ export class MeshLoader {
     geometry.userData = {
       vertices: vertices,
       triangles: triangles,
-      tetrahedra: tetrahedra,
+      polyhedra: polyhedra,
+      polyType: polyType,
       triangleSoup: triangleSoup,
       adjacencyMap: adjacencyMap,
       polyCentroids: null,
@@ -180,16 +203,16 @@ export class MeshLoader {
 
     var vertices = new Array();
     var numVertices = 0;
-    var edges = new Array();        
+    var edges = new Array();
     var numEdges = 0;
-    var faces = new Array(); 
-    var triangles = new Array();       
+    var faces = new Array();
+    var triangles = new Array();
     var numFaces = 0;
+    var ovmPolyhedra = new Array();
+    var numOvmPolyhedra = 0;
     var polyhedra = new Array();
     var numPolyhedra = 0;
-    var tetrahedra = new Array();    
-    var numTetrahedra = 0;
-
+    var polyType = null;
 
     var adjacencyMap = new Map();
 
@@ -239,29 +262,28 @@ export class MeshLoader {
         for (let i = 0; i < numFaces; i++) {
           const parts = nextLine().split(/\s+/);
           const count = parseInt(parts[0]);
-          const halfEdges = new Array;
+          const halfEdges = new Array();
           for (let k = 1; k <= count; k++) {
             halfEdges.push(parseInt(parts[k]));
           }
           faces.push(halfEdges);
         }
       } else if (tokens[0] === "Polyhedra") {
-        numPolyhedra = parseInt(nextLine());
-        for (let i = 0; i < numPolyhedra; i++) {
+        numOvmPolyhedra = parseInt(nextLine());
+        for (let i = 0; i < numOvmPolyhedra; i++) {
           const parts = nextLine().split(/\s+/);
           const count = parseInt(parts[0]);
           const halfFaces = new Array();
           for (let k = 1; k <= count; k++) {
             halfFaces.push(parseInt(parts[k]));
           }
-          polyhedra.push(halfFaces);
+          ovmPolyhedra.push(halfFaces);
         }
       }
     }
 
-    for (let i = 0; i < polyhedra.length; i++) {
-      const halfFaces = polyhedra[i];
-      if (halfFaces.length !== 4) continue;
+    for (let i = 0; i < ovmPolyhedra.length; i++) {
+      const halfFaces = ovmPolyhedra[i];
 
       const vertexSet = new Set();
 
@@ -277,32 +299,33 @@ export class MeshLoader {
         }
       }
 
-      if (vertexSet.size !== 4) continue;
-
-      const [v0, v1, v2, v3] = [...vertexSet];
-
-  
-      tetrahedra.push(v1, v0, v2, v3);
+      if (halfFaces.length === 4 && vertexSet.size === 4) {
+        const [v0, v1, v2, v3] = [...vertexSet];
+        polyhedra.push(v1, v0, v2, v3);
+        if (!polyType) polyType = "TETRAHEDRON";
+      } else if (halfFaces.length === 6 && vertexSet.size === 8) {
+        const [v0, v1, v2, v3, v4, v5, v6, v7] = [...vertexSet];
+        polyhedra.push(v0, v1, v2, v3, v4, v5, v6, v7);
+        if (!polyType) polyType = "HEXAHEDRON";
+      } else {
+        console.warn(`Skipping polyhedron ${i}: unsupported type (${halfFaces.length} half-faces, ${vertexSet.size} vertices)`);
+      }
     }
 
-    numTetrahedra = tetrahedra.length / 4;
+    numPolyhedra = polyhedra.length / POLY_TYPES[polyType].vertsPerPoly;
 
     if (!numVertices) {
       throw new Error("No vertices found in this file.")
     }
-    if (!numTetrahedra) {
-      throw new Error("No tetrahedra found in this file.")
+    if (!numPolyhedra) {
+      throw new Error("No polyhedra found in this file.");
+
     }
     if (vertices.length !== numVertices * 3){
       throw new Error("Dimension not matching (vertices)");
     }
-    if (tetrahedra.length !== numTetrahedra * 4){
-      throw new Error("Dimension not matching (tetrahedra)");
-    }
-      
 
-
-    const tmp = this.generateTrianglesAndAdjacencyMap(tetrahedra);
+    const tmp = this.generateTrianglesAndAdjacencyMap(polyhedra, polyType);
     triangles = tmp.triangles;
     adjacencyMap = tmp.adjacencyMap;
 
@@ -317,7 +340,8 @@ export class MeshLoader {
     geometry.userData = {
       vertices,
       triangles,
-      tetrahedra,
+      polyhedra,
+      polyType,
       triangleSoup,
       adjacencyMap,
       polyCentroids: null,
@@ -337,15 +361,16 @@ export class MeshLoader {
     let lineIndex = 0;
 
     const VTK_TETRA = 10;
-
+    const VTK_HEXAHEDRON = 12;
 
     let format = null;
 
     var vertices = new Array();
     var numVertices = 0;
     var triangles = new Array();
-    var tetrahedra = new Array();
-    var numTetrahedra = 0;
+    var polyhedra = new Array();
+    var numPolyhedra = 0;
+    var polyType = null;
 
     var cells = new Array();
     var numCells = 0;
@@ -427,33 +452,35 @@ export class MeshLoader {
     for (let i = 0; i < cells.length; i++) {
       if (cellTypes[i] === VTK_TETRA) {
         const cell = cells[i];
-        tetrahedra.push(parseInt(cell[1]));
-        tetrahedra.push(parseInt(cell[0]));
-        tetrahedra.push(parseInt(cell[2]));
-        tetrahedra.push(parseInt(cell[3]));
+        polyhedra.push(parseInt(cell[1]));
+        polyhedra.push(parseInt(cell[0]));
+        polyhedra.push(parseInt(cell[2]));
+        polyhedra.push(parseInt(cell[3]));
+        if (!polyType) polyType = "TETRAHEDRON";
+      } else if (cellTypes[i] === VTK_HEXAHEDRON) {
+        const cell = cells[i];
+        for (let k = 0; k < 8; k++) {
+          polyhedra.push(parseInt(cell[k]));
+        }
+        if (!polyType) polyType = "HEXAHEDRON";
       }
     }
 
-    numTetrahedra = tetrahedra.length / 4;
+    numPolyhedra = polyhedra.length / POLY_TYPES[polyType].vertsPerPoly;
 
     if (!numVertices) {
       throw new Error("No vertices found in this file.");
     }
 
-    if (!numTetrahedra) {
-      throw new Error("No tetrahedra found in this file.");
+    if (!numPolyhedra) {
+      throw new Error("No polyhedra found in this file.");
     }
 
     if (vertices.length !== numVertices * 3) {
       throw new Error("Dimension not matching (vertices)");
     }
-
-    if (tetrahedra.length !== numTetrahedra * 4) {
-      throw new Error("Dimension not matching (tetrahedra)");
-    }
-
     //Generate triangles and adjacency map from tetrahedra
-    const tmp = this.generateTrianglesAndAdjacencyMap(tetrahedra);
+    const tmp = this.generateTrianglesAndAdjacencyMap(polyhedra, polyType);
     triangles = tmp.triangles;
     adjacencyMap = tmp.adjacencyMap;
     //Generate triangle soup from vertices and triangles
@@ -466,7 +493,8 @@ export class MeshLoader {
     geometry.userData = {
       vertices: vertices,
       triangles: triangles,
-      tetrahedra: tetrahedra,
+      polyhedra: polyhedra,
+      polyType: polyType,
       triangleSoup: triangleSoup,
       adjacencyMap: adjacencyMap,
       polyCentroids: null,
@@ -538,7 +566,8 @@ export class MeshLoader {
       vertices: vertices,
       verticesIds: verticesIds,
       triangles: null,
-      tetrahedra: null,
+      polyhedra: null,
+      polyType: null,
       triangleSoup: null,
       adjacencyMap: null,
       polyCentroids: null,
@@ -550,44 +579,27 @@ export class MeshLoader {
     return new THREE.Mesh(geometry);
   }
 
-
-  generateTrianglesAndAdjacencyMap(tetrahedra, vertices) {
-    function sortedFaces(v0, v1, v2, v3) {
-      return [
-        [v0, v2, v1],
-        [v0, v1, v3],
-        [v0, v3, v2],
-        [v1, v2, v3],
-      ];
-    }
+  generateTrianglesAndAdjacencyMap(polyhedra, polyType = "TETRAHEDRON") {
+    const { vertsPerPoly, faces } = POLY_TYPES[polyType];
 
     var triangles = new Array();
     var adjacencyMap = new Map();
 
-    for (let i = 0; i < tetrahedra.length; i += 4) {
-      var v0 = tetrahedra[i],
-        v1 = tetrahedra[i + 1],
-        v2 = tetrahedra[i + 2],
-        v3 = tetrahedra[i + 3];
+    for (let i = 0; i < polyhedra.length; i += vertsPerPoly) {
+      const v = polyhedra.slice(i, i + vertsPerPoly);
+      const polyIndex = i / vertsPerPoly;
 
-      var faces = sortedFaces(v0, v1, v2, v3);
-
-      faces.forEach((face) => {
-        //Add face to the triangles array
+      faces(v).forEach((face) => {
         triangles.push(face[0], face[1], face[2]);
-        //Create and adjacency map key for each face and build the map
         const key = [...face].sort((a, b) => a - b).join(",");
         if (!adjacencyMap.has(key)) {
           adjacencyMap.set(key, new Array());
         }
-        adjacencyMap.get(key).push({ sortedFace: face, polyIndex: i / 4 });
+        adjacencyMap.get(key).push({ sortedFace: face, polyIndex });
       });
     }
 
-    return {
-      triangles: triangles,
-      adjacencyMap: adjacencyMap,
-    };
+    return { triangles, adjacencyMap };
   }
 
   generateTriangleSoup(vertices, triangles) {
