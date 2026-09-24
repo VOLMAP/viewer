@@ -1,6 +1,7 @@
 import * as THREE from "../../../libs/three/three.module.js";
 import * as utils from "../../main/utils.js";
 import * as matrixUtils from "./matrixUtils.js";
+import { POLY_TYPES } from "../geometry/Polytypes.js";
 
 export class MapViewer {
   isActive = false;
@@ -100,15 +101,22 @@ export class MapViewer {
 
     const vertices1 = mesh1.geometry.userData.vertices;
     const vertices2 = mesh2.geometry.userData.vertices;
-    const tetrahedra = mesh1.geometry.userData.tetrahedra;
+    const polyhedra = mesh1.geometry.userData.polyhedra;
+    const polyType = mesh1.geometry.userData.polyType;
+    const vertsPerPoly = POLY_TYPES[polyType].vertsPerPoly;
 
-    for (let i = 0; i < tetrahedra.length; i += 4) {
+    if (polyType !== "TETRAHEDRON") {
+      console.warn(`computeDistortion: distortion computation not supported for HEXAHEDRON"`);
+      return;
+    }
+
+    for (let i = 0; i < polyhedra.length; i += vertsPerPoly) {
       const tetrahedra1 = new Array();
       const tetrahedra2 = new Array();
 
-      for (let j = 0; j < 4; j++) {
+      for (let j = 0; j < vertsPerPoly; j++) {
         // Get vertex index
-        const vIndex = tetrahedra[i + j];
+        const vIndex = polyhedra[i + j];
         // Get vertex coordinates
         const v1 = {
           x: vertices1[vIndex * 3],
@@ -153,15 +161,22 @@ export class MapViewer {
 
     const vertices1 = mesh1.geometry.userData.vertices;
     const vertices2 = mesh2.geometry.userData.vertices;
-    const tetrahedra = mesh1.geometry.userData.tetrahedra;
+    const polyhedra = mesh1.geometry.userData.polyhedra;
+    const polyType = mesh1.geometry.userData.polyType;
+    const vertsPerPoly = POLY_TYPES[polyType].vertsPerPoly;
 
     const left = [];
     const right = [];
 
-    for (let i = 0; i < tetrahedra.length; i += 4) {
+    if (polyType !== "TETRAHEDRON") {
+      console.warn(`computeDistortionBothDirections: distortion computation not supported for HEXAHEDRON`);
+      return { left, right };
+    }
+
+    for (let i = 0; i < polyhedra.length; i += vertsPerPoly) {
       const tetrahedronVertices1 = [], tetrahedronVertices2 = [];
-      for (let j = 0; j < 4; j++) {
-        const vertexIndex  = tetrahedra[i + j];
+      for (let j = 0; j < vertsPerPoly; j++) {
+        const vertexIndex  = polyhedra[i + j];
         tetrahedronVertices1.push({ x: vertices1[vertexIndex  * 3], y: vertices1[vertexIndex  * 3 + 1], z: vertices1[vertexIndex  * 3 + 2] });
         tetrahedronVertices2.push({ x: vertices2[vertexIndex  * 3], y: vertices2[vertexIndex  * 3 + 1], z: vertices2[vertexIndex  * 3 + 2] });
       }
@@ -282,9 +297,11 @@ export class MapViewer {
     const mesh1 = this.volumeMap.volumeMesh1.mesh;
     const mesh2 = this.volumeMap.volumeMesh2.mesh;
 
-    const tetrahedra = mesh1.geometry.userData.tetrahedra;
+    const polyhedra = mesh1.geometry.userData.polyhedra;
+    const polyType = mesh1.geometry.userData.polyType;
+    const vertsPerPoly = POLY_TYPES[polyType].vertsPerPoly;
 
-    for (var i = 0; i < tetrahedra.length / 4; i++) {
+    for (var i = 0; i < polyhedra.length / vertsPerPoly; i++) {
       let colorRGB = null;
 
       if (this.clampedPolyDistortion[i] == Infinity) {
