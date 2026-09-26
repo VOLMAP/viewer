@@ -581,22 +581,60 @@ export class MeshLoader {
 
   generateTrianglesAndAdjacencyMap(polyhedra, polyType = "TETRAHEDRON") {
     const { vertsPerPoly, faces } = POLY_TYPES[polyType];
+    const triangles = [];
+    const adjacencyMap = new Map();
+    const faceKey = (face) => [...face].sort((a, b) => a - b).join(",");
 
-    var triangles = new Array();
-    var adjacencyMap = new Map();
+    if (polyType !== "HEXAHEDRON") {
+      for (let i = 0; i < polyhedra.length; i += vertsPerPoly) {
+        const polyhedronVertices = polyhedra.slice(i, i + vertsPerPoly);
+        const polyIndex = i / vertsPerPoly;
+
+        for (const face of faces(polyhedronVertices)) {
+          triangles.push(...face);
+
+          const key = faceKey(face);
+          if (!adjacencyMap.has(key)) adjacencyMap.set(key, []);
+          adjacencyMap.get(key).push({ sortedFace: face, polyIndex });
+        }
+      }
+
+      return { triangles, adjacencyMap };
+    }
+
+    const faceGroups = new Map();
 
     for (let i = 0; i < polyhedra.length; i += vertsPerPoly) {
-      const v = polyhedra.slice(i, i + vertsPerPoly);
+      const polyhedronVertices = polyhedra.slice(i, i + vertsPerPoly);
       const polyIndex = i / vertsPerPoly;
+      const polyhedronFaces = faces(polyhedronVertices);
+      const quads = POLY_TYPES[polyType].quads(polyhedronVertices);
 
-      faces(v).forEach((face) => {
-        triangles.push(face[0], face[1], face[2]);
-        const key = [...face].sort((a, b) => a - b).join(",");
-        if (!adjacencyMap.has(key)) {
-          adjacencyMap.set(key, new Array());
+      polyhedronFaces.forEach((face, faceIndex) => {
+        triangles.push(...face);
+
+        const quadKey = faceKey(quads[Math.floor(faceIndex / 2)]);
+        if (!faceGroups.has(quadKey)) faceGroups.set(quadKey, []);
+
+        let polyhedronEntry = faceGroups.get(quadKey).find(
+          entry => entry.polyIndex === polyIndex
+        );
+        if (!polyhedronEntry) {
+          polyhedronEntry = { faces: [], polyIndex };
+          faceGroups.get(quadKey).push(polyhedronEntry);
         }
-        adjacencyMap.get(key).push({ sortedFace: face, polyIndex });
+        polyhedronEntry.faces.push(face);
       });
+    }
+
+    for (const polyhedraSharingFace of faceGroups.values()) {
+      for (const representativeFace of polyhedraSharingFace[0].faces) {
+        const key = faceKey(representativeFace);
+        adjacencyMap.set(key, polyhedraSharingFace.map(polyhedron => ({
+          sortedFace: polyhedron.faces.find(face => faceKey(face) === key) || representativeFace,
+          polyIndex: polyhedron.polyIndex,
+        })));
+      }
     }
 
     return { triangles, adjacencyMap };

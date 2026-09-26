@@ -72,6 +72,10 @@ export class VolumeMesh {
     this.setWireframe();
     if (this.volumeMap) {
       this.volumeMap.isValid = false;
+      if (this.volumeMap.mapViewer.isActive) {
+        const otherMesh = this.volumeMap.volumeMesh1 === this ? this.volumeMap.volumeMesh2 : this.volumeMap.volumeMesh1;
+        this.volumeMap.mapViewer.setActive(false);
+      }
     }
     this.updateVisibleFaces(false, false, false);
     // Generate shell from the surface mesh
@@ -645,6 +649,7 @@ export class VolumeMesh {
     } else {
       this.mesh.material.color.set(this.plainColor);
       this.mesh.material.vertexColors = false;
+      this.mesh.geometry.deleteAttribute("color");
     }
 
     this.mesh.material.needsUpdate = true;
