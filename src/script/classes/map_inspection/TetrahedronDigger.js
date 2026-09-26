@@ -95,16 +95,7 @@ export class TetrahedronDigger {
       if (this.mode === "digger") {
         this.polyVisibility[pickedPolyhedron] = false;
       } else if (this.mode === "undigger") {
-        if (value.length == 2) {
-          const poly1 = value[0].polyIndex;
-          const poly2 = value[1].polyIndex;
-
-          if (!this.polyVisibility[poly1]) {
-            this.polyVisibility[poly1] = true;
-          } else if (!this.polyVisibility[poly2]) {
-            this.polyVisibility[poly2] = true;
-          }
-        }
+        this.undigger(value);
       }
       else if (this.mode === "isolate") {
         this.isolate(pickedPolyhedron);
@@ -142,12 +133,25 @@ export class TetrahedronDigger {
     this.mode = mode;
   }
 
+  undigger(value) {
+    if (value.length !== 2) return;
+
+    const hiddenPolyhedron = value.find(
+      entry => !this.polyVisibility[entry.polyIndex]
+    );
+
+    if (hiddenPolyhedron) {
+      this.polyVisibility[hiddenPolyhedron.polyIndex] = true;
+    }
+  }
+
   isolate(pickedPolyhedron) {
     const polyhedra = this.volumeMesh.mesh.geometry.userData.polyhedra;
     const polyType = this.volumeMesh.mesh.geometry.userData.polyType;
     const vertsPerPoly = POLY_TYPES[polyType].vertsPerPoly;
     const numPolyhedra = polyhedra.length / vertsPerPoly;
     const vertexIndex = new Array;
+
     for (let i = 0; i < vertsPerPoly; i++) {
       vertexIndex[i] = polyhedra[pickedPolyhedron * vertsPerPoly + i];
     }
