@@ -1,5 +1,6 @@
 import * as THREE from "../../../libs/three/three.module.js";
 import * as utils from "../../main/utils.js";
+import { POLY_TYPES } from "../geometry/Polytypes.js";
 import { ArcballControls } from "../../../libs/three/addons/controls/ArcballControls.js";
 
 const defaultFOV = 50;
@@ -198,7 +199,34 @@ export class MeshRenderer {
       const intersects = raycaster.intersectObject(this.volumeMesh.mesh, true);
 
       if (intersects.length > 0) {
-        this.controls.focus(intersects[0].point, 2);
+        const intersection = intersects[0];
+        const mesh = intersection.object;
+        const geometry = mesh.geometry;
+        const { polyhedra, polyType, vertices } = geometry.userData;
+        let pivot = intersection.point;
+
+        if (polyhedra && polyType && vertices && intersection.faceIndex !== null) {
+          const { vertsPerPoly, faces } = POLY_TYPES[polyType];
+          const facesPerPoly = faces(polyhedra.slice(0, vertsPerPoly)).length;
+          const polyhedronIndex = geometry.userData.facePolyhedra?.[intersection.faceIndex] ??
+            Math.floor(intersection.faceIndex / facesPerPoly);
+          const firstVertex = polyhedronIndex * vertsPerPoly;
+
+          if (firstVertex + vertsPerPoly <= polyhedra.length) {
+            pivot = new THREE.Vector3();
+            for (let i = 0; i < vertsPerPoly; i++) {
+              const vertexIndex = polyhedra[firstVertex + i] * 3;
+              pivot.x += vertices[vertexIndex];
+              pivot.y += vertices[vertexIndex + 1];
+              pivot.z += vertices[vertexIndex + 2];
+            }
+
+            pivot.divideScalar(vertsPerPoly);
+            mesh.localToWorld(pivot);
+          }
+        }
+
+        this.controls.focus(pivot, 2);
 
         this.controls._cameraMatrixState.copy(this.camera.matrix);
         this.controls._gizmoMatrixState.copy(this.controls._gizmos.matrix);

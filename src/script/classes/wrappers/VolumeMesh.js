@@ -71,6 +71,8 @@ export class VolumeMesh {
     //Reset wireframe and generate surface mesh and wireframe
     this.setWireframe();
     if (this.volumeMap) {
+      this.volumeMap.histogramPanel.reset();
+      this.volumeMap.controller.setHistogramVisibility(false);
       this.volumeMap.isValid = false;
       if (this.volumeMap.mapViewer.isActive) {
         const otherMesh = this.volumeMap.volumeMesh1 === this ? this.volumeMap.volumeMesh2 : this.volumeMap.volumeMesh1;
@@ -168,6 +170,7 @@ export class VolumeMesh {
     //Mesh attributes
     var tmpTriangleSoup = new Array();
     var tmpFaces = new Array();
+    var tmpFacePolyhedra = new Array();
     //Wireframe attributes
     var tmpSegments = new Array();
 
@@ -238,6 +241,7 @@ export class VolumeMesh {
         faces.forEach((face) => {
           const faceKey = [...face].sort((a, b) => a - b).join(",");
           tmpFaces.push(faceKey);
+          tmpFacePolyhedra.push(polyIndex);
 
           for (let j = 0; j < 3; j++) {
             const vt = face[j];
@@ -283,15 +287,15 @@ export class VolumeMesh {
         //If the face has to be added
         if (sortedFace) {
           for (let i = 0; i < sortedFace.length; i++) {
-            // Get vertex index
             const v = sortedFace[i];
-            // Push vertex coordinates
+            
             tmpTriangleSoup.push(vertices[v * 3]);
             tmpTriangleSoup.push(vertices[v * 3 + 1]);
             tmpTriangleSoup.push(vertices[v * 3 + 2]);
           }
-          // Push polyhedron index
+          
           tmpFaces.push(key);
+          tmpFacePolyhedra.push(polyIndex);
           // Push wireframe segments (for each face, create its 3 edges)
           tmpSegments.push(sortedFace[0], sortedFace[1]);
           tmpSegments.push(sortedFace[1], sortedFace[2]);
@@ -304,6 +308,7 @@ export class VolumeMesh {
     const positionsAttribute = new THREE.BufferAttribute(new Float32Array(tmpTriangleSoup), 3);
     this.mesh.geometry.setAttribute("position", positionsAttribute);
     this.mesh.geometry.userData.faceKeys = tmpFaces;
+    this.mesh.geometry.userData.facePolyhedra = tmpFacePolyhedra;
     //Compute normals for proper lighting
     this.mesh.geometry.deleteAttribute("normal");
     this.mesh.geometry.computeVertexNormals();
