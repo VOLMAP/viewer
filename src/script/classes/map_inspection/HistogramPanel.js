@@ -90,7 +90,7 @@ export class HistogramPanel {
   }
 
   filterFinite(data) {
-    return data.filter(value => !isNaN(value) && isFinite(value));
+    return data.map(v => (Number.isNaN(v) ? Infinity : v));
   }
 
   buildBins(data) {
