@@ -146,6 +146,49 @@ export class MapViewer {
     mesh2.geometry.userData.polyDistortion = tmpPolyDistortion;
   }
 
+
+  computeDistortionBothDirections() {
+    const mesh1 = this.volumeMap.volumeMesh1.mesh;
+    const mesh2 = this.volumeMap.volumeMesh2.mesh;
+
+    const vertices1 = mesh1.geometry.userData.vertices;
+    const vertices2 = mesh2.geometry.userData.vertices;
+    const tetrahedra = mesh1.geometry.userData.tetrahedra;
+
+    const left = [];
+    const right = [];
+
+    for (let i = 0; i < tetrahedra.length; i += 4) {
+      const tetrahedronVertices1 = [], tetrahedronVertices2 = [];
+      for (let j = 0; j < 4; j++) {
+        const vertexIndex  = tetrahedra[i + j];
+        tetrahedronVertices1.push({ x: vertices1[vertexIndex  * 3], y: vertices1[vertexIndex  * 3 + 1], z: vertices1[vertexIndex  * 3 + 2] });
+        tetrahedronVertices2.push({ x: vertices2[vertexIndex  * 3], y: vertices2[vertexIndex  * 3 + 1], z: vertices2[vertexIndex  * 3 + 2] });
+      }
+
+
+      const jacobianLeft = matrixUtils.jacobianMatrix(tetrahedronVertices1, tetrahedronVertices2);
+      if (matrixUtils.determinant3x3(jacobianLeft) <= 0) {
+        left.push(NaN);
+      } else {
+        const s_left = matrixUtils.computeSingularValues(jacobianLeft );
+        left.push(this.computeTetDistortion(s_left[0], s_left[1], s_left[2], this.energy));
+      }
+
+
+      const jacobianRight = matrixUtils.jacobianMatrix(tetrahedronVertices2, tetrahedronVertices1);
+      if (matrixUtils.determinant3x3(jacobianRight) <= 0) {
+        right.push(NaN);
+      } else {
+        const s_right = matrixUtils.computeSingularValues(jacobianRight);
+        right.push(this.computeTetDistortion(s_right[0], s_right[1], s_right[2], this.energy));
+      }
+    }
+
+    return { left, right };
+  }
+
+
   computeTetDistortion(s_max, s_mid, s_min, energy) {
     switch (energy) {
       case "Conformal":

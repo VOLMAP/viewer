@@ -23,6 +23,7 @@ export class MapController {
   mapEnergy = null;
   mapClamp = null;
   mapGradint = null;
+  histogramToggle = null;
   // Picker Info
   pickerPolyhedron = null;
   pickerDistortion = null;
@@ -57,6 +58,7 @@ export class MapController {
     this.mapEnergy = getElement(statusBarContainer, "map-energy");
     this.mapClamp = getElement(statusBarContainer, "map-clamp");
     this.mapGradient = getElement(statusBarContainer, "map-gradient");
+    this.histogramToggle = getElement(settingsContainer, "histogram-toggle");
     // Picker Info
     this.pickerPolyhedron = getElement(statusBarContainer, "picker-polyhedron");
     this.pickerDistortion = getElement(statusBarContainer, "picker-distortion");
@@ -64,8 +66,8 @@ export class MapController {
     this.distortionSlicerContainer = getElement(document, "distortion-slicer-settings-container");
     this.distortionSlider = getElement(this.distortionSlicerContainer, "distortion-slider");
     this.degenerateFilterToggle = getElement(this.distortionSlicerContainer, "degenerate-filter");
-    this.distortionReverseButton = getElement(this.distortionSlicerContainer,"distortion-reverse-button");
-  
+    this.distortionReverseButton = getElement(this.distortionSlicerContainer, "distortion-reverse-button");
+
 
     this.appendEventListeners(this.volumeMap);
   }
@@ -132,6 +134,15 @@ export class MapController {
         this.value = this.oldValue;
       } else {
         this.oldValue = this.value;
+      }
+    });
+
+    this.histogramToggle.addEventListener("change", function () {
+      const flag = this.checked;
+      if (!volumeMap.toggleHistogram(flag)) {
+        this.checked = !flag;
+      } else {
+        volumeMap.controller.setHistogramVisibility(flag);
       }
     });
 
@@ -309,5 +320,11 @@ export class MapController {
 
   toggleDistortionSlicer(flag) {
     this.distortionSlicerToggle.checked = flag;
+  }
+
+  setHistogramVisibility(flag) {
+    this.histogramToggle.checked = flag;
+
+    
   }
 }
