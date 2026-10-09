@@ -233,7 +233,7 @@ export class HistogramPanel {
       .attr('transform', `translate(${sideW},${X_AXIS_H})`);
 
     gY.append('line')
-      .attr('x1', 0).attr('x2', 0)
+      .attr('x1', -HORIZONTAL_PADDING).attr('x2', -HORIZONTAL_PADDING)
       .attr('y1', 0).attr('y2', innerH)
       .attr('stroke', '#666').attr('stroke-width', 1);
 
@@ -258,11 +258,18 @@ export class HistogramPanel {
       .attr('class', 'bar')
       .attr('y', d => yBand(d.index))
       .attr('height', binH)
-      .attr('x', 0)
-      .attr('width', d => xRight(d.count))
+      .attr('x', HORIZONTAL_PADDING)
+      .attr('width', d => xRight(d.count) - HORIZONTAL_PADDING)
       .attr('fill', d => binColors[d.index])
       .attr('rx', 1)
       .attr('stroke', '#666').attr('stroke-width', 1);;
+
+    svg.append('g')
+      .attr('transform', `translate(${sideW + Y_AXIS_W},${X_AXIS_H})`)
+      .append('line')
+      .attr('x1', HORIZONTAL_PADDING).attr('x2', HORIZONTAL_PADDING)
+      .attr('y1', 0).attr('y2', innerH)
+      .attr('stroke', '#666').attr('stroke-width', 1);
 
     svg.append('g')
       .attr('transform', `translate(${sideW + Y_AXIS_W},${X_AXIS_H})`)
