@@ -173,6 +173,7 @@ export class VolumeMesh {
     var tmpFacePolyhedra = new Array();
     //Wireframe attributes
     var tmpSegments = new Array();
+    var tmpWireframePositions = new Array();
 
     const isPolyVisible = (polyIndex) => {
       return (
@@ -249,11 +250,29 @@ export class VolumeMesh {
             tmpTriangleSoup.push(vertexSeparate.x, vertexSeparate.y, vertexSeparate.z);
           }
 
-          tmpSegments.push(wireframeVertexCounter, wireframeVertexCounter + 1);
-          tmpSegments.push(wireframeVertexCounter + 1, wireframeVertexCounter + 2);
-          tmpSegments.push(wireframeVertexCounter + 2, wireframeVertexCounter);
-          wireframeVertexCounter += 3;
+          if (!polyTypeInfo.quads) {
+            tmpSegments.push(wireframeVertexCounter, wireframeVertexCounter + 1);
+            tmpSegments.push(wireframeVertexCounter + 1, wireframeVertexCounter + 2);
+            tmpSegments.push(wireframeVertexCounter + 2, wireframeVertexCounter);
+            wireframeVertexCounter += 3;
+          }
         });
+
+        if (polyTypeInfo.quads) {
+          for (const quad of polyTypeInfo.quads(v)) {
+            for (const vertex of quad) {
+              const vertexSeparate = computeSeparation(vertex, centroid);
+              tmpWireframePositions.push(vertexSeparate.x, vertexSeparate.y, vertexSeparate.z);
+            }
+            tmpSegments.push(
+              wireframeVertexCounter, wireframeVertexCounter + 1,
+              wireframeVertexCounter + 1, wireframeVertexCounter + 2,
+              wireframeVertexCounter + 2, wireframeVertexCounter + 3,
+              wireframeVertexCounter + 3, wireframeVertexCounter,
+            );
+            wireframeVertexCounter += 4;
+          }
+        }
       }
     } else {
       for (const key of adjacencyMap.keys()) {
@@ -296,10 +315,43 @@ export class VolumeMesh {
           
           tmpFaces.push(key);
           tmpFacePolyhedra.push(polyIndex);
-          // Push wireframe segments (for each face, create its 3 edges)
-          tmpSegments.push(sortedFace[0], sortedFace[1]);
-          tmpSegments.push(sortedFace[1], sortedFace[2]);
-          tmpSegments.push(sortedFace[2], sortedFace[0]);
+          if (!polyTypeInfo.quads) {
+            // Push wireframe segments (for each face, create its 3 edges)
+            tmpSegments.push(sortedFace[0], sortedFace[1]);
+            tmpSegments.push(sortedFace[1], sortedFace[2]);
+            tmpSegments.push(sortedFace[2], sortedFace[0]);
+          }
+        }
+      }
+
+      if (polyTypeInfo.quads) {
+        const visibleFaceKeys = new Set(tmpFaces);
+        const addedEdges = new Set();
+
+        for (let i = 0; i < polyhedra.length; i += vertsPerPoly) {
+          const polyIndex = i / vertsPerPoly;
+          if (!isPolyVisible(polyIndex)) continue;
+
+          const v = polyhedra.slice(i, i + vertsPerPoly);
+          const faces = polyFaces(v);
+
+          for (const quad of polyTypeInfo.quads(v)) {
+            const quadTriangles = faces.filter(face => face.every(vertex => quad.includes(vertex)));
+            if (quadTriangles.length !== 2 ||
+                !quadTriangles.every(face => visibleFaceKeys.has([...face].sort((a, b) => a - b).join(",")))) {
+              continue;
+            }
+
+            for (let edge = 0; edge < quad.length; edge++) {
+              const start = quad[edge];
+              const end = quad[(edge + 1) % quad.length];
+              const edgeKey = start < end ? `${start},${end}` : `${end},${start}`;
+              if (addedEdges.has(edgeKey)) continue;
+
+              addedEdges.add(edgeKey);
+              tmpSegments.push(start, end);
+            }
+          }
         }
       }
     }
@@ -318,7 +370,8 @@ export class VolumeMesh {
     this.wireframe.geometry.setIndex(segmentsAttribute);
     let wireframePositionAttribute = null;
     if (this.separation > 0) {
-      wireframePositionAttribute = new THREE.BufferAttribute(new Float32Array(tmpTriangleSoup), 3);
+      const wireframePositions = polyTypeInfo.quads ? tmpWireframePositions : tmpTriangleSoup;
+      wireframePositionAttribute = new THREE.BufferAttribute(new Float32Array(wireframePositions), 3);
     } else {
       wireframePositionAttribute = new THREE.BufferAttribute(new Float32Array(vertices), 3);
     }
