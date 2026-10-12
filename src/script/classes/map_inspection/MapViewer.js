@@ -3,6 +3,17 @@ import * as utils from "../../main/utils.js";
 import * as matrixUtils from "./matrixUtils.js";
 import { POLY_TYPES } from "../geometry/Polytypes.js";
 
+const HEX_CORNER_FRAMES = [
+  [0, 1, 3, 4],
+  [1, 2, 0, 5],
+  [2, 3, 1, 6],
+  [3, 0, 2, 7],
+  [4, 7, 5, 0],
+  [5, 4, 6, 1],
+  [6, 5, 7, 2],
+  [7, 6, 4, 3],
+];
+
 export class MapViewer {
   isActive = false;
 
@@ -21,6 +32,7 @@ export class MapViewer {
   degenerateColor = utils.mapYellowHex;
 
   isMapDirectionReversed = false;
+  hasWarnedUnsupportedMips3D = false;
 
   volumeMap = null;
 
@@ -88,16 +100,55 @@ export class MapViewer {
     this.volumeMap.tetrahedronPicker.setActive(flag);
   }
 
+  getPolyVertices(vertices, polyhedra, start, vertsPerPoly) {
+    const pts = new Array(vertsPerPoly);
+    for (let j = 0; j < vertsPerPoly; j++) {
+      const base = polyhedra[start + j] * 3;
+      pts[j] = { x: vertices[base], y: vertices[base + 1], z: vertices[base + 2] };
+    }
+    return pts;
+  }
+
+  computeFrameDistortion(f1, f2) {
+    const J = matrixUtils.jacobianMatrix(f1, f2);
+    if (matrixUtils.determinant3x3(J) <= 0) return NaN;
+    const S = matrixUtils.computeSingularValues(J);
+    return this.computeTetDistortion(S[0], S[1], S[2], this.energy);
+  }
+
+  computePolyDistortion(p1, p2, polyType) {
+    if (polyType === "TETRAHEDRON") {
+      return this.computeFrameDistortion(p1, p2);
+    }
+
+    if (polyType === "HEXAHEDRON") {
+      if (this.energy === "MIPS-3D") {
+        if (!this.hasWarnedUnsupportedMips3D) {
+          console.warn("MIPS-3D not supported for hexaedron");
+          this.hasWarnedUnsupportedMips3D = true;
+        }
+        return NaN;
+      }
+      let worst = -Infinity;
+      for (const frame of HEX_CORNER_FRAMES) {
+        const f1 = frame.map((k) => p1[k]);
+        const f2 = frame.map((k) => p2[k]);
+        const d = this.computeFrameDistortion(f1, f2);
+        if (isNaN(d)) return NaN;
+        worst = Math.max(worst, d);
+      }
+      return worst;
+    }
+
+    return NaN;
+  }
+
   computeDistortion() {
-    const tmpPolyDistortion = new Array();
     this.degeneratePolyhedra = 0;
-    // Based on the mapping direction, choose which mesh is source and which is target
-    const mesh1 = this.isMapDirectionReversed
-      ? this.volumeMap.volumeMesh2.mesh
-      : this.volumeMap.volumeMesh1.mesh;
-    const mesh2 = this.isMapDirectionReversed
-      ? this.volumeMap.volumeMesh1.mesh
-      : this.volumeMap.volumeMesh2.mesh;
+
+    const [mesh1, mesh2] = this.isMapDirectionReversed
+      ? [this.volumeMap.volumeMesh2.mesh, this.volumeMap.volumeMesh1.mesh]
+      : [this.volumeMap.volumeMesh1.mesh, this.volumeMap.volumeMesh2.mesh];
 
     const vertices1 = mesh1.geometry.userData.vertices;
     const vertices2 = mesh2.geometry.userData.vertices;
@@ -105,55 +156,20 @@ export class MapViewer {
     const polyType = mesh1.geometry.userData.polyType;
     const vertsPerPoly = POLY_TYPES[polyType].vertsPerPoly;
 
-    if (polyType !== "TETRAHEDRON") {
-      console.warn(`computeDistortion: distortion computation not supported for HEXAHEDRON"`);
-      return;
-    }
-
+    const tmpPolyDistortion = [];
     for (let i = 0; i < polyhedra.length; i += vertsPerPoly) {
-      const tetrahedra1 = new Array();
-      const tetrahedra2 = new Array();
-
-      for (let j = 0; j < vertsPerPoly; j++) {
-        // Get vertex index
-        const vIndex = polyhedra[i + j];
-        // Get vertex coordinates
-        const v1 = {
-          x: vertices1[vIndex * 3],
-          y: vertices1[vIndex * 3 + 1],
-          z: vertices1[vIndex * 3 + 2],
-        };
-        const v2 = {
-          x: vertices2[vIndex * 3],
-          y: vertices2[vIndex * 3 + 1],
-          z: vertices2[vIndex * 3 + 2],
-        };
-        // Store vertex coordinates
-        tetrahedra1.push(v1);
-        tetrahedra2.push(v2);
-      }
-
-      let distortion = null;
-
-      const J = matrixUtils.jacobianMatrix(tetrahedra1, tetrahedra2);
-
-      if (matrixUtils.determinant3x3(J) <= 0) {
-        distortion = NaN;
-        this.degeneratePolyhedra++;
-      } else {
-        const S = matrixUtils.computeSingularValues(J);
-        distortion = this.computeTetDistortion(S[0], S[1], S[2], this.energy);
-      }
-
-      tmpPolyDistortion.push(distortion);
+      const p1 = this.getPolyVertices(vertices1, polyhedra, i, vertsPerPoly);
+      const p2 = this.getPolyVertices(vertices2, polyhedra, i, vertsPerPoly);
+      const d = this.computePolyDistortion(p1, p2, polyType);
+      
+      if (isNaN(d)) this.degeneratePolyhedra++;
+      tmpPolyDistortion.push(d);
     }
 
-    // Store the distortion values in both meshes
     this.polyDistortion = tmpPolyDistortion;
     mesh1.geometry.userData.polyDistortion = tmpPolyDistortion;
     mesh2.geometry.userData.polyDistortion = tmpPolyDistortion;
   }
-
 
   computeDistortionBothDirections() {
     const mesh1 = this.volumeMap.volumeMesh1.mesh;
@@ -168,41 +184,15 @@ export class MapViewer {
     const left = [];
     const right = [];
 
-    if (polyType !== "TETRAHEDRON") {
-      console.warn(`computeDistortionBothDirections: distortion computation not supported for HEXAHEDRON`);
-      return { left, right };
-    }
-
     for (let i = 0; i < polyhedra.length; i += vertsPerPoly) {
-      const tetrahedronVertices1 = [], tetrahedronVertices2 = [];
-      for (let j = 0; j < vertsPerPoly; j++) {
-        const vertexIndex  = polyhedra[i + j];
-        tetrahedronVertices1.push({ x: vertices1[vertexIndex  * 3], y: vertices1[vertexIndex  * 3 + 1], z: vertices1[vertexIndex  * 3 + 2] });
-        tetrahedronVertices2.push({ x: vertices2[vertexIndex  * 3], y: vertices2[vertexIndex  * 3 + 1], z: vertices2[vertexIndex  * 3 + 2] });
-      }
-
-
-      const jacobianLeft = matrixUtils.jacobianMatrix(tetrahedronVertices1, tetrahedronVertices2);
-      if (matrixUtils.determinant3x3(jacobianLeft) <= 0) {
-        left.push(NaN);
-      } else {
-        const s_left = matrixUtils.computeSingularValues(jacobianLeft );
-        left.push(this.computeTetDistortion(s_left[0], s_left[1], s_left[2], this.energy));
-      }
-
-
-      const jacobianRight = matrixUtils.jacobianMatrix(tetrahedronVertices2, tetrahedronVertices1);
-      if (matrixUtils.determinant3x3(jacobianRight) <= 0) {
-        right.push(NaN);
-      } else {
-        const s_right = matrixUtils.computeSingularValues(jacobianRight);
-        right.push(this.computeTetDistortion(s_right[0], s_right[1], s_right[2], this.energy));
-      }
+      const p1 = this.getPolyVertices(vertices1, polyhedra, i, vertsPerPoly);
+      const p2 = this.getPolyVertices(vertices2, polyhedra, i, vertsPerPoly);
+      left.push(this.computePolyDistortion(p1, p2, polyType));
+      right.push(this.computePolyDistortion(p2, p1, polyType));
     }
 
     return { left, right };
   }
-
 
   computeTetDistortion(s_max, s_mid, s_min, energy) {
     switch (energy) {

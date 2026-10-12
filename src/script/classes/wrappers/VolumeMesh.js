@@ -137,10 +137,7 @@ export class VolumeMesh {
   }
 
   setBoundingBox() {
-    this.mesh.geometry.computeBoundingBox();
-    const box = this.mesh.geometry.boundingBox;
-    box.translate(this.mesh.position);
-
+    const box = new THREE.Box3().setFromObject(this.mesh);
     this.boundingBox = new THREE.Box3Helper(box, utils.yellowHex);
   }
 
@@ -307,12 +304,12 @@ export class VolumeMesh {
         if (sortedFace) {
           for (let i = 0; i < sortedFace.length; i++) {
             const v = sortedFace[i];
-            
+
             tmpTriangleSoup.push(vertices[v * 3]);
             tmpTriangleSoup.push(vertices[v * 3 + 1]);
             tmpTriangleSoup.push(vertices[v * 3 + 2]);
           }
-          
+
           tmpFaces.push(key);
           tmpFacePolyhedra.push(polyIndex);
           if (!polyTypeInfo.quads) {
@@ -338,7 +335,7 @@ export class VolumeMesh {
           for (const quad of polyTypeInfo.quads(v)) {
             const quadTriangles = faces.filter(face => face.every(vertex => quad.includes(vertex)));
             if (quadTriangles.length !== 2 ||
-                !quadTriangles.every(face => visibleFaceKeys.has([...face].sort((a, b) => a - b).join(",")))) {
+              !quadTriangles.every(face => visibleFaceKeys.has([...face].sort((a, b) => a - b).join(",")))) {
               continue;
             }
 
