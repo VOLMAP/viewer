@@ -48,8 +48,7 @@ export class VolumeMap {
     if (oldValidity !== this.isValid) {
       if (this.isValid) {
         this.mapViewer.updateMap();
-        const { left, right } = this.mapViewer.computeDistortionBothDirections();
-        this.histogramPanel.setData(left, right, this.mapViewer.clampStart, this.mapViewer.clampEnd);
+        this.updateHistogram();
         this.distortionSlicer.updateMap();
         const data = this.volumeMesh1.mesh.geometry.userData;
         const vertsPerPoly = POLY_TYPES[data.polyType].vertsPerPoly;
@@ -167,8 +166,7 @@ export class VolumeMap {
       this.controller.updateEnergyInfo(this.mapViewer.energy);
       this.controller.updateClampInfo(this.mapViewer.clampStart, this.mapViewer.clampEnd);
       this.controller.updateClampInputInfo(this.mapViewer.clampStart, this.mapViewer.clampEnd);
-      const { left, right } = this.mapViewer.computeDistortionBothDirections();
-      this.histogramPanel.setData(left, right, this.mapViewer.clampStart, this.mapViewer.clampEnd);
+      this.updateHistogram();
     }
     return result;
   }
@@ -274,7 +272,20 @@ export class VolumeMap {
     }
 
     this.mapViewer.reverseMapDirection(flag);
+    this.updateHistogram();
     return true;
+  }
+
+  updateHistogram() {
+    const { left, right } = this.mapViewer.computeDistortionBothDirections();
+    const dataLeft = this.mapViewer.isMapDirectionReversed ? right : left;
+    const dataRight = this.mapViewer.isMapDirectionReversed ? left : right;
+    this.histogramPanel.setData(
+      dataLeft,
+      dataRight,
+      this.mapViewer.clampStart,
+      this.mapViewer.clampEnd
+    );
   }
 
   resetMapViewer() {
@@ -291,8 +302,9 @@ export class VolumeMap {
     this.mapViewer.resetSettings();
     this.mapViewer.updateDistortion();
 
-    const { left, right } = this.mapViewer.computeDistortionBothDirections();
-    this.histogramPanel.setData(left, right, this.mapViewer.clampStart, this.mapViewer.clampEnd);
+    this.updateHistogram();
+    this.toggleHistogram(false);
+    this.controller.setHistogramVisibility(false);
     return true;
   }
 

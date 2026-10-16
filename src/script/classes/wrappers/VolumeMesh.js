@@ -322,7 +322,26 @@ export class VolumeMesh {
       }
 
       if (polyTypeInfo.quads) {
-        const visibleFaceKeys = new Set(tmpFaces);
+        const quadPolyhedra = new Map();
+        for (let i = 0; i < polyhedra.length; i += vertsPerPoly) {
+          const polyIndex = i / vertsPerPoly;
+          const v = polyhedra.slice(i, i + vertsPerPoly);
+
+          for (const quad of polyTypeInfo.quads(v)) {
+            const quadKey = [...quad].sort((a, b) => a - b).join(",");
+            if (!quadPolyhedra.has(quadKey)) quadPolyhedra.set(quadKey, []);
+            quadPolyhedra.get(quadKey).push(polyIndex);
+          }
+        }
+
+        const visibleQuadKeys = new Set();
+        for (const [quadKey, adjacentPolyhedra] of quadPolyhedra) {
+          const visibleCount = adjacentPolyhedra.filter(isPolyVisible).length;
+          if (visibleCount > 0 && (visibleCount < adjacentPolyhedra.length || adjacentPolyhedra.length === 1)) {
+            visibleQuadKeys.add(quadKey);
+          }
+        }
+
         const addedEdges = new Set();
 
         for (let i = 0; i < polyhedra.length; i += vertsPerPoly) {
@@ -330,14 +349,10 @@ export class VolumeMesh {
           if (!isPolyVisible(polyIndex)) continue;
 
           const v = polyhedra.slice(i, i + vertsPerPoly);
-          const faces = polyFaces(v);
 
           for (const quad of polyTypeInfo.quads(v)) {
-            const quadTriangles = faces.filter(face => face.every(vertex => quad.includes(vertex)));
-            if (quadTriangles.length !== 2 ||
-              !quadTriangles.every(face => visibleFaceKeys.has([...face].sort((a, b) => a - b).join(",")))) {
-              continue;
-            }
+            const quadKey = [...quad].sort((a, b) => a - b).join(",");
+            if (!visibleQuadKeys.has(quadKey)) continue;
 
             for (let edge = 0; edge < quad.length; edge++) {
               const start = quad[edge];
@@ -382,28 +397,24 @@ export class VolumeMesh {
   }
 
   updateVisibleFacesColor() {
-    const adjacencyMap = this.mesh.geometry.userData.adjacencyMap;
-    const faceKeys = this.mesh.geometry.userData.faceKeys;
-    const polyColor = this.mesh.geometry.userData.polyColor;
-    var tmpColor = new Array();
+  const facePolyhedra = this.mesh.geometry.userData.facePolyhedra;
+  const polyColor = this.mesh.geometry.userData.polyColor;
+  var tmpColor = new Array();
 
-    for (let i = 0; i < faceKeys.length; i++) {
-      const key = faceKeys[i];
-      const value = adjacencyMap.get(key);
-      const polyIndex = value[0].polyIndex;
-      const color = polyColor[polyIndex];
+  for (let i = 0; i < facePolyhedra.length; i++) {
+    const polyIndex = facePolyhedra[i];
+    const color = polyColor[polyIndex];
 
-      //One color per vertex
-      for (let j = 0; j < 3; j++) {
-        tmpColor.push(color.r, color.g, color.b);
-      }
+    //One color per vertex
+    for (let j = 0; j < 3; j++) {
+      tmpColor.push(color.r, color.g, color.b);
     }
-
-
-    const colorAttribute = new THREE.BufferAttribute(new Float32Array(tmpColor), 3);
-    this.mesh.geometry.setAttribute("color", colorAttribute);
-    this.mesh.geometry.needsUpdate = true;
   }
+
+  const colorAttribute = new THREE.BufferAttribute(new Float32Array(tmpColor), 3);
+  this.mesh.geometry.setAttribute("color", colorAttribute);
+  this.mesh.geometry.needsUpdate = true;
+}
 
   async loadMesh(file) {
     //Convert the filename to lowercase for case-insensitive comparison
